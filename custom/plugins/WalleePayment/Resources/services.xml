@@ -1,0 +1,224 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+    	<!-- Providers -->
+    	
+		<service id="wallee_payment.provider.payment_method" class="WalleePayment\Components\Provider\PaymentMethod">
+            <argument type="service" id="wallee_payment.api_client" />
+            <argument type="service" id="cache" />
+        </service>
+        
+        <service id="wallee_payment.provider.payment_connector" class="WalleePayment\Components\Provider\PaymentConnector">
+            <argument type="service" id="wallee_payment.api_client" />
+            <argument type="service" id="cache" />
+        </service>
+        
+        <service id="wallee_payment.provider.language" class="WalleePayment\Components\Provider\Language">
+            <argument type="service" id="wallee_payment.api_client" />
+            <argument type="service" id="cache" />
+        </service>
+        
+        <service id="wallee_payment.provider.currency" class="WalleePayment\Components\Provider\Currency">
+            <argument type="service" id="wallee_payment.api_client" />
+            <argument type="service" id="cache" />
+        </service>
+        
+        <service id="wallee_payment.provider.label_descriptor" class="WalleePayment\Components\Provider\LabelDescriptor">
+            <argument type="service" id="wallee_payment.api_client" />
+            <argument type="service" id="cache" />
+        </service>
+        
+        <service id="wallee_payment.provider.label_descriptor_group" class="WalleePayment\Components\Provider\LabelDescriptorGroup">
+            <argument type="service" id="wallee_payment.api_client" />
+            <argument type="service" id="cache" />
+        </service>
+        
+        <!-- Services -->
+        
+        <service id="wallee_payment.api_client" class="WalleePayment\Components\ApiClient">
+            <argument type="service" id="shopware.plugin.config_reader" />
+            <argument type="string">%wallee_payment.base_gateway_url%</argument>
+        </service>
+        
+        <service id="wallee_payment.translator" class="WalleePayment\Components\Translator">
+        	<argument type="service" id="models" />
+            <argument type="service" id="wallee_payment.provider.language" />
+        </service>
+        
+        <service id="wallee_payment.manual_task" class="WalleePayment\Components\ManualTask">
+            <argument type="service" id="service_container" />
+            <argument type="service" id="models" />
+            <argument type="service" id="shopware.plugin.config_reader" />
+            <argument type="service" id="cache" />
+            <argument type="service" id="wallee_payment.api_client" />
+        </service>
+        
+        <service id="wallee_payment.delivery_indication" class="WalleePayment\Components\DeliveryIndication">
+            <argument type="service" id="service_container" />
+            <argument type="service" id="models" />
+            <argument type="service" id="shopware.plugin.config_reader" />
+            <argument type="service" id="wallee_payment.api_client" />
+        </service>
+        
+        <service id="wallee_payment.resource" class="WalleePayment\Components\Resource">
+            <argument type="string">%wallee_payment.base_gateway_url%</argument>
+        </service>
+        
+        <service id="wallee_payment.transaction_info" class="WalleePayment\Components\TransactionInfo">
+        	<argument type="service" id="service_container" />
+        	<argument type="service" id="models" />
+        	<argument type="service" id="shopware.plugin.config_reader" />
+        	<argument type="service" id="wallee_payment.api_client" />
+        </service>
+        
+        <service id="wallee_payment.transaction" class="WalleePayment\Components\Transaction">
+            <argument type="service" id="service_container" />
+        	<argument type="service" id="models" />
+        	<argument type="service" id="shopware.plugin.config_reader" />
+        	<argument type="service" id="wallee_payment.api_client" />
+        	<argument type="service" id="wallee_payment.line_item" />
+        	<argument type="service" id="wallee_payment.payment_method_configuration" />
+        </service>
+        
+        <service id="wallee_payment.registry" class="WalleePayment\Components\Registry">
+            <argument type="service" id="service_container" />
+        </service>
+        
+        <service id="wallee_payment.session" class="WalleePayment\Components\Session">
+            <argument type="service" id="service_container" />
+        	<argument type="service" id="models" />
+        </service>
+        
+        <service id="wallee_payment.basket" class="WalleePayment\Components\Basket">
+            <argument type="service" id="service_container" />
+        	<argument type="service" id="dbal_connection" />
+        	<argument type="service" id="wallee_payment.session" />
+        </service>
+        
+        <service id="wallee_payment.refund" class="WalleePayment\Components\Refund">
+            <argument type="service" id="service_container" />
+        	<argument type="service" id="models" />
+        	<argument type="service" id="wallee_payment.api_client" />
+        </service>
+        
+        <service id="wallee_payment.invoice" class="WalleePayment\Components\Invoice">
+            <argument type="service" id="service_container" />
+        	<argument type="service" id="models" />
+        	<argument type="service" id="wallee_payment.api_client" />
+        </service>
+        
+        <service id="wallee_payment.webhook" class="WalleePayment\Components\Webhook">
+            <argument type="service" id="service_container" />
+            <argument type="service" id="models" />
+            <argument type="service" id="shopware.plugin.config_reader" />
+        	<argument type="service" id="wallee_payment.api_client" />
+        </service>
+        
+        <service id="wallee_payment.line_item" class="WalleePayment\Components\LineItem">
+            <argument type="service" id="service_container" />
+        	<argument type="service" id="models" />
+        	<argument type="service" id="wallee_payment.provider.currency" />
+        </service>
+        
+        <service id="wallee_payment.payment_method_configuration" class="WalleePayment\Components\PaymentMethodConfiguration">
+            <argument type="service" id="service_container" />
+            <argument type="service" id="shopware.plugin.config_reader" />
+            <argument type="service" id="models" />
+            <argument type="service" id="shopware.plugin_payment_installer" />
+            <argument type="service" id="wallee_payment.api_client" />
+            <argument type="service" id="wallee_payment.provider.payment_method" />
+            <argument type="service" id="wallee_payment.translator" />
+            <argument type="service" id="wallee_payment.resource" />
+        </service>
+        
+        <!-- Subscribers -->
+        
+        <service id="wallee_payment.subscriber.order" class="WalleePayment\Subscriber\Order">
+            <argument type="service" id="service_container" />
+            <argument type="service" id="shopware.plugin.config_reader" />
+        	<argument type="service" id="models" />
+        	<argument type="service" id="wallee_payment.transaction" />
+        	<argument type="service" id="wallee_payment.transaction_info" />
+        	<argument type="service" id="wallee_payment.session" />
+        	<argument type="service" id="wallee_payment.registry" />
+            <tag name="shopware.event_subscriber" />
+        </service>
+        
+        <service id="wallee_payment.subscriber.account" class="WalleePayment\Subscriber\Account">
+            <argument type="service" id="service_container" />
+            <argument type="service" id="shopware.plugin.config_reader" />
+        	<argument type="service" id="models" />
+        	<argument type="service" id="wallee_payment.transaction_info" />
+            <tag name="shopware.event_subscriber" />
+        </service>
+        
+        <service id="wallee_payment.subscriber.checkout" class="WalleePayment\Subscriber\Checkout">
+            <argument type="service" id="service_container" />
+        	<argument type="service" id="models" />
+        	<argument type="service" id="wallee_payment.transaction" />
+        	<argument type="service" id="wallee_payment.session" />
+            <tag name="shopware.event_subscriber" />
+        </service>
+        
+       	<service id="wallee_payment.subscriber.payment_method_configuration" class="WalleePayment\Subscriber\PaymentMethodConfiguration">
+            <argument type="service" id="wallee_payment.payment_method_configuration" />
+            <tag name="shopware.event_subscriber" />
+        </service>
+        
+        <service id="wallee_payment.subscriber.webhook" class="WalleePayment\Subscriber\Webhook">
+            <argument type="service" id="wallee_payment.webhook" />
+            <tag name="shopware.event_subscriber" />
+        </service>
+        
+        <service id="wallee_payment.subscriber.risk_management" class="WalleePayment\Subscriber\RiskManagement">
+        	<argument type="service" id="service_container" />
+        	<argument type="service" id="models" />
+        	<argument type="service" id="shopware.plugin.config_reader" />
+        	<argument type="service" id="wallee_payment.transaction" />
+        	<argument type="service" id="wallee_payment.session" />
+        	<tag name="shopware.event_subscriber" />
+        </service>
+        
+        <service id="wallee_payment.subscriber.backend" class="WalleePayment\Subscriber\Backend">
+        	<argument type="service" id="service_container" />
+        	<argument type="service" id="models" />
+        	<tag name="shopware.event_subscriber" />
+        </service>
+        
+        <!-- Webhook Subscribers -->
+        
+        <service id="wallee_payment.subscriber.webhook.transaction" class="WalleePayment\Subscriber\Webhook\Transaction">
+        	<argument type="service" id="service_container" />
+        	<argument type="service" id="shopware.plugin.config_reader" />
+            <argument type="service" id="models" />
+            <argument type="service" id="wallee_payment.transaction" />
+            <argument type="service" id="wallee_payment.transaction_info" />
+            <argument type="service" id="wallee_payment.registry" />
+            <tag name="shopware.event_subscriber" />
+        </service>
+        
+        <service id="wallee_payment.subscriber.webhook.transaction_invoice" class="WalleePayment\Subscriber\Webhook\TransactionInvoice">
+            <argument type="service" id="models" />
+            <argument type="service" id="wallee_payment.api_client" />
+            <tag name="shopware.event_subscriber" />
+        </service>
+        
+        <service id="wallee_payment.subscriber.webhook.delivery_indication" class="WalleePayment\Subscriber\Webhook\DeliveryIndication">
+            <argument type="service" id="models" />
+            <argument type="service" id="wallee_payment.api_client" />
+            <tag name="shopware.event_subscriber" />
+        </service>
+        
+        <service id="wallee_payment.subscriber.webhook.payment_method_configuration" class="WalleePayment\Subscriber\Webhook\PaymentMethodConfiguration">
+            <argument type="service" id="wallee_payment.payment_method_configuration" />
+            <tag name="shopware.event_subscriber" />
+        </service>
+        
+        <service id="wallee_payment.subscriber.webhook.manual_task" class="WalleePayment\Subscriber\Webhook\ManualTask">
+            <argument type="service" id="wallee_payment.manual_task" />
+            <tag name="shopware.event_subscriber" />
+        </service>
+    </services>
+</container>

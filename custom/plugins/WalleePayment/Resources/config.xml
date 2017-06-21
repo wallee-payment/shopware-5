@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.2/engine/Shopware/Components/Plugin/schema/config.xsd">
+    <elements>
+    	<element type="button">
+            <name>buttonSynchronize</name>
+            <label lang="de">Synchronisieren</label>
+            <label lang="en">Synchronize</label>
+            <options>
+                <handler>
+                    <![CDATA[
+                    function(button) {
+                    	if (window.WalleeActive) {
+	                        openNewModule('Shopware.apps.WalleePaymentSynchronize');
+                        } else {
+                        	Shopware.Notification.createStickyGrowlMessage({
+								title: 'Wallee Payment',
+								text: 'Please activate the plugin \'Wallee Payment\' and reload the page before synchronising.'
+							});
+                        }
+                    }
+                    ]]>
+                </handler>
+            </options>
+        </element>
+        <element required="true" type="number">
+            <name>applicationUserId</name>
+            <label lang="de">Applikationsbenutzer-Id</label>
+            <label lang="en">Application User Id</label>
+            <value></value>
+            <description lang="en">The Application User needs to have full permissions in all spaces this shop is linked to.</description>
+        </element>
+        <element required="true" type="password">
+            <name>applicationUserKey</name>
+            <label lang="de">Applikationsbenutzer-Schlüssel</label>
+            <label lang="en">Application User Secret Key</label>
+            <value></value>
+        </element>
+        <element required="true" type="number" scope="shop">
+            <name>spaceId</name>
+            <label lang="de">Space Id</label>
+            <label lang="en">Space Id</label>
+            <value></value>
+        </element>
+        <element required="false" type="number" scope="shop">
+            <name>spaceViewId</name>
+            <label lang="de">Space View Id</label>
+            <label lang="en">Space View Id</label>
+            <value></value>
+        </element>
+        <element type="boolean" scope="shop">
+        	<name>orderEmail</name>
+        	<label lang="de">Bestell-E-Mail senden</label>
+        	<label lang="en">Send Order Email</label>
+        	<value>1</value>
+        </element>
+        <element type="boolean" scope="shop">
+        	<name>customerDownloadInvoice</name>
+        	<label lang="de">Kunden-Download: Rechnung</label>
+        	<label lang="en">Customer Download: Invoice</label>
+        	<value>1</value>
+        </element>
+        <element type="boolean" scope="shop">
+        	<name>customerDownloadPackingSlip</name>
+        	<label lang="de">Kunden-Download: Lieferschein</label>
+        	<label lang="en">Customer Download: Packing Slip</label>
+        	<value>1</value>
+        </element>
+    </elements>
+</config>
