@@ -85,7 +85,7 @@ class TransactionInfo extends AbstractService
             ->getPaymentMethod() : null);
         $info->setImage($this->getPaymentMethodImage($transaction, $order));
         $info->setLabels($this->getTransactionLabels($transaction));
-        if ($transaction->getState() == \Wallee\Sdk\Model\Transaction::STATE_FAILED || $transaction->getState() == \Wallee\Sdk\Model\Transaction::STATE_DECLINE) {
+        if ($transaction->getState() == \Wallee\Sdk\Model\TransactionState::FAILED || $transaction->getState() == \Wallee\Sdk\Model\TransactionState::DECLINE) {
             $failedChargeAttempt = $this->getFailedChargeAttempt($transaction->getLinkedSpaceId(), $transaction->getId());
             if ($failedChargeAttempt != null && $failedChargeAttempt->getFailureReason() != null) {
                 $info->setFailureReason($failedChargeAttempt->getFailureReason()->getDescription());
@@ -128,10 +128,10 @@ class TransactionInfo extends AbstractService
         $chargeAttemptService = new \Wallee\Sdk\Service\ChargeAttemptService($this->apiClient);
         $query = new \Wallee\Sdk\Model\EntityQuery();
         $filter = new \Wallee\Sdk\Model\EntityQueryFilter();
-        $filter->setType(\Wallee\Sdk\Model\EntityQueryFilter::TYPE_AND);
+        $filter->setType(\Wallee\Sdk\Model\EntityQueryFilterType::_AND);
         $filter->setChildren(array(
             $this->createEntityFilter('charge.transaction.id', $transaction->getId()),
-            $this->createEntityFilter('state', \Wallee\Sdk\Model\ChargeAttempt::STATE_SUCCESSFUL)
+            $this->createEntityFilter('state', \Wallee\Sdk\Model\ChargeAttemptState::SUCCESSFUL)
         ));
         $query->setFilter($filter);
         $query->setNumberOfEntities(1);
@@ -205,11 +205,11 @@ class TransactionInfo extends AbstractService
         $chargeAttemptService = new \Wallee\Sdk\Service\ChargeAttemptService($this->apiClient);
         $query = new \Wallee\Sdk\Model\EntityQuery();
         $filter = new \Wallee\Sdk\Model\EntityQueryFilter();
-        $filter->setType(\Wallee\Sdk\Model\EntityQueryFilter::TYPE_AND);
+        $filter->setType(\Wallee\Sdk\Model\EntityQueryFilterType::_AND);
         $filter->setChildren(
             array(
                 $this->createEntityFilter('charge.transaction.id', $transactionId),
-                $this->createEntityFilter('state', \Wallee\Sdk\Model\ChargeAttempt::STATE_FAILED)
+                $this->createEntityFilter('state', \Wallee\Sdk\Model\ChargeAttemptState::FAILED)
             )
             );
         $query->setFilter($filter);

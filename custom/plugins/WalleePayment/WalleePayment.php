@@ -42,7 +42,7 @@ class WalleePayment extends Plugin
 
     public function build(ContainerBuilder $container)
     {
-        $container->setParameter($this->getContainerPrefix() . '.base_gateway_url', 'https://app-wallee.com:443');
+        $container->setParameter($this->getContainerPrefix() . '.base_gateway_url', 'http://localhost:8000');
 
         parent::build($container);
     }

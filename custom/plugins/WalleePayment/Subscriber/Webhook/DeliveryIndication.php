@@ -72,7 +72,7 @@ class DeliveryIndication extends AbstractOrderRelatedSubscriber
     protected function handleOrderRelatedInner(Order $order, $deliveryIndication)
     {
         switch ($deliveryIndication->getState()) {
-            case \Wallee\Sdk\Model\DeliveryIndication::STATE_MANUAL_CHECK_REQUIRED:
+            case \Wallee\Sdk\Model\DeliveryIndicationState::MANUAL_CHECK_REQUIRED:
                 $this->review($order, $deliveryIndication);
                 break;
             default:

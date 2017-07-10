@@ -20,7 +20,7 @@ class Request
     /**
      * Constructor.
      *
-     * @param stdClass $model
+     * @param \stdClass $model
      */
     public function __construct($model)
     {

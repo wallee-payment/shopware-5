@@ -47,7 +47,7 @@ class Refund extends AbstractService
         $query = new EntityQuery();
         $query->setFilter($this->createEntityFilter('transaction.id', $transactionId));
         $query->setOrderBys([
-            $this->createEntityOrderBy('createdOn', \Wallee\Sdk\Model\EntityQueryOrderBy::SORTING_DESC)
+            $this->createEntityOrderBy('createdOn', \Wallee\Sdk\Model\EntityQueryOrderByType::DESC)
         ]);
         $query->setNumberOfEntities(50);
         return $this->refundService->search($spaceId, $query);
@@ -78,7 +78,7 @@ class Refund extends AbstractService
     private function getLastSuccessfulRefund(array $refunds)
     {
         foreach ($refunds as $refund) {
-            if ($refund->getState() == \Wallee\Sdk\Model\Refund::STATE_SUCCESSFUL) {
+            if ($refund->getState() == \Wallee\Sdk\Model\RefundState::SUCCESSFUL) {
                 return $refund;
             }
         }
@@ -96,14 +96,19 @@ class Refund extends AbstractService
         $refund = new \Wallee\Sdk\Model\RefundCreate();
         $refund->setExternalId(uniqid($order->getNumber() . '-'));
         $refund->setReductions($reductions);
-        $refund->setTransaction($transaction);
-        $refund->setType(\Wallee\Sdk\Model\RefundCreate::TYPE_MERCHANT_INITIATED_ONLINE);
+        $refund->setTransaction($transaction->getId());
+        $refund->setType(\Wallee\Sdk\Model\RefundType::MERCHANT_INITIATED_ONLINE);
         return $refund;
     }
 
-    public function refund(\Wallee\Sdk\Model\RefundCreate $refundRequest)
+    /**
+     * 
+     * @param int $spaceId
+     * @param \Wallee\Sdk\Model\RefundCreate $refundRequest
+     * @return \Wallee\Sdk\Model\Refund
+     */
+    public function refund($spaceId, \Wallee\Sdk\Model\RefundCreate $refundRequest)
     {
-        return $this->refundService->create($refundRequest->getTransaction()
-            ->getLinkedSpaceId(), $refundRequest);
+        return $this->refundService->refund($spaceId, $refundRequest);
     }
 }

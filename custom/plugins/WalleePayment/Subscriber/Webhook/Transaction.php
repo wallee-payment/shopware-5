@@ -114,22 +114,22 @@ class Transaction extends AbstractOrderRelatedSubscriber
         ]);
         if ($transaction->getState() != $transactionInfo->getState()) {
             switch ($transaction->getState()) {
-                case \Wallee\Sdk\Model\Transaction::STATE_AUTHORIZED:
+                case \Wallee\Sdk\Model\TransactionState::AUTHORIZED:
                     $this->authorize($order, $transaction);
                     break;
-                case \Wallee\Sdk\Model\Transaction::STATE_DECLINE:
+                case \Wallee\Sdk\Model\TransactionState::DECLINE:
                     $this->decline($order, $transaction);
                     break;
-                case \Wallee\Sdk\Model\Transaction::STATE_FAILED:
+                case \Wallee\Sdk\Model\TransactionState::FAILED:
                     $this->failed($order, $transaction);
                     break;
-                case \Wallee\Sdk\Model\Transaction::STATE_FULFILL:
+                case \Wallee\Sdk\Model\TransactionState::FULFILL:
                     $this->fulfill($order, $transaction);
                     break;
-                case \Wallee\Sdk\Model\Transaction::STATE_VOIDED:
+                case \Wallee\Sdk\Model\TransactionState::VOIDED:
                     $this->voided($order, $transaction);
                     break;
-                case \Wallee\Sdk\Model\Transaction::STATE_COMPLETED:
+                case \Wallee\Sdk\Model\TransactionState::COMPLETED:
                 default:
                     // Nothing to do.
                     break;
@@ -193,7 +193,7 @@ class Transaction extends AbstractOrderRelatedSubscriber
                 $this->registry->set('force_order_email', true);
                 $orderModule->sendMail($orderTransactionMapping->getOrderEmailVariables()['variables']);
                 $this->registry->remove('force_order_email');
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
             }
             $orderModule->sUserData = $sUserDataBackup;
         }

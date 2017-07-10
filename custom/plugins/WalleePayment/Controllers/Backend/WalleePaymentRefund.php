@@ -1,6 +1,5 @@
 <?php
 use WalleePayment\Models\OrderTransactionMapping;
-use WalleePayment\Components\Refund;
 use WalleePayment\Models\TransactionInfo;
 use Shopware\Components\CSRFWhitelistAware;
 use WalleePayment\Components\Controller\Backend;
@@ -184,7 +183,7 @@ class Shopware_Controllers_Backend_WalleePaymentRefund extends Backend implement
 
         try {
             $refundRequest = $refundService->createRefund($orderTransactionMapping->getOrder(), $transaction, $reductions);
-            $refund = $refundService->refund($refundRequest);
+            $refund = $refundService->refund($spaceId, $refundRequest);
         } catch (\Exception $e) {
             $this->View()->assign(array(
                 'success' => true,
@@ -195,7 +194,7 @@ class Shopware_Controllers_Backend_WalleePaymentRefund extends Backend implement
             return;
         }
 
-        if ($refund->getState() == \Wallee\Sdk\Model\Refund::STATE_FAILED) {
+        if ($refund->getState() == \Wallee\Sdk\Model\RefundState::FAILED) {
             $this->View()->assign(array(
                 'success' => true,
                 'data' => $this->Request()
@@ -205,7 +204,7 @@ class Shopware_Controllers_Backend_WalleePaymentRefund extends Backend implement
                 'refundId' => $refund->getId()
             ));
             return;
-        } elseif ($refund->getState() == \Wallee\Sdk\Model\Refund::STATE_PENDING) {
+        } elseif ($refund->getState() == \Wallee\Sdk\Model\RefundState::PENDING) {
             $this->View()->assign(array(
                 'success' => true,
                 'data' => $this->Request()

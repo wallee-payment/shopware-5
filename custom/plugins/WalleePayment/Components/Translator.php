@@ -34,7 +34,7 @@ class Translator
     /**
      * Returns the translation in the given language.
      *
-     * @param map[string,string]|\Wallee\Sdk\Model\DatabaseTranslatedString $translatedString
+     * @param array[string,string]|\Wallee\Sdk\Model\DatabaseTranslatedString $translatedString
      * @param string $language
      * @return string
      */

@@ -68,7 +68,7 @@ class TransactionInfo extends AbstractArrayBuilder
     /**
      *
      * @param Transaction $transaction
-     * @return \WalleePayment\Components\TransactionInfo\ArrayBuilder
+     * @return TransactionInfo
      */
     public function setTransaction(Transaction $transaction)
     {
@@ -79,7 +79,7 @@ class TransactionInfo extends AbstractArrayBuilder
     /**
      *
      * @param PaymentMethod $paymentMethod
-     * @return \WalleePayment\Components\TransactionInfo\ArrayBuilder
+     * @return TransactionInfo
      */
     public function setPaymentMethod(PaymentMethod $paymentMethod)
     {
@@ -90,7 +90,7 @@ class TransactionInfo extends AbstractArrayBuilder
     /**
      *
      * @param TransactionInvoice $invoice
-     * @return \WalleePayment\Components\TransactionInfo\ArrayBuilder
+     * @return TransactionInfo
      */
     public function setInvoice(TransactionInvoice $invoice)
     {
@@ -101,7 +101,7 @@ class TransactionInfo extends AbstractArrayBuilder
     /**
      *
      * @param TransactionLineItemVersion $lineItemVersion
-     * @return \WalleePayment\Components\TransactionInfo\ArrayBuilder
+     * @return TransactionInfo
      */
     public function setLineItemVersion(TransactionLineItemVersion $lineItemVersion)
     {
@@ -112,7 +112,7 @@ class TransactionInfo extends AbstractArrayBuilder
     /**
      *
      * @param Refund[] $refunds
-     * @return \WalleePayment\Components\TransactionInfo\ArrayBuilder
+     * @return TransactionInfo
      */
     public function setRefunds($refunds)
     {
@@ -214,7 +214,7 @@ class TransactionInfo extends AbstractArrayBuilder
             /* @var \Wallee\Sdk\Model\DeliveryIndication $deliveryIndication */
             $deliveryIndication = $this->container->get('wallee_payment.delivery_indication')->getDeliveryIndication($this->transactionInfo);
             if ($deliveryIndication != null) {
-                return $deliveryIndication->getState() == \Wallee\Sdk\Model\DeliveryIndication::STATE_MANUAL_CHECK_REQUIRED;
+                return $deliveryIndication->getState() == \Wallee\Sdk\Model\DeliveryIndicationState::MANUAL_CHECK_REQUIRED;
             } else {
                 return false;
             }
@@ -229,7 +229,7 @@ class TransactionInfo extends AbstractArrayBuilder
      */
     private function canUpdateLineItems()
     {
-        if ($this->transaction != null && $this->transaction->getState() == \Wallee\Sdk\Model\Transaction::STATE_AUTHORIZED) {
+        if ($this->transaction != null && $this->transaction->getState() == \Wallee\Sdk\Model\TransactionState::AUTHORIZED) {
             return true;
         } else {
             return false;
@@ -242,7 +242,7 @@ class TransactionInfo extends AbstractArrayBuilder
      */
     private function canCompleteTransaction()
     {
-        if ($this->transaction!= null && $this->transaction->getState() == \Wallee\Sdk\Model\Transaction::STATE_AUTHORIZED) {
+        if ($this->transaction!= null && $this->transaction->getState() == \Wallee\Sdk\Model\TransactionState::AUTHORIZED) {
             return true;
         } else {
             return false;
@@ -255,7 +255,7 @@ class TransactionInfo extends AbstractArrayBuilder
      */
     private function canVoidTransaction()
     {
-        if ($this->transaction!= null && $this->transaction->getState() == \Wallee\Sdk\Model\Transaction::STATE_AUTHORIZED) {
+        if ($this->transaction!= null && $this->transaction->getState() == \Wallee\Sdk\Model\TransactionState::AUTHORIZED) {
             return true;
         } else {
             return false;
@@ -273,17 +273,17 @@ class TransactionInfo extends AbstractArrayBuilder
         }
 
         if (! in_array($this->transaction->getState(), [
-            \Wallee\Sdk\Model\Transaction::STATE_COMPLETED,
-            \Wallee\Sdk\Model\Transaction::STATE_FULFILL,
-            \Wallee\Sdk\Model\Transaction::STATE_DECLINE
+            \Wallee\Sdk\Model\TransactionState::COMPLETED,
+            \Wallee\Sdk\Model\TransactionState::FULFILL,
+            \Wallee\Sdk\Model\TransactionState::DECLINE
         ])) {
             return false;
         }
 
         foreach ($this->refunds as $refund) {
             if (in_array($refund->getState(), [
-                \Wallee\Sdk\Model\Refund::STATE_MANUAL_CHECK,
-                \Wallee\Sdk\Model\Refund::STATE_PENDING
+                \Wallee\Sdk\Model\RefundState::MANUAL_CHECK,
+                \Wallee\Sdk\Model\RefundState::PENDING
             ])) {
                 return false;
             }

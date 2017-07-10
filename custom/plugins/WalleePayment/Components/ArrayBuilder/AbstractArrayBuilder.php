@@ -29,7 +29,7 @@ abstract class AbstractArrayBuilder
 
     /**
      *
-     * @param map[string,string]|\Wallee\Sdk\Model\DatabaseTranslatedString $string
+     * @param array[string,string]|\Wallee\Sdk\Model\DatabaseTranslatedString $string
      * @return string
      */
     protected function translate($string)

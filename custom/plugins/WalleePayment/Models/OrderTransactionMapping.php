@@ -4,6 +4,7 @@ namespace WalleePayment\Models;
 use Shopware\Components\Model\ModelEntity;
 use Doctrine\ORM\Mapping as ORM;
 use Shopware\Models\Order\Order;
+use Shopware\Models\Shop\Shop;
 
 /**
  * @ORM\Table(name="wallee_payment_order_transaction_mapping",

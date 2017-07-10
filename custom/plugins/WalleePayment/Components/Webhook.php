@@ -62,33 +62,33 @@ class Webhook extends AbstractService
         $this->webhookListenerService = new \Wallee\Sdk\Service\WebhookListenerService($this->apiClient);
 
         $this->webhookEntities[] = new Entity(1487165678181, 'Manual Task', array(
-            \Wallee\Sdk\Model\ManualTask::STATE_DONE,
-            \Wallee\Sdk\Model\ManualTask::STATE_EXPIRED,
-            \Wallee\Sdk\Model\ManualTask::STATE_OPEN
+            \Wallee\Sdk\Model\ManualTaskState::DONE,
+            \Wallee\Sdk\Model\ManualTaskState::EXPIRED,
+            \Wallee\Sdk\Model\ManualTaskState::OPEN
         ));
         $this->webhookEntities[] = new Entity(1472041857405, 'Payment Method Configuration', array(
-            \Wallee\Sdk\Model\PaymentMethodConfiguration::STATE_ACTIVE,
-            \Wallee\Sdk\Model\PaymentMethodConfiguration::STATE_DELETED,
-            \Wallee\Sdk\Model\PaymentMethodConfiguration::STATE_DELETING,
-            \Wallee\Sdk\Model\PaymentMethodConfiguration::STATE_INACTIVE
+            \Wallee\Sdk\Model\CreationEntityState::ACTIVE,
+            \Wallee\Sdk\Model\CreationEntityState::DELETED,
+            \Wallee\Sdk\Model\CreationEntityState::DELETING,
+            \Wallee\Sdk\Model\CreationEntityState::INACTIVE
         ), true);
         $this->webhookEntities[] = new Entity(1472041829003, 'Transaction', array(
-            \Wallee\Sdk\Model\Transaction::STATE_AUTHORIZED,
-            \Wallee\Sdk\Model\Transaction::STATE_DECLINE,
-            \Wallee\Sdk\Model\Transaction::STATE_FAILED,
-            \Wallee\Sdk\Model\Transaction::STATE_FULFILL,
-            \Wallee\Sdk\Model\Transaction::STATE_VOIDED,
-            \Wallee\Sdk\Model\Transaction::STATE_COMPLETED,
-            \Wallee\Sdk\Model\Transaction::STATE_PROCESSING,
-            \Wallee\Sdk\Model\Transaction::STATE_CONFIRMED
+            \Wallee\Sdk\Model\TransactionState::AUTHORIZED,
+            \Wallee\Sdk\Model\TransactionState::DECLINE,
+            \Wallee\Sdk\Model\TransactionState::FAILED,
+            \Wallee\Sdk\Model\TransactionState::FULFILL,
+            \Wallee\Sdk\Model\TransactionState::VOIDED,
+            \Wallee\Sdk\Model\TransactionState::COMPLETED,
+            \Wallee\Sdk\Model\TransactionState::PROCESSING,
+            \Wallee\Sdk\Model\TransactionState::CONFIRMED
         ));
         $this->webhookEntities[] = new Entity(1472041819799, 'Delivery Indication', array(
-            \Wallee\Sdk\Model\DeliveryIndication::STATE_MANUAL_CHECK_REQUIRED
+            \Wallee\Sdk\Model\DeliveryIndicationState::MANUAL_CHECK_REQUIRED
         ));
         $this->webhookEntities[] = new Entity(1472041816898, 'Transaction Invoice', array(
-            \Wallee\Sdk\Model\TransactionInvoice::STATE_NOT_APPLICABLE,
-            \Wallee\Sdk\Model\TransactionInvoice::STATE_PAID,
-            \Wallee\Sdk\Model\TransactionInvoice::STATE_DERECOGNIZED
+            \Wallee\Sdk\Model\TransactionInvoiceState::NOT_APPLICABLE,
+            \Wallee\Sdk\Model\TransactionInvoiceState::PAID,
+            \Wallee\Sdk\Model\TransactionInvoiceState::DERECOGNIZED
         ));
     }
 
@@ -139,9 +139,8 @@ class Webhook extends AbstractService
         $webhookListener = new \Wallee\Sdk\Model\WebhookListenerCreate();
         $webhookListener->setEntity($entity->getId());
         $webhookListener->setEntityStates($entity->getStates());
-        $webhookListener->setLinkedSpaceId($spaceId);
         $webhookListener->setName('Shopware ' . $entity->getName());
-        $webhookListener->setState(\Wallee\Sdk\Model\WebhookListenerCreate::STATE_ACTIVE);
+        $webhookListener->setState(\Wallee\Sdk\Model\CreationEntityState::ACTIVE);
         $webhookListener->setUrl($webhookUrl->getId());
         $webhookListener->setNotifyEveryChange($entity->isNotifyEveryChange());
         return $this->webhookListenerService->create($spaceId, $webhookListener);
@@ -158,9 +157,9 @@ class Webhook extends AbstractService
     {
         $query = new \Wallee\Sdk\Model\EntityQuery();
         $filter = new \Wallee\Sdk\Model\EntityQueryFilter();
-        $filter->setType(\Wallee\Sdk\Model\EntityQueryFilter::TYPE_AND);
+        $filter->setType(\Wallee\Sdk\Model\EntityQueryFilterType::_AND);
         $filter->setChildren(array(
-            $this->createEntityFilter('state', \Wallee\Sdk\Model\WebhookListener::STATE_ACTIVE),
+            $this->createEntityFilter('state', \Wallee\Sdk\Model\CreationEntityState::ACTIVE),
             $this->createEntityFilter('url.id', $webhookUrl->getId())
         ));
         $query->setFilter($filter);
@@ -176,9 +175,8 @@ class Webhook extends AbstractService
     private function createWebhookUrl($spaceId)
     {
         $webhookUrl = new \Wallee\Sdk\Model\WebhookUrlCreate();
-        $webhookUrl->setLinkedSpaceId($spaceId);
         $webhookUrl->setUrl($this->getHandleUrl());
-        $webhookUrl->setState(\Wallee\Sdk\Model\WebhookUrlCreate::STATE_ACTIVE);
+        $webhookUrl->setState(\Wallee\Sdk\Model\CreationEntityState::ACTIVE);
         $webhookUrl->setName('Shopware');
         return $this->webhookUrlService->create($spaceId, $webhookUrl);
     }
@@ -194,9 +192,9 @@ class Webhook extends AbstractService
         $query = new \Wallee\Sdk\Model\EntityQuery();
         $query->setNumberOfEntities(1);
         $filter = new \Wallee\Sdk\Model\EntityQueryFilter();
-        $filter->setType(\Wallee\Sdk\Model\EntityQueryFilter::TYPE_AND);
+        $filter->setType(\Wallee\Sdk\Model\EntityQueryFilterType::_AND);
         $filter->setChildren(array(
-            $this->createEntityFilter('state', \Wallee\Sdk\Model\WebhookUrl::STATE_ACTIVE),
+            $this->createEntityFilter('state', \Wallee\Sdk\Model\CreationEntityState::ACTIVE),
             $this->createEntityFilter('url', $this->getHandleUrl())
         ));
         $query->setFilter($filter);

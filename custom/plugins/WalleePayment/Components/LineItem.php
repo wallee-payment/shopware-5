@@ -66,7 +66,7 @@ class LineItem
             $lineItem->setAmountIncludingTax($this->roundAmount($this->getAmountIncludingTax($order, $detail), $order->getCurrency()));
             $lineItem->setName($detail->getArticleName());
             $lineItem->setQuantity($detail->getQuantity());
-            $lineItem->setShippingRequired($type == \Wallee\Sdk\Model\LineItem::TYPE_PRODUCT && ! $detail->getEsdArticle());
+            $lineItem->setShippingRequired($type == \Wallee\Sdk\Model\LineItemType::PRODUCT && ! $detail->getEsdArticle());
             $lineItem->setSku($detail->getArticleNumber());
             $lineItem->setTaxes([
                 $detail->getTax()
@@ -96,7 +96,7 @@ class LineItem
             $lineItem->setTaxes([
                 $this->getShippingTax($order)
             ]);
-            $lineItem->setType(\Wallee\Sdk\Model\LineItem::TYPE_SHIPPING);
+            $lineItem->setType(\Wallee\Sdk\Model\LineItemType::SHIPPING);
             $lineItem->setUniqueId('shipping');
             $lineItems[] = $lineItem;
         }
@@ -135,18 +135,18 @@ class LineItem
             case self::ORDER_DETAIL_MODE_VOUCHER:
             case self::ORDER_DETAIL_MODE_CUSTOMERGROUP_DISCOUNT:
             case self::ORDER_DETAIL_MODE_BUNDLE_DISCOUNT:
-                return \Wallee\Sdk\Model\LineItem::TYPE_DISCOUNT;
+                return \Wallee\Sdk\Model\LineItemType::DISCOUNT;
             case self::ORDER_DETAIL_MODE_PAYMENT_SURCHARGE_DISCOUNT:
                 if ($detail->getPrice() > 0) {
-                    return \Wallee\Sdk\Model\LineItem::TYPE_FEE;
+                    return \Wallee\Sdk\Model\LineItemType::FEE;
                 } else {
-                    return \Wallee\Sdk\Model\LineItem::TYPE_DISCOUNT;
+                    return \Wallee\Sdk\Model\LineItemType::DISCOUNT;
                 }
             case self::ORDER_DETAIL_MODE_DEFAULT_ARTICLE:
             case self::ORDER_DETAIL_MODE_PREMIUM_ARTICLE:
             case self::ORDER_DETAIL_MODE_TRUSTED_SHOP_ARTICLE:
             default:
-                return \Wallee\Sdk\Model\LineItem::TYPE_PRODUCT;
+                return \Wallee\Sdk\Model\LineItemType::PRODUCT;
         }
     }
 

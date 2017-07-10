@@ -6,7 +6,6 @@ use Shopware\Components\Model\ModelManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use WalleePayment\Models\OrderTransactionMapping;
 use WalleePayment\Components\PaymentMethodConfiguration as PaymentMethodConfigurationService;
-use WalleePayment\Models\PaymentMethodConfiguration;
 use Shopware\Components\Plugin\ConfigReader;
 
 class Transaction extends AbstractService
@@ -197,7 +196,7 @@ class Transaction extends AbstractService
     public function createTransaction(Order $order)
     {
         $transaction = new \Wallee\Sdk\Model\TransactionCreate();
-        $transaction->setCustomersPresence(\Wallee\Sdk\Model\Transaction::CUSTOMERS_PRESENCE_VIRTUAL_PRESENT);
+        $transaction->setCustomersPresence(\Wallee\Sdk\Model\CustomersPresence::VIRTUAL_PRESENT);
         $this->assembleTransactionData($transaction, $order);
 
         $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
@@ -229,7 +228,7 @@ class Transaction extends AbstractService
     public function updateTransaction(Order $order, $transactionId, $spaceId)
     {
         $transaction = $this->transactionService->read($spaceId, $transactionId);
-        if ($transaction->getState() != \Wallee\Sdk\Model\Transaction::STATE_PENDING) {
+        if ($transaction->getState() != \Wallee\Sdk\Model\TransactionState::PENDING) {
             return $this->createTransaction($order);
         }
 
@@ -278,7 +277,10 @@ class Transaction extends AbstractService
 
         $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
         $spaceViewId = $pluginConfig['spaceViewId'];
-        $transaction->setSpaceViewId($spaceViewId);
+        
+        if ($transaction instanceof \Wallee\Sdk\Model\TransactionCreate) {
+            $transaction->setSpaceViewId($spaceViewId);
+        }
 
         $transaction->setLineItems($this->lineItem->collectLineItems($order));
         $transaction->setAllowedPaymentMethodConfigurations([]);

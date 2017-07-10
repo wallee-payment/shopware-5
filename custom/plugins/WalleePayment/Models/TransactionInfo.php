@@ -371,9 +371,9 @@ class TransactionInfo extends ModelEntity
     public function canDownloadInvoice()
     {
         if (in_array($this->getState(), [
-            \Wallee\Sdk\Model\Transaction::STATE_COMPLETED,
-            \Wallee\Sdk\Model\Transaction::STATE_FULFILL,
-            \Wallee\Sdk\Model\Transaction::STATE_DECLINE
+            \Wallee\Sdk\Model\TransactionState::COMPLETED,
+            \Wallee\Sdk\Model\TransactionState::FULFILL,
+            \Wallee\Sdk\Model\TransactionState::DECLINE
         ])) {
             return true;
         } else {
@@ -387,7 +387,7 @@ class TransactionInfo extends ModelEntity
      */
     public function canDownloadPackingSlip()
     {
-        if ($this->getState() == \Wallee\Sdk\Model\Transaction::STATE_FULFILL) {
+        if ($this->getState() == \Wallee\Sdk\Model\TransactionState::FULFILL) {
             return true;
         } else {
             return false;

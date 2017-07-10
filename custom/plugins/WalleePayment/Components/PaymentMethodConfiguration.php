@@ -4,13 +4,10 @@ namespace WalleePayment\Components;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Shopware\Components\Model\ModelManager;
 use WalleePayment\Models\PaymentMethodConfiguration as PaymentMethodConfigurationModel;
-use WalleePayment\Components\ApiClient;
 use WalleePayment\Components\Provider\PaymentMethod as PaymentMethodProvider;
 use Shopware\Components\Plugin\ConfigReader;
 use Shopware\Components\Plugin\PaymentInstaller;
-use WalleePayment\Components\Translator;
 use Shopware\Models\Shop\Shop;
-use WalleePayment\Components\Resource;
 
 class PaymentMethodConfiguration
 {
@@ -215,9 +212,9 @@ class PaymentMethodConfiguration
     private function getConfigurationState(\Wallee\Sdk\Model\PaymentMethodConfiguration $configuration)
     {
         switch ($configuration->getState()) {
-            case \Wallee\Sdk\Model\PaymentMethodConfiguration::STATE_ACTIVE:
+            case \Wallee\Sdk\Model\CreationEntityState::ACTIVE:
                 return PaymentMethodConfigurationModel::STATE_ACTIVE;
-            case \Wallee\Sdk\Model\PaymentMethodConfiguration::STATE_INACTIVE:
+            case \Wallee\Sdk\Model\CreationEntityState::INACTIVE:
                 return PaymentMethodConfigurationModel::STATE_INACTIVE;
             default:
                 return PaymentMethodConfigurationModel::STATE_HIDDEN;

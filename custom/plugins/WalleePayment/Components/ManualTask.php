@@ -86,7 +86,7 @@ class ManualTask extends AbstractService
             $spaceId = $pluginConfig['spaceId'];
             if ($spaceId && ! in_array($spaceId, $spaceIds)) {
                 try {
-                    $numberBySpace = $this->manualTaskService->count($spaceId, $this->createEntityFilter('state', \Wallee\Sdk\Model\ManualTask::STATE_OPEN));
+                    $numberBySpace = $this->manualTaskService->count($spaceId, $this->createEntityFilter('state', \Wallee\Sdk\Model\ManualTaskState::OPEN));
                     if ($numberBySpace > 0) {
                         $numberOfManualTasks[$spaceId] = $numberBySpace;
                     }

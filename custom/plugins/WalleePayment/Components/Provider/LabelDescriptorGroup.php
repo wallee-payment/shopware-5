@@ -50,7 +50,7 @@ class LabelDescriptorGroup extends AbstractProvider
 
     protected function fetchData()
     {
-        $labelDescriptorService= new \Wallee\Sdk\Service\LabelDescriptorGroupService($this->apiClient);
+        $labelDescriptorService= new \Wallee\Sdk\Service\LabelDescriptionGroupService($this->apiClient);
         return $labelDescriptorService->all();
     }
 

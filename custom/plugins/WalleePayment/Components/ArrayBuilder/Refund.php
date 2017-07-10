@@ -7,7 +7,6 @@ use WalleePayment\Components\ArrayBuilder\Label as LabelArrayBuilder;
 use WalleePayment\Components\ArrayBuilder\LabelGroup as LabelGroupArrayBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Wallee\Sdk\Model\TransactionInvoice;
-use WalleePayment\Components\Refund as RefundService;
 
 class Refund extends AbstractArrayBuilder
 {
@@ -53,7 +52,7 @@ class Refund extends AbstractArrayBuilder
      */
     public static function buildBaseLineItems(ContainerInterface $container, TransactionInvoice $invoice, array $refunds)
     {
-        /* @var RefundService $refundService */
+        /* @var \WalleePayment\Components\Refund $refundService */
         $refundService = $container->get('wallee_payment.refund');
 
         $result = [];

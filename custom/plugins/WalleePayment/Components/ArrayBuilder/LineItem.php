@@ -1,8 +1,8 @@
 <?php
 namespace WalleePayment\Components\ArrayBuilder;
 
-use Wallee\Sdk\Model\LineItem as LineItemModel;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Wallee\Sdk\Model\LineItem as LineItemModel;
 
 class LineItem extends AbstractArrayBuilder
 {

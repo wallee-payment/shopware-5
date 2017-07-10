@@ -22,7 +22,7 @@ class Label extends AbstractArrayBuilder
      * Constructor.
      *
      * @param ContainerInterface $container
-     * @param LabelModel $label
+     * @param LabelDescriptor $descriptor
      * @param string $value
      */
     public function __construct(ContainerInterface $container, LabelDescriptor $descriptor, $value)

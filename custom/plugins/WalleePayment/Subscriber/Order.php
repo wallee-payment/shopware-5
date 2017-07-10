@@ -5,7 +5,6 @@ use Enlight\Event\SubscriberInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Plugin\Plugin;
-use Shopware\Models\Payment\Payment;
 use WalleePayment\Components\Transaction as TransactionService;
 use WalleePayment\Components\TransactionInfo as TransactionInfoService;
 use WalleePayment\Components\Session as SessionService;
@@ -105,9 +104,15 @@ class Order implements SubscriberInterface
             if ($order->getPayment() instanceof \Shopware\Models\Payment\Payment && $plugin->getId() == $order->getPayment()->getPluginId()) {
                 /* @var OrderTransactionMapping $orderTransactionMapping */
                 $orderTransactionMapping = $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy([
-                    'temporaryId' => $this->sessionService->getSessionId(),
+                    'orderId' => $order->getId(),
                     'shopId' => $order->getShop()->getId()
                 ]);
+                if (!($orderTransactionMapping instanceof OrderTransactionMapping)) {
+                    $orderTransactionMapping = $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy([
+                        'temporaryId' => $this->sessionService->getSessionId(),
+                        'shopId' => $order->getShop()->getId()
+                    ]);
+                }
                 $transaction = $this->transactionService->updateTransaction($order, $orderTransactionMapping->getTransactionId(), $orderTransactionMapping->getSpaceId());
                 $this->transactionInfoService->updateTransactionInfo($transaction, $order);
             }

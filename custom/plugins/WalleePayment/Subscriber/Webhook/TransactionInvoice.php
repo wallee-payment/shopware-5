@@ -74,13 +74,13 @@ class TransactionInvoice extends AbstractOrderRelatedSubscriber
     protected function handleOrderRelatedInner(Order $order, $transactionInvoice)
     {
         switch ($transactionInvoice->getState()) {
-            case \Wallee\Sdk\Model\TransactionInvoice::STATE_NOT_APPLICABLE:
+            case \Wallee\Sdk\Model\TransactionInvoiceState::NOT_APPLICABLE:
                 $this->notApplicable($order, $transactionInvoice);
                 break;
-            case \Wallee\Sdk\Model\TransactionInvoice::STATE_PAID:
+            case \Wallee\Sdk\Model\TransactionInvoiceState::PAID:
                 $this->paid($order, $transactionInvoice);
                 break;
-            case \Wallee\Sdk\Model\TransactionInvoice::STATE_DERECOGNIZED:
+            case \Wallee\Sdk\Model\TransactionInvoiceState::DERECOGNIZED:
                 $this->derecognized($order, $transactionInvoice);
                 break;
             default:
