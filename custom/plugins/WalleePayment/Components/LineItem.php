@@ -7,7 +7,7 @@ use Shopware\Components\Model\ModelManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use WalleePayment\Components\Provider\Currency as CurrencyProvider;
 
-class LineItem
+class LineItem extends AbstractService
 {
     const ORDER_DETAIL_MODE_DEFAULT_ARTICLE = 0;
 
@@ -22,12 +22,6 @@ class LineItem
     const ORDER_DETAIL_MODE_BUNDLE_DISCOUNT = 10;
 
     const ORDER_DETAIL_MODE_TRUSTED_SHOP_ARTICLE = 12;
-
-    /**
-     *
-     * @var ContainerInterface
-     */
-    private $container;
 
     /**
      *
@@ -46,10 +40,11 @@ class LineItem
      *
      * @param ContainerInterface $container
      * @param ModelManager $modelManager
+     * @param CurrencyProvider $currencyProvider
      */
     public function __construct(ContainerInterface $container, ModelManager $modelManager, CurrencyProvider $currencyProvider)
     {
-        $this->container = $container;
+        parent::__construct($container);
         $this->modelManager = $modelManager;
         $this->currencyProvider = $currencyProvider;
     }
@@ -75,7 +70,7 @@ class LineItem
             ]);
             $lineItem->setType($type);
             $lineItem->setUniqueId($detail->getId());
-            $lineItems[] = $lineItem;
+            $lineItems[] = $this->cleanLineItem($lineItem);
         }
 
         if ($order->getInvoiceShipping() > 0) {
@@ -98,7 +93,7 @@ class LineItem
             ]);
             $lineItem->setType(\Wallee\Sdk\Model\LineItemType::SHIPPING);
             $lineItem->setUniqueId('shipping');
-            $lineItems[] = $lineItem;
+            $lineItems[] = $this->cleanLineItem($lineItem);
         }
 
         return $lineItems;
@@ -206,4 +201,18 @@ class LineItem
     {
         return round($amount, $this->currencyProvider->getFractionDigits($currencyCode));
     }
+    
+    /**
+     * Cleans the given line item for it to meet the API's requirements.
+     *
+     * @param \Wallee\Sdk\Model\LineItemCreate $lineItem
+     * @return \Wallee\Sdk\Model\LineItemCreate
+     */
+    private function cleanLineItem(\Wallee\Sdk\Model\LineItemCreate $lineItem)
+    {
+        $lineItem->setSku($this->fixLength($lineItem->getSku(), 200));
+        $lineItem->setName($this->fixLength($lineItem->getName(), 40));
+        return $lineItem;
+    }
+    
 }

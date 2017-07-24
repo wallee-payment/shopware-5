@@ -271,8 +271,8 @@ class Transaction extends AbstractService
             ->getId());
         $transaction->setLanguage($this->getLanguage($order));
         if ($order->getDispatch() instanceof \Shopware\Models\Dispatch\Dispatch) {
-            $transaction->setShippingMethod($order->getDispatch()
-                ->getName());
+            $transaction->setShippingMethod($this->fixLength($order->getDispatch()
+                ->getName(), 200));
         }
 
         $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
@@ -339,8 +339,8 @@ class Transaction extends AbstractService
         $address->setOrganizationName($this->fixLength($customerAddress->getCompany(), 100));
         $address->setPhoneNumber($customerAddress->getPhone());
         if ($customerAddress->getState() instanceof \Shopware\Models\Country\State) {
-            $address->setPostalState($this->fixLength($customerAddress->getState()
-                ->getShortCode()));
+            $address->setPostalState($customerAddress->getState()
+                ->getShortCode());
         }
         $address->setPostCode($this->fixLength($customerAddress->getZipCode(), 40));
         $address->setStreet($this->fixLength($customerAddress->getStreet(), 300));
@@ -372,16 +372,5 @@ class Transaction extends AbstractService
         }
         return $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy($filter);
     }
-
-    /**
-     * Changes the given string to have no more characters as specified.
-     *
-     * @param string $string
-     * @param int $maxLength
-     * @return string
-     */
-    protected function fixLength($string, $maxLength)
-    {
-        return mb_substr($string, 0, $maxLength, 'UTF-8');
-    }
+    
 }

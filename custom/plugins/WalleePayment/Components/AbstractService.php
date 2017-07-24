@@ -74,4 +74,16 @@ abstract class AbstractService
         $frontController = $this->container->get('front');
         return $frontController->Router()->assemble($params);
     }
+    
+    /**
+     * Changes the given string to have no more characters as specified.
+     *
+     * @param string $string
+     * @param int $maxLength
+     * @return string
+     */
+    protected function fixLength($string, $maxLength)
+    {
+        return mb_substr($string, 0, $maxLength, 'UTF-8');
+    }
 }
