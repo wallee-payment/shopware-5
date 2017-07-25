@@ -73,7 +73,7 @@ class Order implements SubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            'Shopware_Modules_Order_SaveOrder_FilterDetailAttributes' => 'onSaveOrder',
+            'Shopware_Modules_Order_SaveOrder_ProcessDetails' => 'onSaveOrder',
             'Shopware_Modules_Order_SendMail_Create' => 'onOrderCreateMail',
             'Shopware_Modules_Order_SendMail_Send' => 'onOrderSendMail'
         ];

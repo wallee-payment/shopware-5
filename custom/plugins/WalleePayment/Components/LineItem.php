@@ -107,6 +107,10 @@ class LineItem extends AbstractService
             $lineItem->setUniqueId('shipping');
             $lineItems[] = $this->cleanLineItem($lineItem);
         }
+        
+        if (abs($this->getTotalAmountIncludingTax($lineItems) - $order->getInvoiceAmount()) > 0.00000001) {
+            throw new \Exception('The line item total amount does not match the order\'s invoice amount.');
+        }
 
         return $lineItems;
     }
