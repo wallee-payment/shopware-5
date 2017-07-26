@@ -13,6 +13,8 @@
 
 class Shopware_Controllers_Frontend_WalleePaymentCheckout extends Shopware_Controllers_Frontend_Checkout
 {
+    private $_orderNumber;
+    
     public function preDispatch()
     {
         parent::preDispatch();
@@ -22,29 +24,33 @@ class Shopware_Controllers_Frontend_WalleePaymentCheckout extends Shopware_Contr
         ])) {
             $this->Front()
                 ->Plugins()
-                ->Json()
-                ->setRenderer(true);
+                ->ViewRenderer()
+                ->setNoRender();
         }
     }
 
     public function saveOrderAction()
     {
+        $this->_orderNumber = null;
         $backup = $this->get('wallee_payment.basket')->backupBasket();
         $this->finishAction();
         $this->get('wallee_payment.basket')->restoreBasket($backup);
-        $this->get('modules')->Order()->sCreateTemporaryOrder();
+        if ($this->_orderNumber != null) {
+            $this->get('modules')->Order()->sCreateTemporaryOrder();
+            echo json_encode([
+                'result' => 'success'
+            ]);
+        }
+    }
+    
+    public function saveOrder()
+    {
+        $orderNumber = parent::saveOrder();
+        $this->_orderNumber = $orderNumber;
+        return $orderNumber;
     }
 
     public function forward($action, $controller = null, $module = null, array $params = null)
     {
-        if ($action == 'confirm') {
-            $this->view->assign([
-                'success' => false
-            ]);
-        } else {
-            $this->view->assign([
-                'success' => true
-            ]);
-        }
     }
 }

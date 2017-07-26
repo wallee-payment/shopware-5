@@ -45,9 +45,17 @@ ShopwareWallee.Checkout = {
                     $.ajax({
                         url: saveOrderUrl,
                         data: $('#confirm--form').serializeArray(),
-                        success: $.proxy(function(){
-                            this.handler.submit();
-                        }, this)
+                        dataType: 'json',
+                        success: $.proxy(function(response){
+                        		if (response.result == 'success') {
+                        			this.handler.submit();
+                        		} else {
+                        			window.location.reload();
+                        		}
+                        }, this),
+                        error: function(){
+                        		window.location.reload();
+                        }
                     })
                 } else {
                     this.unblockCheckoutButton();

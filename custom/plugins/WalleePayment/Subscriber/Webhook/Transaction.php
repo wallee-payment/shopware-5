@@ -142,6 +142,8 @@ class Transaction extends AbstractOrderRelatedSubscriber
                     $this->voided($order, $transaction);
                     break;
                 case \Wallee\Sdk\Model\TransactionState::COMPLETED:
+                    $this->complete($order, $transaction);
+                    break;
                 default:
                     // Nothing to do.
                     break;
@@ -152,27 +154,35 @@ class Transaction extends AbstractOrderRelatedSubscriber
 
     private function authorize(Order $order, \Wallee\Sdk\Model\Transaction $transaction)
     {
-        $order->setPaymentStatus($this->getStatus(Status::PAYMENT_STATE_COMPLETELY_INVOICED));
+        $order->setPaymentStatus($this->getStatus(Status::PAYMENT_STATE_RESERVED));
         $this->modelManager->flush($order);
         $this->sendOrderEmail($order);
+    }
+    
+    private function complete(Order $order, \Wallee\Sdk\Model\Transaction $transaction)
+    {
+        if ($order->getOrderStatus()->getId() == Status::PAYMENT_STATE_RESERVED) {
+            $order->setPaymentStatus($this->getStatus(Status::PAYMENT_STATE_COMPLETELY_INVOICED));
+            $this->modelManager->flush($order);
+        }
     }
 
     private function decline(Order $order, \Wallee\Sdk\Model\Transaction $transaction)
     {
-        $order->setOrderStatus($this->getStatus(Status::ORDER_STATE_CANCELLED_REJECTED));
+        $order->setOrderStatus($this->getStatus($this->getCancelledOrderStatusId($order)));
         $this->modelManager->flush($order);
     }
 
     private function failed(Order $order, \Wallee\Sdk\Model\Transaction $transaction)
     {
-        $order->setOrderStatus($this->getStatus(Status::ORDER_STATE_CANCELLED_REJECTED));
+        $order->setOrderStatus($this->getStatus($this->getCancelledOrderStatusId($order)));
         $order->setPaymentStatus($this->getStatus(Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED));
         $this->modelManager->flush($order);
     }
 
     private function fulfill(Order $order, \Wallee\Sdk\Model\Transaction $transaction)
     {
-        $order->setOrderStatus($this->getStatus(Status::ORDER_STATE_READY_FOR_DELIVERY));
+        $order->setOrderStatus($this->getStatus($this->getFulfillOrderStatusId($order)));
         $this->modelManager->flush($order);
         $this->sendOrderEmail($order);
     }
@@ -182,7 +192,29 @@ class Transaction extends AbstractOrderRelatedSubscriber
         $order->setPaymentStatus($this->getStatus(Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED));
         $this->modelManager->flush($order);
     }
-
+    
+    private function getCancelledOrderStatusId(Order $order)
+    {
+        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
+        $status = $pluginConfig['orderStatusCancelled'];
+        if ($status == null || $status == '' || !is_numeric($status)) {
+            return Status::ORDER_STATE_CANCELLED_REJECTED;
+        } else {
+            return (int)$status;
+        }
+    }
+    
+    private function getFulfillOrderStatusId(Order $order)
+    {
+        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
+        $status = $pluginConfig['orderStatusFulfill'];
+        if ($status == null || $status == '' || !is_numeric($status)) {
+            return Status::ORDER_STATE_READY_FOR_DELIVERY;
+        } else {
+            return (int)$status;
+        }
+    }
+    
     private function getStatus($statusId)
     {
         return $this->modelManager->getRepository(Status::class)->find($statusId);

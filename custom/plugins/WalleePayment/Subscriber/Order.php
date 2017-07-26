@@ -24,6 +24,7 @@ use Shopware\Models\Order\Order as OrderModel;
 use WalleePayment\Models\OrderTransactionMapping;
 use WalleePayment\Components\Registry;
 use Shopware\Components\Plugin\ConfigReader;
+use Shopware\Models\Order\Status;
 
 class Order implements SubscriberInterface
 {
@@ -114,6 +115,8 @@ class Order implements SubscriberInterface
                 'name' => $this->container->getParameter('wallee_payment.plugin_name')
             ]);
             if ($order->getPayment() instanceof \Shopware\Models\Payment\Payment && $plugin->getId() == $order->getPayment()->getPluginId()) {
+                $order->setOrderStatus($this->getStatus($this->getPendingOrderStatusId($order)));
+                $this->modelManager->flush($order);
                 /* @var OrderTransactionMapping $orderTransactionMapping */
                 $orderTransactionMapping = $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy([
                     'orderId' => $order->getId(),
@@ -125,7 +128,7 @@ class Order implements SubscriberInterface
                         'shopId' => $order->getShop()->getId()
                     ]);
                 }
-                $transaction = $this->transactionService->updateTransaction($order, $orderTransactionMapping->getTransactionId(), $orderTransactionMapping->getSpaceId());
+                $transaction = $this->transactionService->updateTransaction($order, $orderTransactionMapping->getTransactionId(), $orderTransactionMapping->getSpaceId(), true);
                 $this->transactionInfoService->updateTransactionInfo($transaction, $order);
             }
         }
@@ -196,5 +199,21 @@ class Order implements SubscriberInterface
             }
         }
         return $args->getReturn();
+    }
+    
+    private function getStatus($statusId)
+    {
+        return $this->modelManager->getRepository(Status::class)->find($statusId);
+    }
+    
+    private function getPendingOrderStatusId(Order $order)
+    {
+        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
+        $status = $pluginConfig['orderStatusPending'];
+        if ($status == null || $status == '' || !is_numeric($status)) {
+            return Status::ORDER_STATE_CLARIFICATION_REQUIRED;
+        } else {
+            return (int)$status;
+        }
     }
 }

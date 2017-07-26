@@ -235,9 +235,10 @@ class Transaction extends AbstractService
      * @param Order $order
      * @param int $transactionId
      * @param int $spaceId
+     * @param boolean $confirm
      * @return \Wallee\Sdk\Model\TransactionPending
      */
-    public function updateTransaction(Order $order, $transactionId, $spaceId)
+    public function updateTransaction(Order $order, $transactionId, $spaceId, $confirm = false)
     {
         $transaction = $this->transactionService->read($spaceId, $transactionId);
         if ($transaction->getState() != \Wallee\Sdk\Model\TransactionState::PENDING) {
@@ -248,7 +249,12 @@ class Transaction extends AbstractService
         $pendingTransaction->setId($transaction->getId());
         $pendingTransaction->setVersion($transaction->getVersion());
         $this->assembleTransactionData($pendingTransaction, $order);
-        $updatedTransaction = $this->transactionService->update($spaceId, $pendingTransaction);
+
+        if ($confirm) {
+            $updatedTransaction = $this->transactionService->confirm($spaceId, $pendingTransaction);
+        } else {
+            $updatedTransaction = $this->transactionService->update($spaceId, $pendingTransaction);
+        }
 
         /* @var OrderTransactionMapping $orderTransactionMapping */
         $orderTransactionMapping = $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy([
@@ -262,7 +268,7 @@ class Transaction extends AbstractService
         self::$transactionCache[$order->getId()] = $updatedTransaction;
         return $updatedTransaction;
     }
-
+    
     /**
      * Assembles the transaction data for the given order.
      *

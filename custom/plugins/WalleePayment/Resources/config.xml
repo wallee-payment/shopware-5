@@ -77,5 +77,26 @@
         	<label lang="en">Customer Download: Packing Slip</label>
         	<value>1</value>
         </element>
+        <element type="select" scope="shop">
+        	<name>orderStatusPending</name>
+        	<label lang="de">Bestell-Status: Ausstehend</label>
+        	<label lang="en">Order Status: Pending</label>
+        	<value>8</value>
+        	<store>Shopware.apps.Base.store.OrderStatus</store>
+        </element>
+        <element type="select" scope="shop">
+        	<name>orderStatusFulfill</name>
+        	<label lang="de">Bestell-Status: Erfüllen</label>
+        	<label lang="en">Order Status: Fulfill</label>
+        	<value>5</value>
+        	<store>Shopware.apps.Base.store.OrderStatus</store>
+        </element>
+        <element type="select" scope="shop">
+        	<name>orderStatusCancelled</name>
+        	<label lang="de">Bestell-Status: Abgelehnt/Fehlgeschlagen</label>
+        	<label lang="en">Order Status: Declined/Failed</label>
+        	<value>4</value>
+        	<store>Shopware.apps.Base.store.OrderStatus</store>
+        </element>
     </elements>
 </config>
