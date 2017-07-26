@@ -206,7 +206,7 @@ class Order implements SubscriberInterface
         return $this->modelManager->getRepository(Status::class)->find($statusId);
     }
     
-    private function getPendingOrderStatusId(Order $order)
+    private function getPendingOrderStatusId(OrderModel $order)
     {
         $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
         $status = $pluginConfig['orderStatusPending'];
