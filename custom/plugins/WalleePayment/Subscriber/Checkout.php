@@ -122,9 +122,10 @@ class Checkout implements SubscriberInterface
                 ->find($session['wallee_payment.failed_transaction']);
             $session['wallee_payment.failed_transaction'] = '';
 
-            return $transactionInfo->getUserFailureMessage();
-        } else {
-            return null;
+            if ($transactionInfo instanceof TransactionInfo) {
+                return $transactionInfo->getUserFailureMessage();
+            }
         }
+        return null;
     }
 }
