@@ -210,7 +210,7 @@ class Order implements SubscriberInterface
     {
         $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
         $status = $pluginConfig['orderStatusPending'];
-        if ($status == null || $status == '' || !is_numeric($status)) {
+        if ($status === null || $status === '' || !is_numeric($status)) {
             return Status::ORDER_STATE_CLARIFICATION_REQUIRED;
         } else {
             return (int)$status;

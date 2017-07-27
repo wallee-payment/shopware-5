@@ -197,7 +197,7 @@ class Transaction extends AbstractOrderRelatedSubscriber
     {
         $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
         $status = $pluginConfig['orderStatusCancelled'];
-        if ($status == null || $status == '' || !is_numeric($status)) {
+        if ($status === null || $status === '' || !is_numeric($status)) {
             return Status::ORDER_STATE_CANCELLED_REJECTED;
         } else {
             return (int)$status;
@@ -208,7 +208,7 @@ class Transaction extends AbstractOrderRelatedSubscriber
     {
         $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
         $status = $pluginConfig['orderStatusFulfill'];
-        if ($status == null || $status == '' || !is_numeric($status)) {
+        if ($status === null || $status === '' || !is_numeric($status)) {
             return Status::ORDER_STATE_READY_FOR_DELIVERY;
         } else {
             return (int)$status;

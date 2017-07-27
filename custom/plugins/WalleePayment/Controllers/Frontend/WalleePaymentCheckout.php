@@ -36,6 +36,7 @@ class Shopware_Controllers_Frontend_WalleePaymentCheckout extends Shopware_Contr
         $this->finishAction();
         $this->get('wallee_payment.basket')->restoreBasket($backup);
         if ($this->_orderNumber != null) {
+            $this->get('wallee_payment.registry')->set('disable_risk_management', true);
             $this->get('modules')->Order()->sCreateTemporaryOrder();
             echo json_encode([
                 'result' => 'success'

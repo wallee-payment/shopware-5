@@ -23,6 +23,7 @@ use Shopware\Models\Order\Order as OrderModel;
 use Shopware\Models\Plugin\Plugin;
 use WalleePayment\Models\PaymentMethodConfiguration as PaymentMethodConfigurationModel;
 use Shopware\Components\Plugin\ConfigReader;
+use WalleePayment\Components\Registry;
 
 class RiskManagement implements SubscriberInterface
 {
@@ -56,6 +57,11 @@ class RiskManagement implements SubscriberInterface
      * @var SessionService
      */
     private $sessionService;
+    
+    /**
+     * @var Registry
+     */
+    private $registry;
 
     public static function getSubscribedEvents()
     {
@@ -72,14 +78,16 @@ class RiskManagement implements SubscriberInterface
      * @param ConfigReader $configReader
      * @param TransactionService $transactionService
      * @param SessionService $sessionService
+     * @param Registry $registry
      */
-    public function __construct(ContainerInterface $container, ModelManager $modelManager, ConfigReader $configReader, TransactionService $transactionService, SessionService $sessionService)
+    public function __construct(ContainerInterface $container, ModelManager $modelManager, ConfigReader $configReader, TransactionService $transactionService, SessionService $sessionService, Registry $registry)
     {
         $this->container = $container;
         $this->modelManager = $modelManager;
         $this->configReader = $configReader;
         $this->transactionService = $transactionService;
         $this->sessionService = $sessionService;
+        $this->registry = $registry;
     }
 
     public function onAfterManageRisk(\Enlight_Hook_HookArgs $args)
@@ -101,6 +109,10 @@ class RiskManagement implements SubscriberInterface
                 'name' => $this->container->getParameter('wallee_payment.plugin_name')
             ]);
             if ($payment instanceof \Shopware\Models\Payment\Payment && $plugin->getId() == $payment->getPluginId()) {
+                if ($this->registry->get('disable_risk_management') === true) {
+                    return $args->getReturn();
+                }
+                
                 $order = $this->sessionService->getTemporaryOrder();
 
                 $shop = ($order instanceof OrderModel ? $order->getShop() : $this->container->get('shop'));

@@ -190,6 +190,7 @@
         	<argument type="service" id="shopware.plugin.config_reader" />
         	<argument type="service" id="wallee_payment.transaction" />
         	<argument type="service" id="wallee_payment.session" />
+        	<argument type="service" id="wallee_payment.registry" />
         	<tag name="shopware.event_subscriber" />
         </service>
         
