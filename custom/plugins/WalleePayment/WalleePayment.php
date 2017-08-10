@@ -23,6 +23,7 @@ use WalleePayment\Models\OrderTransactionMapping;
 use WalleePayment\Models\PaymentMethodConfiguration;
 use WalleePayment\Models\TransactionInfo;
 use Shopware\Models\Widget\Widget;
+use Shopware\Components\Plugin\Context\ActivateContext;
 
 class WalleePayment extends Plugin
 {
@@ -50,6 +51,11 @@ class WalleePayment extends Plugin
         parent::uninstall($context);
 //         $this->uninstallSchema();
         $this->uninstallWidgets($context);
+    }
+    
+    public function activate(ActivateContext $context)
+    {
+        $context->scheduleClearCache(InstallContext::CACHE_LIST_ALL);
     }
 
     public function build(ContainerBuilder $container)

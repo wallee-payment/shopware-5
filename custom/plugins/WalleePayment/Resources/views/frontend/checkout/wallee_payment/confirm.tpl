@@ -13,11 +13,17 @@
 
 {block name="frontend_index_header_javascript_jquery" append}
 	<script type="text/javascript" src="{$walleePaymentJavascriptUrl}"></script>
-	<script type="text/javascript" src="{link file='frontend/checkout/wallee_payment/_resources/checkout.js'}"></script>
 	<script type="text/javascript">
-	$(document).ready(function(){
+	var ShopwareWalleeCheckoutInit = function(){
 		ShopwareWallee.Checkout.init('wallee_payment_method_form', '{$walleePaymentConfigurationId}', '{url controller='WalleePaymentCheckout' action='saveOrder'}');
-	});
+	};
+	if (typeof document.asyncReady == 'function') {
+		document.asyncReady(function(){
+			$(document).ready(ShopwareWalleeCheckoutInit);
+		});
+	} else {
+		$(document).ready(ShopwareWalleeCheckoutInit);
+	}
 	</script>
 {/block}
 
