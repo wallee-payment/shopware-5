@@ -98,5 +98,11 @@
         	<value>4</value>
         	<store>Shopware.apps.Base.store.OrderStatus</store>
         </element>
+        <element type="boolean" scope="shop">
+		<name>orderRemoveFailed</name>
+		<label lang="de">Fehlgeschlagene Bestellungen löschen</label>
+		<label lang="en">Delete failed orders</label>
+		<value>0</value>
+        </element>
     </elements>
 </config>
