@@ -28,7 +28,7 @@
 {/block}
 
 {block name='frontend_checkout_confirm_premiums' prepend}
-	<div class="panel has--border">
+	<div class="panel has--border" id="wallee_payment_method_form_container">
 		<div class="panel--title is--underline">
 			{s name=checkout/payment_information namespace=frontend/wallee_payment/main}Payment Information{/s}
 		</div>
