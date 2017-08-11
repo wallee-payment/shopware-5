@@ -82,7 +82,7 @@ class TransactionInfo extends AbstractArrayBuilder
      * @param Transaction $transaction
      * @return TransactionInfo
      */
-    public function setTransaction(Transaction $transaction)
+    public function setTransaction(Transaction $transaction = null)
     {
         $this->transaction = $transaction;
         return $this;
@@ -93,7 +93,7 @@ class TransactionInfo extends AbstractArrayBuilder
      * @param PaymentMethod $paymentMethod
      * @return TransactionInfo
      */
-    public function setPaymentMethod(PaymentMethod $paymentMethod)
+    public function setPaymentMethod(PaymentMethod $paymentMethod = null)
     {
         $this->paymentMethod = $paymentMethod;
         return $this;
@@ -104,7 +104,7 @@ class TransactionInfo extends AbstractArrayBuilder
      * @param TransactionInvoice $invoice
      * @return TransactionInfo
      */
-    public function setInvoice(TransactionInvoice $invoice)
+    public function setInvoice(TransactionInvoice $invoice = null)
     {
         $this->invoice = $invoice;
         return $this;
@@ -115,7 +115,7 @@ class TransactionInfo extends AbstractArrayBuilder
      * @param TransactionLineItemVersion $lineItemVersion
      * @return TransactionInfo
      */
-    public function setLineItemVersion(TransactionLineItemVersion $lineItemVersion)
+    public function setLineItemVersion(TransactionLineItemVersion $lineItemVersion = null)
     {
         $this->lineItemVersion = $lineItemVersion;
         return $this;
