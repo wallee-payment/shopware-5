@@ -25,6 +25,7 @@ use WalleePayment\Components\ArrayBuilder\TransactionInfo as TransactionInfoArra
 use WalleePayment\Models\TransactionInfo as TransactionInfoModel;
 use WalleePayment\Models\PaymentMethodConfiguration as PaymentMethodConfigurationModel;
 use Shopware\Models\Order\Order;
+use Wallee\Sdk\Model\FailureReason;
 
 class TransactionInfo extends AbstractService
 {
@@ -98,11 +99,8 @@ class TransactionInfo extends AbstractService
         $info->setImage($this->getPaymentMethodImage($transaction, $order));
         $info->setLabels($this->getTransactionLabels($transaction));
         if ($transaction->getState() == \Wallee\Sdk\Model\TransactionState::FAILED || $transaction->getState() == \Wallee\Sdk\Model\TransactionState::DECLINE) {
-            $failedChargeAttempt = $this->getFailedChargeAttempt($transaction->getLinkedSpaceId(), $transaction->getId());
-            if ($failedChargeAttempt != null && $failedChargeAttempt->getFailureReason() != null) {
-                $info->setFailureReason($failedChargeAttempt->getFailureReason()->getDescription());
-                $info->setUserFailureMessage($failedChargeAttempt->getUserFailureMessage());
-            }
+            $info->setFailureReason($transaction->getFailureReason() instanceof FailureReason ? $transaction->getFailureReason()->getDescription() : null);
+            $info->setUserFailureMessage($transaction->getUserFailureMessage());
         }
         $this->modelManager->persist($info);
         $this->modelManager->flush($info);
@@ -202,40 +200,6 @@ class TransactionInfo extends AbstractService
                     'paymentId' => $payment->getId()
                 ]);
             return $paymentMethodConfiguration->getImage();
-        }
-    }
-
-    /**
-     * Returns the last failed charge attempt of the transaction.
-     *
-     * @param int $spaceId
-     * @param int $transactionId
-     * @return \Wallee\Sdk\Model\ChargeAttempt
-     */
-    private function getFailedChargeAttempt($spaceId, $transactionId)
-    {
-        $chargeAttemptService = new \Wallee\Sdk\Service\ChargeAttemptService($this->apiClient);
-        $query = new \Wallee\Sdk\Model\EntityQuery();
-        $filter = new \Wallee\Sdk\Model\EntityQueryFilter();
-        $filter->setType(\Wallee\Sdk\Model\EntityQueryFilterType::_AND);
-        $filter->setChildren(
-            array(
-                $this->createEntityFilter('charge.transaction.id', $transactionId),
-                $this->createEntityFilter('state', \Wallee\Sdk\Model\ChargeAttemptState::FAILED)
-            )
-            );
-        $query->setFilter($filter);
-        $query->setOrderBys(
-            array(
-                $this->createEntityOrderBy('failedOn')
-            )
-            );
-        $query->setNumberOfEntities(1);
-        $result = $chargeAttemptService->search($spaceId, $query);
-        if ($result != null && ! empty($result)) {
-            return current($result);
-        } else {
-            return null;
         }
     }
 

@@ -109,8 +109,8 @@ class PaymentMethodConfiguration
         ));
         if ($model instanceof PaymentMethodConfigurationModel) {
             $model->setConfigurationName($configuration->getName());
-            $model->setTitle($this->getTranslationsArray($configuration->getTitle()));
-            $model->setDescription($this->getTranslationsArray($configuration->getDescription()));
+            $model->setTitle($configuration->getResolvedTitle());
+            $model->setDescription($configuration->getResolvedDescription());
             $model->setImage($configuration->getImageResourcePath() != null ? $configuration->getImageResourcePath()
                 ->getPath() : $this->paymentMethodProvider->find($configuration->getPaymentMethod())
                 ->getImagePath());
@@ -160,8 +160,8 @@ class PaymentMethodConfiguration
                     $method->setConfigurationId($configuration->getId());
                     $method->setConfigurationName($configuration->getName());
                     $method->setState($this->getConfigurationState($configuration));
-                    $method->setTitle($this->getTranslationsArray($configuration->getTitle()));
-                    $method->setDescription($this->getTranslationsArray($configuration->getDescription()));
+                    $method->setTitle($configuration->getResolvedTitle());
+                    $method->setDescription($configuration->getResolvedDescription());
                     $method->setImage($configuration->getImageResourcePath() != null ? $configuration->getImageResourcePath()
                         ->getPath() : $this->paymentMethodProvider->find($configuration->getPaymentMethod())
                         ->getImagePath());
@@ -231,24 +231,5 @@ class PaymentMethodConfiguration
             default:
                 return PaymentMethodConfigurationModel::STATE_HIDDEN;
         }
-    }
-
-    /**
-     * Converts a DatabaseTranslatedString into a serializable array.
-     *
-     * @param \Wallee\Sdk\Model\DatabaseTranslatedString $translatedString
-     * @return string[]
-     */
-    private function getTranslationsArray(\Wallee\Sdk\Model\DatabaseTranslatedString $translatedString)
-    {
-        $translations = array();
-        foreach ($translatedString->getItems() as $item) {
-            $translation = $item->getTranslation();
-            if (! empty($translation)) {
-                $translations[$item->getLanguage()] = $item->getTranslation();
-            }
-        }
-
-        return $translations;
     }
 }

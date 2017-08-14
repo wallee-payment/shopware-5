@@ -24,23 +24,22 @@ namespace Wallee\Sdk\Model;
 use Wallee\Sdk\ValidationException;
 
 /**
- * HumanUserUpdate model
+ * AbstractHumanUserUpdate model
  *
  * @category    Class
- * @description 
  * @package     Wallee\Sdk
  * @author      customweb GmbH
  * @license     http://www.apache.org/licenses/LICENSE-2.0 Apache License v2
  * @link        https://github.com/wallee-payment/wallee-php-sdk
  */
-class HumanUserUpdate extends AbstractHumanUserUpdate  {
+class AbstractHumanUserUpdate  {
 
 	/**
 	 * The original name of the model.
 	 *
 	 * @var string
 	 */
-	private static $swaggerModelName = 'HumanUser.Update';
+	private static $swaggerModelName = 'Abstract.HumanUser.Update';
 
 	/**
 	 * An array of property to type mappings. Used for (de)serialization.
@@ -48,8 +47,12 @@ class HumanUserUpdate extends AbstractHumanUserUpdate  {
 	 * @var string[]
 	 */
 	private static $swaggerTypes = array(
-		'id' => 'int',
-		'version' => 'int'	);
+		'emailAddress' => 'string',
+		'firstname' => 'string',
+		'language' => 'string',
+		'lastname' => 'string',
+		'state' => '\Wallee\Sdk\Model\CreationEntityState',
+		'timeZone' => 'string'	);
 
 	/**
 	 * Returns an array of property to type mappings.
@@ -57,24 +60,52 @@ class HumanUserUpdate extends AbstractHumanUserUpdate  {
 	 * @return string[]
 	 */
 	public static function swaggerTypes() {
-		return self::$swaggerTypes + parent::swaggerTypes();
+		return self::$swaggerTypes;
 	}
 
 	
 
 	/**
-	 * The ID is the primary key of the entity. The ID identifies the entity uniquely.
+	 * The email address of the user.
 	 *
-	 * @var int
+	 * @var string
 	 */
-	private $id;
+	private $emailAddress;
 
 	/**
-	 * The version number indicates the version of the entity. The version is incremented whenever the entity is changed.
+	 * The first name of the user.
 	 *
-	 * @var int
+	 * @var string
 	 */
-	private $version;
+	private $firstname;
+
+	/**
+	 * The preferred language of the user.
+	 *
+	 * @var string
+	 */
+	private $language;
+
+	/**
+	 * The last name of the user.
+	 *
+	 * @var string
+	 */
+	private $lastname;
+
+	/**
+	 * 
+	 *
+	 * @var \Wallee\Sdk\Model\CreationEntityState
+	 */
+	private $state;
+
+	/**
+	 * The time zone which is applied for the user. If no timezone is specified the browser is used to determine an appropriate time zone.
+	 *
+	 * @var string
+	 */
+	private $timeZone;
 
 
 	/**
@@ -83,13 +114,23 @@ class HumanUserUpdate extends AbstractHumanUserUpdate  {
 	 * @param mixed[] $data an associated array of property values initializing the model
 	 */
 	public function __construct(array $data = null) {
-		parent::__construct($data);
-
-		if (isset($data['id']) && $data['id'] != null) {
-			$this->setId($data['id']);
+		if (isset($data['emailAddress']) && $data['emailAddress'] != null) {
+			$this->setEmailAddress($data['emailAddress']);
 		}
-		if (isset($data['version']) && $data['version'] != null) {
-			$this->setVersion($data['version']);
+		if (isset($data['firstname']) && $data['firstname'] != null) {
+			$this->setFirstname($data['firstname']);
+		}
+		if (isset($data['language']) && $data['language'] != null) {
+			$this->setLanguage($data['language']);
+		}
+		if (isset($data['lastname']) && $data['lastname'] != null) {
+			$this->setLastname($data['lastname']);
+		}
+		if (isset($data['state']) && $data['state'] != null) {
+			$this->setState($data['state']);
+		}
+		if (isset($data['timeZone']) && $data['timeZone'] != null) {
+			$this->setTimeZone($data['timeZone']);
 		}
 	}
 
@@ -102,17 +143,19 @@ class HumanUserUpdate extends AbstractHumanUserUpdate  {
 	 * @return string
 	 */
 	public function getEmailAddress() {
-		return parent::getEmailAddress();
+		return $this->emailAddress;
 	}
 
 	/**
 	 * Sets emailAddress.
 	 *
 	 * @param string $emailAddress
-	 * @return HumanUserUpdate
+	 * @return AbstractHumanUserUpdate
 	 */
 	public function setEmailAddress($emailAddress) {
-		return parent::setEmailAddress($emailAddress);
+		$this->emailAddress = $emailAddress;
+
+		return $this;
 	}
 
 	/**
@@ -123,17 +166,19 @@ class HumanUserUpdate extends AbstractHumanUserUpdate  {
 	 * @return string
 	 */
 	public function getFirstname() {
-		return parent::getFirstname();
+		return $this->firstname;
 	}
 
 	/**
 	 * Sets firstname.
 	 *
 	 * @param string $firstname
-	 * @return HumanUserUpdate
+	 * @return AbstractHumanUserUpdate
 	 */
 	public function setFirstname($firstname) {
-		return parent::setFirstname($firstname);
+		$this->firstname = $firstname;
+
+		return $this;
 	}
 
 	/**
@@ -144,17 +189,19 @@ class HumanUserUpdate extends AbstractHumanUserUpdate  {
 	 * @return string
 	 */
 	public function getLanguage() {
-		return parent::getLanguage();
+		return $this->language;
 	}
 
 	/**
 	 * Sets language.
 	 *
 	 * @param string $language
-	 * @return HumanUserUpdate
+	 * @return AbstractHumanUserUpdate
 	 */
 	public function setLanguage($language) {
-		return parent::setLanguage($language);
+		$this->language = $language;
+
+		return $this;
 	}
 
 	/**
@@ -165,17 +212,42 @@ class HumanUserUpdate extends AbstractHumanUserUpdate  {
 	 * @return string
 	 */
 	public function getLastname() {
-		return parent::getLastname();
+		return $this->lastname;
 	}
 
 	/**
 	 * Sets lastname.
 	 *
 	 * @param string $lastname
-	 * @return HumanUserUpdate
+	 * @return AbstractHumanUserUpdate
 	 */
 	public function setLastname($lastname) {
-		return parent::setLastname($lastname);
+		$this->lastname = $lastname;
+
+		return $this;
+	}
+
+	/**
+	 * Returns state.
+	 *
+	 * 
+	 *
+	 * @return \Wallee\Sdk\Model\CreationEntityState
+	 */
+	public function getState() {
+		return $this->state;
+	}
+
+	/**
+	 * Sets state.
+	 *
+	 * @param \Wallee\Sdk\Model\CreationEntityState $state
+	 * @return AbstractHumanUserUpdate
+	 */
+	public function setState($state) {
+		$this->state = $state;
+
+		return $this;
 	}
 
 	/**
@@ -186,61 +258,17 @@ class HumanUserUpdate extends AbstractHumanUserUpdate  {
 	 * @return string
 	 */
 	public function getTimeZone() {
-		return parent::getTimeZone();
+		return $this->timeZone;
 	}
 
 	/**
 	 * Sets timeZone.
 	 *
 	 * @param string $timeZone
-	 * @return HumanUserUpdate
+	 * @return AbstractHumanUserUpdate
 	 */
 	public function setTimeZone($timeZone) {
-		return parent::setTimeZone($timeZone);
-	}
-
-	/**
-	 * Returns id.
-	 *
-	 * The ID is the primary key of the entity. The ID identifies the entity uniquely.
-	 *
-	 * @return int
-	 */
-	public function getId() {
-		return $this->id;
-	}
-
-	/**
-	 * Sets id.
-	 *
-	 * @param int $id
-	 * @return HumanUserUpdate
-	 */
-	public function setId($id) {
-		$this->id = $id;
-
-		return $this;
-	}
-
-	/**
-	 * Returns version.
-	 *
-	 * The version number indicates the version of the entity. The version is incremented whenever the entity is changed.
-	 *
-	 * @return int
-	 */
-	public function getVersion() {
-		return $this->version;
-	}
-
-	/**
-	 * Sets version.
-	 *
-	 * @param int $version
-	 * @return HumanUserUpdate
-	 */
-	public function setVersion($version) {
-		$this->version = $version;
+		$this->timeZone = $timeZone;
 
 		return $this;
 	}
@@ -251,14 +279,7 @@ class HumanUserUpdate extends AbstractHumanUserUpdate  {
 	 * @throws ValidationException
 	 */
 	public function validate() {
-		parent::validate();
 
-		if ($this->getId() === null) {
-			throw new ValidationException("'id' can't be null", 'id', $this);
-		}
-		if ($this->getVersion() === null) {
-			throw new ValidationException("'version' can't be null", 'version', $this);
-		}
 	}
 
 	/**

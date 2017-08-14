@@ -240,21 +240,7 @@ class Transaction extends AbstractService
      */
     public function updateTransaction(Order $order, $transactionId, $spaceId, $confirm = false)
     {
-        $transaction = $this->transactionService->read($spaceId, $transactionId);
-        if ($transaction->getState() != \Wallee\Sdk\Model\TransactionState::PENDING) {
-            return $this->createTransaction($order);
-        }
-
-        $pendingTransaction = new \Wallee\Sdk\Model\TransactionPending();
-        $pendingTransaction->setId($transaction->getId());
-        $pendingTransaction->setVersion($transaction->getVersion());
-        $this->assembleTransactionData($pendingTransaction, $order);
-
-        if ($confirm) {
-            $updatedTransaction = $this->transactionService->confirm($spaceId, $pendingTransaction);
-        } else {
-            $updatedTransaction = $this->transactionService->update($spaceId, $pendingTransaction);
-        }
+        $transaction = $this->updateTransactionInner($order, $transactionId, $spaceId, $confirm);
 
         /* @var OrderTransactionMapping $orderTransactionMapping */
         $orderTransactionMapping = $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy([
@@ -265,8 +251,35 @@ class Transaction extends AbstractService
         $this->modelManager->persist($orderTransactionMapping);
         $this->modelManager->flush($orderTransactionMapping);
 
-        self::$transactionCache[$order->getId()] = $updatedTransaction;
-        return $updatedTransaction;
+        self::$transactionCache[$order->getId()] = $transaction;
+        return $transaction;
+    }
+    
+    private function updateTransactionInner(Order $order, $transactionId, $spaceId, $confirm = false)
+    {
+        for ($i = 0; $i < 5; $i++) {
+            try {
+                $transaction = $this->transactionService->read($spaceId, $transactionId);
+                if ($transaction->getState() != \Wallee\Sdk\Model\TransactionState::PENDING) {
+                    return $this->createTransaction($order);
+                }
+                
+                $pendingTransaction = new \Wallee\Sdk\Model\TransactionPending();
+                $pendingTransaction->setId($transaction->getId());
+                $pendingTransaction->setVersion($transaction->getVersion());
+                $this->assembleTransactionData($pendingTransaction, $order);
+                
+                if ($confirm) {
+                    $updatedTransaction = $this->transactionService->confirm($spaceId, $pendingTransaction);
+                } else {
+                    $updatedTransaction = $this->transactionService->update($spaceId, $pendingTransaction);
+                }
+                return $updatedTransaction;
+            } catch (\Wallee\Sdk\VersioningException $e) {
+                // Try again to update the transaction again, if a versioning exception occurred.
+            }
+        }
+        throw new \Wallee\Sdk\VersioningException();
     }
     
     /**
@@ -302,8 +315,11 @@ class Transaction extends AbstractService
 
         $transaction->setLineItems($this->lineItem->collectLineItems($order));
         $transaction->setAllowedPaymentMethodConfigurations([]);
-        $transaction->setSuccessUrl($this->getUrl('WalleePaymentTransaction', 'success', null, null, ['spaceId' => $pluginConfig['spaceId'], 'transactionId' => $transaction->getId()]));
-        $transaction->setFailedUrl($this->getUrl('WalleePaymentTransaction', 'failure', null, null, ['spaceId' => $pluginConfig['spaceId'], 'transactionId' => $transaction->getId()]));
+        
+        if (!($transaction instanceof \Wallee\Sdk\Model\TransactionCreate)) {
+            $transaction->setSuccessUrl($this->getUrl('WalleePaymentTransaction', 'success', null, null, ['spaceId' => $pluginConfig['spaceId'], 'transactionId' => $transaction->getId()]));
+            $transaction->setFailedUrl($this->getUrl('WalleePaymentTransaction', 'failure', null, null, ['spaceId' => $pluginConfig['spaceId'], 'transactionId' => $transaction->getId()]));
+        }
     }
 
     private function getBillingAddress(Order $order)
