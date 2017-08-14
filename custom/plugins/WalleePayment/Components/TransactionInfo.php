@@ -263,11 +263,13 @@ class TransactionInfo extends AbstractService
     private function getPaymentMethod(TransactionInfoModel $transactionInfo)
     {
         try {
-            return $this->container->get('wallee_payment.provider.payment_method')->find($transactionInfo->getPaymentMethodId());
-        } catch (\Exception $e) {
-            // If payment methods cannot be loaded from Wallee, information about the payment method cannot be displayed.
-            return null;
-        }
+            $paymentMethod = $this->container->get('wallee_payment.provider.payment_method')->find($transactionInfo->getPaymentMethodId());
+            if ($paymentMethod instanceof PaymentMethod) {
+                return $paymentMethod;
+            }
+        } catch (\Exception $e) {}
+        // If payment methods cannot be loaded from Wallee, information about the payment method cannot be displayed.
+        return null;
     }
 
     /**
@@ -278,10 +280,12 @@ class TransactionInfo extends AbstractService
     private function getTransaction(TransactionInfoModel $transactionInfo)
     {
         try {
-            return $this->container->get('wallee_payment.transaction')->getTransaction($transactionInfo->getSpaceId(), $transactionInfo->getTransactionId());
-        } catch (\Exception $e) {
-            return null;
-        }
+            $transaction = $this->container->get('wallee_payment.transaction')->getTransaction($transactionInfo->getSpaceId(), $transactionInfo->getTransactionId());
+            if ($transaction instanceof TransactionModel) {
+                return $transaction;
+            }
+        } catch (\Exception $e) {}
+        return null;
     }
 
     /**
@@ -292,10 +296,12 @@ class TransactionInfo extends AbstractService
     private function getInvoice(TransactionInfoModel $transactionInfo)
     {
         try {
-            return $this->container->get('wallee_payment.invoice')->getInvoice($transactionInfo->getSpaceId(), $transactionInfo->getTransactionId());
-        } catch (\Exception $e) {
-            return null;
-        }
+            $invoice = $this->container->get('wallee_payment.invoice')->getInvoice($transactionInfo->getSpaceId(), $transactionInfo->getTransactionId());
+            if ($invoice instanceof TransactionInvoice) {
+                return $invoice;
+            }
+        } catch (\Exception $e) {}
+        return null;
     }
 
     /**
@@ -306,10 +312,12 @@ class TransactionInfo extends AbstractService
     private function getLineItemVersion(TransactionInfoModel $transactionInfo)
     {
         try {
-            return $this->container->get('wallee_payment.transaction')->getLineItemVersion($transactionInfo->getSpaceId(), $transactionInfo->getTransactionId());
-        } catch (\Exception $e) {
-            return null;
-        }
+            $lineItemVersion = $this->container->get('wallee_payment.transaction')->getLineItemVersion($transactionInfo->getSpaceId(), $transactionInfo->getTransactionId());
+            if ($lineItemVersion instanceof TransactionLineItemVersion) {
+                return $lineItemVersion;
+            }
+        } catch (\Exception $e) {}
+        return null;
     }
 
     /**
@@ -320,9 +328,11 @@ class TransactionInfo extends AbstractService
     private function getRefunds(TransactionInfoModel $transactionInfo)
     {
         try {
-            return $this->container->get('wallee_payment.refund')->getRefunds($transactionInfo->getSpaceId(), $transactionInfo->getTransactionId());
-        } catch (\Exception $e) {
-            return [];
-        }
+            $refunds = $this->container->get('wallee_payment.refund')->getRefunds($transactionInfo->getSpaceId(), $transactionInfo->getTransactionId());
+            if (is_array($refunds)) {
+                return $refunds;
+            }
+        } catch (\Exception $e) {}
+        return [];
     }
 }
