@@ -23,6 +23,8 @@ abstract class AbstractProvider
     private $cache;
 
     private $cacheKey;
+    
+    private $data = null;
 
     public function __construct(\Zend_Cache_Core $cache, $cacheKey)
     {

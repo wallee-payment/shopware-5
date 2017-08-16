@@ -27,7 +27,7 @@ class Resource
      *
      * @param string $baseGatewayUrl
      */
-    public function __construct(string $baseGatewayUrl)
+    public function __construct($baseGatewayUrl)
     {
         $this->baseGatewayUrl = $baseGatewayUrl;
     }

@@ -19,6 +19,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use WalleePayment\Models\OrderTransactionMapping;
 use WalleePayment\Components\PaymentMethodConfiguration as PaymentMethodConfigurationService;
 use Shopware\Components\Plugin\ConfigReader;
+use Wallee\Sdk\Model\EntityQuery;
+use Wallee\Sdk\Model\EntityQueryFilter;
+use Wallee\Sdk\Model\EntityQueryFilterType;
+use Wallee\Sdk\Model\TransactionState;
+use Wallee\Sdk\Model\EntityQueryOrderByType;
 
 class Transaction extends AbstractService
 {
@@ -207,14 +212,19 @@ class Transaction extends AbstractService
      */
     public function createTransaction(Order $order)
     {
-        $transaction = new \Wallee\Sdk\Model\TransactionCreate();
-        $transaction->setCustomersPresence(\Wallee\Sdk\Model\CustomersPresence::VIRTUAL_PRESENT);
-        $this->assembleTransactionData($transaction, $order);
+        $existingTransaction = $this->findExistingTransaction($order);
+        if ($existingTransaction instanceof \Wallee\Sdk\Model\Transaction) {
+            $transaction = $this->updateTransactionInner($order, $existingTransaction->getId(), $existingTransaction->getLinkedSpaceId());
+        } else {
+            $transaction = new \Wallee\Sdk\Model\TransactionCreate();
+            $transaction->setCustomersPresence(\Wallee\Sdk\Model\CustomersPresence::VIRTUAL_PRESENT);
+            $this->assembleTransactionData($transaction, $order);
 
-        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
-        $spaceId = $pluginConfig['spaceId'];
+            $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
+            $spaceId = $pluginConfig['spaceId'];
 
-        $transaction = $this->transactionService->create($spaceId, $transaction);
+            $transaction = $this->transactionService->create($spaceId, $transaction);
+        }
 
         $orderTransactionMapping = new OrderTransactionMapping();
         $orderTransactionMapping->setOrder($order);
@@ -225,6 +235,28 @@ class Transaction extends AbstractService
 
         self::$transactionCache[$order->getId()] = $transaction;
         return $transaction;
+    }
+    
+    private function findExistingTransaction(Order $order)
+    {
+        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
+        $spaceId = $pluginConfig['spaceId'];
+        
+        $query = new EntityQuery();
+        $filter = new EntityQueryFilter();
+        $filter->setType(EntityQueryFilterType::_AND);
+        $filter->setChildren($this->createEntityFilter('state', TransactionState::PENDING),
+            $this->createEntityFilter('customerId', $order->getCustomer()->getId()),
+            $this->createEntityFilter('customerEmailAddress', $order->getCustomer()->getEmail()));
+        $query->setFilter($filter);
+        $query->setOrderBys([$this->createEntityOrderBy('createdOn', EntityQueryOrderByType::DESC)]);
+        $query->setNumberOfEntities(1);
+        $transactions = $this->transactionService->search($spaceId, $query);
+        if (is_array($transactions) && !empty($transactions)) {
+            return current($transactions);
+        } else {
+            return null;
+        }
     }
 
     /**

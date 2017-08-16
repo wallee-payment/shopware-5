@@ -238,5 +238,11 @@
             <argument type="service" id="wallee_payment.manual_task" />
             <tag name="shopware.event_subscriber" />
         </service>
+        
+        <!-- Commands -->
+        
+        <service id="wallee_payment.commands.transaction_update" class="WalleePayment\Commands\UpdateTransactionCommand">
+			<tag name="console.command"/>
+		</service>
     </services>
 </container>

@@ -159,8 +159,10 @@ class Order implements SubscriberInterface
                     $this->modelManager->persist($orderTransactionMapping);
                     $this->modelManager->flush($orderTransactionMapping);
                 } elseif ($orderTransactionMapping->getOrderEmailVariables() == null) {
+                    $variables = $args->getVariables();
+                    $variables['sBookingID'] = $orderTransactionMapping->getTransactionId();
                     $orderTransactionMapping->setOrderEmailVariables([
-                        'variables' => $args->getVariables(),
+                        'variables' => $variables,
                         'sUserData' => $args->getSubject()->sUserData
                     ]);
                     $this->modelManager->persist($orderTransactionMapping);
