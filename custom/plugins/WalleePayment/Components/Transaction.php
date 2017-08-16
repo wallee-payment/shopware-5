@@ -214,7 +214,7 @@ class Transaction extends AbstractService
     {
         $existingTransaction = $this->findExistingTransaction($order);
         if ($existingTransaction instanceof \Wallee\Sdk\Model\Transaction) {
-            $transaction = $this->updateTransactionInner($order, $existingTransaction->getId(), $existingTransaction->getLinkedSpaceId());
+            return $this->updateTransaction($order, $existingTransaction->getId(), $existingTransaction->getLinkedSpaceId());
         } else {
             $transaction = new \Wallee\Sdk\Model\TransactionCreate();
             $transaction->setCustomersPresence(\Wallee\Sdk\Model\CustomersPresence::VIRTUAL_PRESENT);
@@ -224,17 +224,11 @@ class Transaction extends AbstractService
             $spaceId = $pluginConfig['spaceId'];
 
             $transaction = $this->transactionService->create($spaceId, $transaction);
+            
+            $this->updateOrCreateTransactionMapping($transaction, $order);
+            self::$transactionCache[$order->getId()] = $transaction;
+            return $transaction;
         }
-
-        $orderTransactionMapping = new OrderTransactionMapping();
-        $orderTransactionMapping->setOrder($order);
-        $orderTransactionMapping->setSpaceId($transaction->getLinkedSpaceId());
-        $orderTransactionMapping->setTransactionId($transaction->getId());
-        $this->modelManager->persist($orderTransactionMapping);
-        $this->modelManager->flush($orderTransactionMapping);
-
-        self::$transactionCache[$order->getId()] = $transaction;
-        return $transaction;
     }
     
     private function findExistingTransaction(Order $order)
@@ -274,23 +268,6 @@ class Transaction extends AbstractService
      */
     public function updateTransaction(Order $order, $transactionId, $spaceId, $confirm = false)
     {
-        $transaction = $this->updateTransactionInner($order, $transactionId, $spaceId, $confirm);
-
-        /* @var OrderTransactionMapping $orderTransactionMapping */
-        $orderTransactionMapping = $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy([
-            'transactionId' => $transactionId,
-            'spaceId' => $spaceId
-        ]);
-        $orderTransactionMapping->setOrder($order);
-        $this->modelManager->persist($orderTransactionMapping);
-        $this->modelManager->flush($orderTransactionMapping);
-
-        self::$transactionCache[$order->getId()] = $transaction;
-        return $transaction;
-    }
-    
-    private function updateTransactionInner(Order $order, $transactionId, $spaceId, $confirm = false)
-    {
         for ($i = 0; $i < 5; $i++) {
             try {
                 $transaction = $this->transactionService->read($spaceId, $transactionId);
@@ -308,6 +285,9 @@ class Transaction extends AbstractService
                 } else {
                     $updatedTransaction = $this->transactionService->update($spaceId, $pendingTransaction);
                 }
+                
+                $this->updateOrCreateTransactionMapping($transaction, $order);
+                self::$transactionCache[$order->getId()] = $transaction;
                 return $updatedTransaction;
             } catch (\Wallee\Sdk\VersioningException $e) {
                 // Try to update the transaction again, if a versioning exception occurred.
@@ -439,5 +419,31 @@ class Transaction extends AbstractService
             ];
         }
         return $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy($filter);
+    }
+    
+    private function updateOrCreateTransactionMapping(\Wallee\Sdk\Model\Transaction $transaction, Order $order)
+    {
+        /* @var OrderTransactionMapping $orderTransactionMapping */
+        $orderTransactionMappings = $this->modelManager->getRepository(OrderTransactionMapping::class)->findBy([
+            'transactionId' => $transaction->getId(),
+            'spaceId' => $transaction->getLinkedSpaceId()
+        ]);
+        if (count($orderTransactionMappings) > 1) {
+            foreach($orderTransactionMappings as $mapping) {
+                $this->modelManager->remove($mapping);
+            }
+            $this->modelManager->flush();
+            $orderTransactionMapping = null;
+        } else {
+            $orderTransactionMapping = current($orderTransactionMappings);
+        }
+        if (!($orderTransactionMapping instanceof OrderTransactionMapping)) {
+            $orderTransactionMapping = new OrderTransactionMapping();
+            $orderTransactionMapping->setSpaceId($transaction->getLinkedSpaceId());
+            $orderTransactionMapping->setTransactionId($transaction->getId());
+        }
+        $orderTransactionMapping->setOrder($order);
+        $this->modelManager->persist($orderTransactionMapping);
+        $this->modelManager->flush($orderTransactionMapping);
     }
 }
