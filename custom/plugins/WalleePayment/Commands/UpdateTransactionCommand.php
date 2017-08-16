@@ -35,6 +35,10 @@ class UpdateTransactionCommand extends ShopwareCommand
             require_once __DIR__ . '/../vendor/autoload.php';
         }
         
+        if (Shopware()->Front()->Request() == null) {
+            Shopware()->Front()->setRequest(new \Enlight_Controller_Request_RequestHttp());
+        }
+        
         /* @var \WalleePayment\Components\Transaction $transactionService */
         $transactionService = $this->getContainer()->get('wallee_payment.transaction');
         /* @var \WalleePayment\Components\Invoice $invoiceService */
@@ -46,9 +50,10 @@ class UpdateTransactionCommand extends ShopwareCommand
         /* @var \WalleePayment\Subscriber\Webhook\TransactionInvoice $invoiceWebhookService */
         $invoiceWebhookService = $this->getContainer()->get('wallee_payment.subscriber.webhook.transaction_invoice');
         
+        // Can only update one transaction at a time, because the context changes.
         $transactionInfos = $this->getContainer()->get('models')->getRepository(TransactionInfoModel::class)->findBy([
             'state' => 'CONFIRMED'
-        ], null, 50, null);
+        ], null, 1, null);
         foreach ($transactionInfos as $transactionInfo) {
             /* @var TransactionInfoModel $transactionInfo */
             $this->getContainer()->set('shop', $transactionInfo->getShop());
