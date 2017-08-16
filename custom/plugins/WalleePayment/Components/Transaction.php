@@ -236,7 +236,7 @@ class Transaction extends AbstractService
      * @param int $transactionId
      * @param int $spaceId
      * @param boolean $confirm
-     * @return \Wallee\Sdk\Model\TransactionPending
+     * @return \Wallee\Sdk\Model\AbstractTransactionPending
      */
     public function updateTransaction(Order $order, $transactionId, $spaceId, $confirm = false)
     {
@@ -276,7 +276,7 @@ class Transaction extends AbstractService
                 }
                 return $updatedTransaction;
             } catch (\Wallee\Sdk\VersioningException $e) {
-                // Try again to update the transaction again, if a versioning exception occurred.
+                // Try to update the transaction again, if a versioning exception occurred.
             }
         }
         throw new \Wallee\Sdk\VersioningException();
@@ -285,10 +285,10 @@ class Transaction extends AbstractService
     /**
      * Assembles the transaction data for the given order.
      *
-     * @param \Wallee\Sdk\Model\TransactionPending $transaction
+     * @param \Wallee\Sdk\Model\AbstractTransactionPending $transaction
      * @param Order $order
      */
-    private function assembleTransactionData(\Wallee\Sdk\Model\TransactionPending $transaction, Order $order)
+    private function assembleTransactionData(\Wallee\Sdk\Model\AbstractTransactionPending $transaction, Order $order)
     {
         if ($order->getNumber() != '0') {
             $transaction->setMerchantReference($order->getNumber());
