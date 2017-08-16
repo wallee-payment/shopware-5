@@ -133,7 +133,7 @@ class LineItem extends AbstractService
 
     private function getAmountIncludingTax(Order $order, Detail $detail)
     {
-        $amountIncludingTax = $detail->getPrice() * $detail->getQuantity();
+        $amountIncludingTax = $this->roundAmount($detail->getPrice(), $order->getCurrency()) * $detail->getQuantity();
         if ($order->getNet() && ! $order->getTaxFree()) {
             $amountIncludingTax = $amountIncludingTax / 100 * (100 + $detail->getTaxRate());
         }
