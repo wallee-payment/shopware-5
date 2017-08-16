@@ -245,9 +245,11 @@ class Transaction extends AbstractService
         $query = new EntityQuery();
         $filter = new EntityQueryFilter();
         $filter->setType(EntityQueryFilterType::_AND);
-        $filter->setChildren($this->createEntityFilter('state', TransactionState::PENDING),
+        $filter->setChildren(array(
+            $this->createEntityFilter('state', TransactionState::PENDING),
             $this->createEntityFilter('customerId', $order->getCustomer()->getId()),
-            $this->createEntityFilter('customerEmailAddress', $order->getCustomer()->getEmail()));
+            $this->createEntityFilter('customerEmailAddress', $order->getCustomer()->getEmail())
+        ));
         $query->setFilter($filter);
         $query->setOrderBys([$this->createEntityOrderBy('createdOn', EntityQueryOrderByType::DESC)]);
         $query->setNumberOfEntities(1);
