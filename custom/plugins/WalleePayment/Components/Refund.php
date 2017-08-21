@@ -71,7 +71,7 @@ class Refund extends AbstractService
      * @param \Wallee\Sdk\Model\Refund[] $refunds
      * @return \Wallee\Sdk\Model\LineItem[]
      */
-    public function getRefundBaseLineItems(\Wallee\Sdk\Model\TransactionInvoice $invoice, array $refunds)
+    public function getRefundBaseLineItems(\Wallee\Sdk\Model\TransactionInvoice $invoice = null, array $refunds = [])
     {
         $refund = $this->getLastSuccessfulRefund($refunds);
         if ($refund) {

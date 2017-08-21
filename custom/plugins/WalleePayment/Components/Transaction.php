@@ -18,6 +18,7 @@ use Shopware\Components\Model\ModelManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use WalleePayment\Models\OrderTransactionMapping;
 use WalleePayment\Components\PaymentMethodConfiguration as PaymentMethodConfigurationService;
+use WalleePayment\Components\TransactionInfo as TransactionInfoService;
 use Shopware\Components\Plugin\ConfigReader;
 use Wallee\Sdk\Model\EntityQuery;
 use Wallee\Sdk\Model\EntityQueryFilter;
@@ -69,6 +70,12 @@ class Transaction extends AbstractService
      * @var PaymentMethodConfigurationService
      */
     private $paymentMethodConfigurationService;
+    
+    /**
+     *
+     * @var TransactionInfoService
+     */
+    private $transactionInfoService;
 
     /**
      * The transaction API service.
@@ -85,8 +92,10 @@ class Transaction extends AbstractService
      * @param ConfigReader $configReader
      * @param ApiClient $apiClient
      * @param LineItem $lineItem
+     * @param PaymentMethodConfigurationService $paymentMethodConfigurationService
+     * @param TransactionInfoService $transactionInfoService
      */
-    public function __construct(ContainerInterface $container, ModelManager $modelManager, ConfigReader $configReader, ApiClient $apiClient, LineItem $lineItem, PaymentMethodConfigurationService $paymentMethodConfigurationService)
+    public function __construct(ContainerInterface $container, ModelManager $modelManager, ConfigReader $configReader, ApiClient $apiClient, LineItem $lineItem, PaymentMethodConfigurationService $paymentMethodConfigurationService, TransactionInfoService $transactionInfoService)
     {
         parent::__construct($container);
         $this->container = $container;
@@ -95,6 +104,7 @@ class Transaction extends AbstractService
         $this->apiClient = $apiClient->getInstance();
         $this->lineItem = $lineItem;
         $this->paymentMethodConfigurationService = $paymentMethodConfigurationService;
+        $this->transactionInfoService = $transactionInfoService;
         $this->transactionService = new \Wallee\Sdk\Service\TransactionService($this->apiClient);
     }
 
@@ -274,6 +284,7 @@ class Transaction extends AbstractService
                 if ($transaction->getState() != \Wallee\Sdk\Model\TransactionState::PENDING) {
                     return $this->createTransaction($order);
                 }
+                $this->transactionInfoService->updateTransactionInfo($transaction, $order);
                 
                 $pendingTransaction = new \Wallee\Sdk\Model\TransactionPending();
                 $pendingTransaction->setId($transaction->getId());
@@ -429,7 +440,7 @@ class Transaction extends AbstractService
             'spaceId' => $transaction->getLinkedSpaceId()
         ]);
         if (count($orderTransactionMappings) > 1) {
-            foreach($orderTransactionMappings as $mapping) {
+            foreach ($orderTransactionMappings as $mapping) {
                 $this->modelManager->remove($mapping);
             }
             $this->modelManager->flush();

@@ -231,7 +231,8 @@ class TransactionInfo extends AbstractService
             if ($paymentMethod instanceof PaymentMethod) {
                 return $paymentMethod;
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
         // If payment methods cannot be loaded from Wallee, information about the payment method cannot be displayed.
         return null;
     }
@@ -248,7 +249,8 @@ class TransactionInfo extends AbstractService
             if ($transaction instanceof TransactionModel) {
                 return $transaction;
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
         return null;
     }
 
@@ -264,7 +266,8 @@ class TransactionInfo extends AbstractService
             if ($invoice instanceof TransactionInvoice) {
                 return $invoice;
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
         return null;
     }
 
@@ -280,7 +283,8 @@ class TransactionInfo extends AbstractService
             if ($lineItemVersion instanceof TransactionLineItemVersion) {
                 return $lineItemVersion;
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
         return null;
     }
 
@@ -296,7 +300,8 @@ class TransactionInfo extends AbstractService
             if (is_array($refunds)) {
                 return $refunds;
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
         return [];
     }
 }

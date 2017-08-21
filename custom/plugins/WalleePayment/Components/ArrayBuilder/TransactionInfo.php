@@ -128,7 +128,7 @@ class TransactionInfo extends AbstractArrayBuilder
      */
     public function setRefunds($refunds)
     {
-        $this->refunds = $refunds;
+        $this->refunds = $refunds != null ? $refunds : [];
         return $this;
     }
 

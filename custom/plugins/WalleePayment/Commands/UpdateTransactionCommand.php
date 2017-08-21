@@ -22,7 +22,7 @@ use Wallee\Sdk\Model\Transaction as TransactionModel;
 
 class UpdateTransactionCommand extends ShopwareCommand
 {
-	protected function configure()
+    protected function configure()
     {
         $this
             ->setName('wallee:transaction:update')

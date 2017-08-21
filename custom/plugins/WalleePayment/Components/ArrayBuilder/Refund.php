@@ -37,7 +37,7 @@ class Refund extends AbstractArrayBuilder
     public function __construct(ContainerInterface $container, RefundModel $refund)
     {
         parent::__construct($container);
-        $this->refund= $refund;
+        $this->refund = $refund;
     }
 
     public function build()
@@ -62,7 +62,7 @@ class Refund extends AbstractArrayBuilder
      * @param Refund[] $refunds
      * @return array
      */
-    public static function buildBaseLineItems(ContainerInterface $container, TransactionInvoice $invoice, array $refunds)
+    public static function buildBaseLineItems(ContainerInterface $container, TransactionInvoice $invoice = null, array $refunds = [])
     {
         /* @var \WalleePayment\Components\Refund $refundService */
         $refundService = $container->get('wallee_payment.refund');

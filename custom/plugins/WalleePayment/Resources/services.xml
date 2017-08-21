@@ -92,6 +92,7 @@
         	<argument type="service" id="wallee_payment.api_client" />
         	<argument type="service" id="wallee_payment.line_item" />
         	<argument type="service" id="wallee_payment.payment_method_configuration" />
+        	<argument type="service" id="wallee_payment.transaction_info" />
         </service>
         
         <service id="wallee_payment.registry" class="WalleePayment\Components\Registry">

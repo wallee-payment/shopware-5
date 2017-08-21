@@ -128,8 +128,7 @@ class Order implements SubscriberInterface
                         'shopId' => $order->getShop()->getId()
                     ]);
                 }
-                $transaction = $this->transactionService->updateTransaction($order, $orderTransactionMapping->getTransactionId(), $orderTransactionMapping->getSpaceId(), true);
-                $this->transactionInfoService->updateTransactionInfo($transaction, $order);
+                $this->transactionService->updateTransaction($order, $orderTransactionMapping->getTransactionId(), $orderTransactionMapping->getSpaceId(), true);
             }
         }
     }
