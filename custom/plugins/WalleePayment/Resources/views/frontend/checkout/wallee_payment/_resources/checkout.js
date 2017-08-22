@@ -41,7 +41,12 @@ ShopwareWallee.Checkout = {
         if (!this.handler) {
             this.handler = window.IframeCheckoutHandler(configurationId);
             this.handler.setHeightChangeCallback(function(height){
-            		$('#wallee_payment_method_form_container').toggle(height > 0);
+            		if (height > 0) {
+            			$('#wallee_payment_method_form_container').css({
+            				position: 'static',
+            				left: 'auto'
+            			});
+                }
             });
             this.handler.create(container, $.proxy(function(validationResult) {
                 if (validationResult.success) {

@@ -168,7 +168,11 @@ class TransactionInfo extends AbstractService
             $paymentMethodConfiguration = $this->modelManager->getRepository(PaymentMethodConfigurationModel::class)->findOneBy([
                 'paymentId' => $payment->getId()
             ]);
-            return $paymentMethodConfiguration->getImage();
+            if ($paymentMethodConfiguration instanceof PaymentMethodConfigurationModel) {
+                return $paymentMethodConfiguration->getImage();
+            } else {
+                return null;
+            }
         }
 
         /* @var \WalleePayment\Components\Provider\PaymentConnector $connectorProvider */
@@ -199,7 +203,11 @@ class TransactionInfo extends AbstractService
                 $paymentMethodConfiguration = $this->modelManager->getRepository(PaymentMethodConfigurationModel::class)->findOneBy([
                     'paymentId' => $payment->getId()
                 ]);
-            return $paymentMethodConfiguration->getImage();
+            if ($paymentMethodConfiguration instanceof PaymentMethodConfigurationModel) {
+                return $paymentMethodConfiguration->getImage();
+            } else {
+                return null;
+            }
         }
     }
 
