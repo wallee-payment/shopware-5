@@ -136,6 +136,9 @@ class OrderTransactionMapping extends ModelEntity
      */
     public function setOrder(Order $order)
     {
+        if (empty($order->getId())) {
+            return $this;
+        }
         $this->order = $order;
         $this->shopId = $order->getShop()->getId();
         $this->shop = $order->getShop();
