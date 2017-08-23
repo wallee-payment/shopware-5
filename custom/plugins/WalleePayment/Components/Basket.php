@@ -116,6 +116,8 @@ class Basket
                 }
                 if ($key == 'basketID') {
                     $values[$key] = $basketIdMap[$value];
+                } elseif ($key == 'tonur_gift_option_parent_basket_id' && !empty($value)) {
+                    $values[$key] = $basketIdMap[$value];
                 } else {
                     $values[$key] = $value;
                 }
