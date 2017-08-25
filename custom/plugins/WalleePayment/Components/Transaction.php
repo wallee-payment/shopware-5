@@ -434,6 +434,16 @@ class Transaction extends AbstractService
     
     private function updateOrCreateTransactionMapping(\Wallee\Sdk\Model\Transaction $transaction, Order $order)
     {
+        if ($order->getTemporaryId() != null) {
+            /* @var OrderTransactionMapping $orderTransactionMapping */
+            $orderTransactionMappings = $this->modelManager->getRepository(OrderTransactionMapping::class)->findBy([
+                'temporaryId' => $order->getTemporaryId()
+            ]);
+            foreach ($orderTransactionMappings as $mapping) {
+                $this->modelManager->remove($mapping);
+            }
+            $this->modelManager->flush();
+        }
         /* @var OrderTransactionMapping $orderTransactionMapping */
         $orderTransactionMappings = $this->modelManager->getRepository(OrderTransactionMapping::class)->findBy([
             'transactionId' => $transaction->getId(),

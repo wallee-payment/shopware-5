@@ -81,9 +81,9 @@ class Checkout implements SubscriberInterface
 
         $view = $checkoutController->View();
 
-        $paymentData = $checkoutController->getSelectedPayment();
-        if (! empty($paymentData['id'])) {
-            $payment = $this->modelManager->find(Payment::class, $paymentData['id']);
+        $order = $this->sessionService->getTemporaryOrder();
+        if ($order instanceof OrderModel) {
+            $payment = $order->getPayment();
             /* @var Plugin $plugin */
             $plugin = $this->modelManager->getRepository(Plugin::class)->findOneBy([
                 'name' => $this->container->getParameter('wallee_payment.plugin_name')
@@ -93,22 +93,38 @@ class Checkout implements SubscriberInterface
                     'paymentId' => $payment->getId()
                 ]);
                 if ($paymentMethodConfiguration instanceof PaymentMethodConfigurationModel) {
-                    $order = $this->sessionService->getTemporaryOrder();
-                    if ($order instanceof OrderModel) {
-                        $view->addTemplateDir($this->container->getParameter('wallee_payment.plugin_dir') . '/Resources/views/');
-                        $view->extendsTemplate('frontend/checkout/wallee_payment/confirm.tpl');
+                    if (!$this->isPaymentMethodAvailable($order, $paymentMethodConfiguration)) {
+                        $checkoutController->redirect(['controller' => 'checkout', 'action' => 'shippingPayment']);
+                        return;
+                    }
 
-                        $view->assign('walleePaymentJavascriptUrl', $this->transactionService->getJavaScriptUrl($order));
-                        $view->assign('walleePaymentConfigurationId', $paymentMethodConfiguration->getConfigurationId());
+                    $view->addTemplateDir($this->container->getParameter('wallee_payment.plugin_dir') . '/Resources/views/');
+                    $view->extendsTemplate('frontend/checkout/wallee_payment/confirm.tpl');
 
-                        $userFailureMessage = $this->getUserFailureMessage();
-                        if (!empty($userFailureMessage)) {
-                            $view->assign('walleePaymentFailureMessage', $userFailureMessage);
-                        }
+                    $view->assign('walleePaymentJavascriptUrl', $this->transactionService->getJavaScriptUrl($order));
+                    $view->assign('walleePaymentConfigurationId', $paymentMethodConfiguration->getConfigurationId());
+
+                    $userFailureMessage = $this->getUserFailureMessage();
+                    if (!empty($userFailureMessage)) {
+                        $view->assign('walleePaymentFailureMessage', $userFailureMessage);
                     }
                 }
             }
         }
+    }
+
+    private function isPaymentMethodAvailable(OrderModel $order, PaymentMethodConfigurationModel $paymentMethodConfiguration)
+    {
+        try {
+            $possiblePaymentMethods = $this->transactionService->getPossiblePaymentMethods($order);
+            foreach ($possiblePaymentMethods as $possiblePaymentMethod) {
+                if ($possiblePaymentMethod->getId() == $paymentMethodConfiguration->getConfigurationId()) {
+                    return true;
+                }
+            }
+        } catch (\Exception $e) {
+        }
+        return false;
     }
 
     private function getUserFailureMessage()
@@ -128,4 +144,5 @@ class Checkout implements SubscriberInterface
         }
         return null;
     }
+
 }
