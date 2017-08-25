@@ -25,14 +25,8 @@ Ext.define('Shopware.apps.Order.PluginWalleePayment.view.window.TransactionTab',
      * @return Ext.container.Container
      */
     createOrderTransactionTab: function(parent) {
-        var me = this;
-        
-        var tabTransactionStore = Ext.create('Shopware.apps.WalleePaymentTransaction.store.Transaction');
-        tabTransactionStore.load({
-            params: {
-                orderId: parent.record.get('id')
-            }
-        });
+        var me = this,
+            tabTransactionStore = Ext.create('Shopware.apps.WalleePaymentTransaction.store.Transaction');
         
         me.transactionDetails = Ext.create('Shopware.apps.WalleePaymentTransaction.view.transaction.Transaction', {
         	region: 'center'
@@ -47,12 +41,26 @@ Ext.define('Shopware.apps.Order.PluginWalleePayment.view.window.TransactionTab',
             ],
             listeners: {
                 activate: function() {
-                    var record = tabTransactionStore.first();
-                    if (record && !me.transactionDetails.record) {
-                        me.transactionDetails.setRecord(record);
+                    if (!me.transactionDetails.record) {
+                        parent.setLoading(true);
+                        var record = tabTransactionStore.first();
+                        if (record) {
+                            me.transactionDetails.setRecord(record);
+                            parent.setLoading(false);
+                        }
                     }
                 	parent.fireEvent('orderTransactionsTabActivated', parent);
                 }
+            }
+        });
+
+        tabTransactionStore.load({
+            params: {
+                orderId: parent.record.get('id')
+            },
+            callback: function(records, operation, success){
+                 me.transactionDetails.setRecord(this.first());
+                 parent.setLoading(false);
             }
         });
  
