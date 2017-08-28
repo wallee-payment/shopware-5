@@ -26,6 +26,7 @@ use WalleePayment\Models\TransactionInfo as TransactionInfoModel;
 use WalleePayment\Models\PaymentMethodConfiguration as PaymentMethodConfigurationModel;
 use Shopware\Models\Order\Order;
 use Wallee\Sdk\Model\FailureReason;
+use Shopware\Models\Customer\Customer;
 
 class TransactionInfo extends AbstractService
 {
@@ -104,7 +105,38 @@ class TransactionInfo extends AbstractService
         }
         $this->modelManager->persist($info);
         $this->modelManager->flush($info);
+        $this->updateCustomerData($order->getCustomer(), $transaction);
         return $info;
+    }
+    
+    private function updateCustomerData(Customer $customer, \Wallee\Sdk\Model\Transaction $transaction)
+    {
+        $billingAddress = $customer->getDefaultBillingAddress();
+        
+        if ($customer->getBirthday() == null && $transaction->getBillingAddress()->getDateOfBirth() != null) {
+            $customer->setBirthday($transaction->getBillingAddress()->getDateOfBirth());
+        }
+        
+        $customerBillingPhone = $billingAddress->getPhone();
+        if (empty($customerBillingPhone)) {
+            $transactionBillingPhone = $transaction->getBillingAddress()->getPhoneNumber();
+            $transactionBillingMobile = $transaction->getBillingAddress()->getPhoneNumber();
+            if (!empty($transactionBillingPhone)) {
+                $billingAddress->setPhone($transactionBillingPhone);
+            } elseif (!empty($transactionBillingMobile)) {
+                $billingAddress->setPhone($transactionBillingMobile);
+            }
+        }
+        
+        $billingVatId = $billingAddress->getVatId();
+        $transactionSalesTaxNumber = $transaction->getBillingAddress()->getSalesTaxNumber();
+        if (empty($billingVatId) && !empty($transactionSalesTaxNumber)) {
+            $billingAddress->setVatId($transactionSalesTaxNumber);
+        }
+        
+        $this->modelManager->persist($billingAddress);
+        $this->modelManager->persist($customer);
+        $this->modelManager->flush([$billingAddress, $customer]);
     }
 
     /**

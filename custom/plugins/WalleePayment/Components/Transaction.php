@@ -403,6 +403,7 @@ class Transaction extends AbstractService
         }
         $address->setPostCode($this->fixLength($customerAddress->getZipCode(), 40));
         $address->setStreet($this->fixLength($customerAddress->getStreet(), 300));
+        $address->setSalesTaxNumber($this->fixLength($customerAddress->getVatId(), 100));
         return $address;
     }
 
