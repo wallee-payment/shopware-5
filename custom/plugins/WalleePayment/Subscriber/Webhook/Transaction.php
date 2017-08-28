@@ -124,6 +124,9 @@ class Transaction extends AbstractOrderRelatedSubscriber
         $transactionInfo = $this->modelManager->getRepository(TransactionInfo::class)->findOneBy([
             'transactionId' => $transaction->getId()
         ]);
+        if (!($transactionInfo instanceof TransactionInfo)) {
+            throw new \WalleePayment\Components\Webhook\Exception();
+        }
         if ($transaction->getState() != $transactionInfo->getState()) {
             switch ($transaction->getState()) {
                 case \Wallee\Sdk\Model\TransactionState::AUTHORIZED:

@@ -39,12 +39,16 @@ class Shopware_Controllers_Frontend_WalleePaymentWebhook extends Frontend implem
     public function handleAction()
     {
         $this->Response()->setHttpResponseCode(500);
-        $request = new WebhookRequest(json_decode($this->Request()->getRawBody()));
-        $this->get('events')->notify('Wallee_Payment_Webhook_' . $request->getListenerEntityTechnicalName(), [
-            'request' => $request
-        ]);
-        if (! $this->Response()->isException()) {
-            $this->Response()->setHttpResponseCode(200);
+        try {
+            $request = new WebhookRequest(json_decode($this->Request()->getRawBody()));
+            $this->get('events')->notify('Wallee_Payment_Webhook_' . $request->getListenerEntityTechnicalName(), [
+                'request' => $request
+            ]);
+            if (! $this->Response()->isException()) {
+                $this->Response()->setHttpResponseCode(200);
+            }
+        } catch (\WalleePayment\Components\Webhook\Exception $e) {
+            $this->Response()->setHttpResponseCode(500);
         }
     }
 }
