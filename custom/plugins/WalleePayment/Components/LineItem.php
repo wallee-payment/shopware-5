@@ -18,6 +18,8 @@ use Shopware\Models\Order\Detail;
 use Shopware\Components\Model\ModelManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use WalleePayment\Components\Provider\Currency as CurrencyProvider;
+use Shopware\Models\Tax\Tax;
+use Shopware\Models\Dispatch\Dispatch;
 
 class LineItem extends AbstractService
 {
@@ -61,16 +63,23 @@ class LineItem extends AbstractService
         $this->currencyProvider = $currencyProvider;
     }
 
+    /**
+     * Returns the line items for the given order.
+     * 
+     * @param Order $order
+     * @throws \Exception
+     * @return \Wallee\Sdk\Model\LineItemCreate[]
+     */
     public function collectLineItems(Order $order)
     {
         $lineItems = [];
 
         $details = $order->getDetails();
         foreach ($details as $detail) {
-            $type = $this->getType($detail);
             /* @var Detail $detail */
+            $type = $this->getType($detail->getMode(), $detail->getPrice());
             $lineItem = new \Wallee\Sdk\Model\LineItemCreate();
-            $lineItem->setAmountIncludingTax($this->roundAmount($this->getAmountIncludingTax($order, $detail), $order->getCurrency()));
+            $lineItem->setAmountIncludingTax($this->roundAmount($this->getOrderAmountIncludingTax($order, $detail), $order->getCurrency()));
             $lineItem->setName($detail->getArticleName());
             $lineItem->setQuantity($detail->getQuantity());
             $lineItem->setShippingRequired($type == \Wallee\Sdk\Model\LineItemType::PRODUCT && ! $detail->getEsdArticle());
@@ -101,7 +110,7 @@ class LineItem extends AbstractService
             $lineItem->setShippingRequired(false);
             $lineItem->setSku('shipping');
             $lineItem->setTaxes([
-                $this->getShippingTax($order)
+                $this->getOrderShippingTax($order)
             ]);
             $lineItem->setType(\Wallee\Sdk\Model\LineItemType::SHIPPING);
             $lineItem->setUniqueId('shipping');
@@ -115,7 +124,113 @@ class LineItem extends AbstractService
 
         return $lineItems;
     }
-
+    
+    /**
+     * Returns the line items for the currency user's basket.
+     * 
+     * @throws \Exception
+     * @return \Wallee\Sdk\Model\LineItemCreate
+     */
+    public function collectBasketLineItems() {
+        $lineItems = [];
+        
+        $basketData = Shopware()->Modules()->Basket()->sGetBasketData();
+        
+        $currency = Shopware()->Modules()->System()->sCurrency['currency'];
+        if (empty($currency)) {
+            $currency = 'EUR';
+        }
+        
+        $shippingcosts = Shopware()->Modules()->Admin()->sGetPremiumShippingcosts($this->getCountry());
+        
+        $net = $this->isNet();
+        $taxfree = false;
+        if ($this->isTaxFree()) {
+            $net = true;
+            $taxfree = true;
+            if (isset($shippingcosts['netto'])) {
+                $shippingcosts['brutto'] = $shippingcosts['netto'];
+            }
+        }
+        
+        if (isset($basketData['AmountNumeric']) && !empty($basketData['AmountNumeric'])
+            && isset($shippingcosts['brutto'])) {
+            $basketData['AmountNumeric'] += $shippingcosts['brutto'];
+        }
+        
+        $index = 1;
+        foreach ($basketData['content'] as $basketRow) {
+            if (!isset($basketRow['modus']) || empty($basketRow['modus'])) {
+                $basketRow['modus'] = '0';
+            }
+            
+            if (!isset($basketRow['esdarticle']) || empty($basketRow['esdarticle'])) {
+                $basketRow['esdarticle'] = false;
+            }
+            
+            if (!isset($basketRow['taxID']) || empty($basketRow['taxID'])) {
+                $basketRow['taxID'] = 0;
+            }
+            
+            if ($basketRow['taxID'] != 0) {
+                /* @var Tax $tax */
+                $tax = $this->modelManager->getRepository(Tax::class)->find($basketRow['taxID']);
+            }
+            
+            $basketRow['articlename'] = Shopware()->Modules()->System()->sMODULES['sArticles']->sOptimizeText(strip_tags(html_entity_decode($basketRow['articlename'])));
+            
+            $type = $this->getType($basketRow['modus'], $basketRow['priceNumeric']);
+            
+            $lineItem = new \Wallee\Sdk\Model\LineItemCreate();
+            $lineItem->setAmountIncludingTax($this->roundAmount($this->getAmountIncludingTax($basketRow['priceNumeric'], $currency, $basketRow['quantity'], $basketRow['tax_rate'], $net && ! $taxfree), $currency));
+            $lineItem->setName($basketRow['articlename']);
+            $lineItem->setQuantity($basketRow['quantity']);
+            $lineItem->setShippingRequired($type == \Wallee\Sdk\Model\LineItemType::PRODUCT && ! $basketRow['esdarticle']);
+            $lineItem->setSku($basketRow['ordernumber']);
+            $lineItem->setTaxes([
+                $basketRow['taxID'] != 0 ? $this->getTax($basketRow['tax_rate'], $tax
+                    ->getName()) : $this->getBestMatchingTax($basketRow['tax_rate'])
+            ]);
+            $lineItem->setType($type);
+            $lineItem->setUniqueId($index++);
+            $lineItems[] = $this->cleanLineItem($lineItem);
+        }
+        
+        $dispatchId = $this->container->get('session')->get('sDispatch');
+        if ($dispatchId > 0) {
+            $dispatch = $this->modelManager->getRepository(Dispatch::class)->find($dispatchId);
+        }
+        if (isset($shippingcosts['brutto']) && $shippingcosts['brutto'] > 0) {
+            if ($dispatch instanceof \Shopware\Models\Dispatch\Dispatch) {
+                $shippingMethodName = $dispatch->getName();
+            } else {
+                $shippingMethodName = $this->container->get('snippets')
+                ->getNamespace('frontend/wallee_payment/main')
+                ->get('line_item/shipping', 'Shipping');
+            }
+            
+            $lineItem = new \Wallee\Sdk\Model\LineItemCreate();
+            $lineItem->setAmountIncludingTax($this->roundAmount($shippingcosts['brutto'], $currency));
+            $lineItem->setName($shippingMethodName);
+            $lineItem->setQuantity(1);
+            $lineItem->setShippingRequired(false);
+            $lineItem->setSku('shipping');
+            $lineItem->setTaxes([
+                $this->getShippingTax($shippingcosts['brutto'], $shippingcosts['netto'])
+            ]);
+            $lineItem->setType(\Wallee\Sdk\Model\LineItemType::SHIPPING);
+            $lineItem->setUniqueId('shipping');
+            $lineItems[] = $this->cleanLineItem($lineItem);
+        }
+        
+        $lineItemTotalAmount = $this->getTotalAmountIncludingTax($lineItems);
+        if (abs($lineItemTotalAmount - $basketData['AmountNumeric']) > 0.0001) {
+            throw new \Exception('The line item total amount of ' . $lineItemTotalAmount . ' does not match the basket\'s invoice amount of ' . $basketData['AmountNumeric'] . '.');
+        }
+        
+        return $lineItems;
+    }
+    
     /**
      * Returns the total amount including tax of the given line items.
      *
@@ -132,24 +247,50 @@ class LineItem extends AbstractService
         return $sum;
     }
 
-    private function getAmountIncludingTax(Order $order, Detail $detail)
+    /**
+     * 
+     * @param Order $order
+     * @param Detail $detail
+     * @return float
+     */
+    private function getOrderAmountIncludingTax(Order $order, Detail $detail)
     {
-        $amountIncludingTax = $this->roundAmount($detail->getPrice(), $order->getCurrency()) * $detail->getQuantity();
-        if ($order->getNet() && ! $order->getTaxFree()) {
-            $amountIncludingTax = $amountIncludingTax / 100 * (100 + $detail->getTaxRate());
+        return $this->getAmountIncludingTax($detail->getPrice(), $order->getCurrency(), $detail->getQuantity(), $detail->getTaxRate(), $order->getNet() && ! $order->getTaxFree());
+    }
+    
+    /**
+     * 
+     * @param float $price
+     * @param string $currency
+     * @param int $quantity
+     * @param string $taxRate
+     * @param boolean $priceExcludingTax
+     * @return float
+     */
+    private function getAmountIncludingTax($price, $currency, $quantity, $taxRate, $priceExcludingTax)
+    {
+        $amountIncludingTax = $this->roundAmount($price, $currency) * $quantity;
+        if ($priceExcludingTax) {
+            $amountIncludingTax = $amountIncludingTax / 100 * (100 + $taxRate);
         }
         return $amountIncludingTax;
     }
 
-    private function getType(Detail $detail)
+    /**
+     * 
+     * @param int $mode
+     * @param float $price
+     * @return string
+     */
+    private function getType($mode, $price)
     {
-        switch ($detail->getMode()) {
+        switch ($mode) {
             case self::ORDER_DETAIL_MODE_VOUCHER:
             case self::ORDER_DETAIL_MODE_CUSTOMERGROUP_DISCOUNT:
             case self::ORDER_DETAIL_MODE_BUNDLE_DISCOUNT:
                 return \Wallee\Sdk\Model\LineItemType::DISCOUNT;
             case self::ORDER_DETAIL_MODE_PAYMENT_SURCHARGE_DISCOUNT:
-                if ($detail->getPrice() > 0) {
+                if ($price > 0) {
                     return \Wallee\Sdk\Model\LineItemType::FEE;
                 } else {
                     return \Wallee\Sdk\Model\LineItemType::DISCOUNT;
@@ -162,6 +303,12 @@ class LineItem extends AbstractService
         }
     }
 
+    /**
+     * 
+     * @param float $rate
+     * @param string $title
+     * @return \Shopware\Models\Tax\Tax
+     */
     private function getTax($rate, $title)
     {
         $tax = new \Wallee\Sdk\Model\TaxCreate();
@@ -170,6 +317,11 @@ class LineItem extends AbstractService
         return $tax;
     }
 
+    /**
+     * 
+     * @param float $inputTaxRate
+     * @return \Shopware\Models\Tax\Tax
+     */
     private function getBestMatchingTax($inputTaxRate)
     {
         $matchingRate = null;
@@ -200,11 +352,66 @@ class LineItem extends AbstractService
         return $this->getTax($matchingRate, $matchingTitle);
     }
 
-    private function getShippingTax(Order $order)
+    /**
+     * 
+     * @param Order $order
+     * @return \Shopware\Models\Tax\Tax
+     */
+    private function getOrderShippingTax(Order $order)
     {
-        $taxAmount = ($order->getInvoiceShipping() - $order->getInvoiceShippingNet());
-        $calculatedTaxRate = $taxAmount / $order->getInvoiceShippingNet() * 100;
+        return $this->getShippingTax($order->getInvoiceShipping(), $order->getInvoiceShippingNet());
+    }
+    
+    /**
+     * 
+     * @param float $priceIncludingTax
+     * @param float $priceExcludingTax
+     * @return \Shopware\Models\Tax\Tax
+     */
+    private function getShippingTax($priceIncludingTax, $priceExcludingTax)
+    {
+        $taxAmount = ($priceIncludingTax - $priceExcludingTax);
+        $calculatedTaxRate = $taxAmount / $priceExcludingTax * 100;
         return $this->getBestMatchingTax($calculatedTaxRate);
+    }
+    
+    /**
+     * 
+     * @return boolean
+     */
+    private function isNet() {
+        $taxId = Shopware()->Modules()->System()->sUSERGROUPDATA['tax'];
+        $customerGroupId = Shopware()->Modules()->System()->sUSERGROUPDATA['id'];
+        return ($this->container->get('config')->get('sARTICLESOUTPUTNETTO') && !$taxId) || (!$taxId && $customerGroupId);
+    }
+    
+    /**
+     * 
+     * @return boolean
+     */
+    private function isTaxFree()
+    {
+        $userData = Shopware()->Modules()->Admin()->sGetUserData();
+        if (!empty($userData['additional']['countryShipping']['taxfree'])) {
+            return true;
+        }
+        if (empty($userData['additional']['countryShipping']['taxfree_ustid'])) {
+            return false;
+        }
+        return !empty($userData['shippingaddress']['ustid']);
+    }
+    
+    private function getCountry()
+    {
+        $userData = Shopware()->Modules()->Admin()->sGetUserData();
+        if (!empty($userData['additional']['countryShipping'])) {
+            return $userData['additional']['countryShipping'];
+        }
+        $countries = Shopware()->Modules()->Admin()->sGetCountryList();
+        if (empty($countries)) {
+            return false;
+        }
+        return reset($countries);
     }
 
     /**
@@ -231,4 +438,5 @@ class LineItem extends AbstractService
         $lineItem->setName($this->fixLength($lineItem->getName(), 40));
         return $lineItem;
     }
+    
 }

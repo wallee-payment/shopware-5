@@ -140,8 +140,7 @@ class OrderTransactionMapping extends ModelEntity
             return $this;
         }
         $this->order = $order;
-        $this->shopId = $order->getShop()->getId();
-        $this->shop = $order->getShop();
+        $this->setShop($order->getShop());
         if ($order->getTemporaryId() != null) {
             $this->temporaryId = $order->getTemporaryId();
         } else {
@@ -150,7 +149,7 @@ class OrderTransactionMapping extends ModelEntity
         }
         return $this;
     }
-
+    
     /**
      *
      * @return Shop|null
@@ -158,6 +157,12 @@ class OrderTransactionMapping extends ModelEntity
     public function getShop()
     {
         return $this->shop;
+    }
+    
+    public function setShop(Shop $shop)
+    {
+        $this->shopId = $shop->getId();
+        return $this;
     }
 
     public function getTemporaryId()

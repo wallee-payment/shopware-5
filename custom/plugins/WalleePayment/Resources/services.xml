@@ -93,6 +93,7 @@
         	<argument type="service" id="wallee_payment.line_item" />
         	<argument type="service" id="wallee_payment.payment_method_configuration" />
         	<argument type="service" id="wallee_payment.transaction_info" />
+        	<argument type="service" id="wallee_payment.session" />
         </service>
         
         <service id="wallee_payment.registry" class="WalleePayment\Components\Registry">

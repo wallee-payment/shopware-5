@@ -157,7 +157,7 @@ class Account implements SubscriberInterface
                 'orderId' => $orderId
             ]);
         if ($mapping instanceof OrderTransactionMapping) {
-            return $this->transactionInfoService->updateTransactionInfo($this->get('wallee_payment.transaction')
+            return $this->transactionInfoService->updateTransactionInfoByOrder($this->get('wallee_payment.transaction')
                 ->getTransaction($mapping->getSpaceId(), $mapping->getTransactionId()), $mapping->getOrder());
         }
     }

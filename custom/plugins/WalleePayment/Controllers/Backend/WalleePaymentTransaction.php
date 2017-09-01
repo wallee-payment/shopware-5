@@ -260,7 +260,7 @@ class Shopware_Controllers_Backend_WalleePaymentTransaction extends Backend impl
             'orderId' => $orderId
         ]);
         if ($mapping instanceof OrderTransactionMapping) {
-            return $this->get('wallee_payment.transaction_info')->updateTransactionInfo($this->get('wallee_payment.transaction')
+            return $this->get('wallee_payment.transaction_info')->updateTransactionInfoByOrder($this->get('wallee_payment.transaction')
                 ->getTransaction($mapping->getSpaceId(), $mapping->getTransactionId()), $mapping->getOrder());
         }
     }

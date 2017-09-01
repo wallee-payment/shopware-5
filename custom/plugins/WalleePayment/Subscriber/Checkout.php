@@ -17,7 +17,6 @@ use Enlight\Event\SubscriberInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Plugin\Plugin;
-use Shopware\Models\Payment\Payment;
 use WalleePayment\Components\Transaction as TransactionService;
 use WalleePayment\Components\Session as SessionService;
 use WalleePayment\Models\PaymentMethodConfiguration as PaymentMethodConfigurationModel;
@@ -93,11 +92,6 @@ class Checkout implements SubscriberInterface
                     'paymentId' => $payment->getId()
                 ]);
                 if ($paymentMethodConfiguration instanceof PaymentMethodConfigurationModel) {
-                    if (!$this->isPaymentMethodAvailable($order, $paymentMethodConfiguration)) {
-                        $checkoutController->redirect(['controller' => 'checkout', 'action' => 'shippingPayment']);
-                        return;
-                    }
-
                     $view->addTemplateDir($this->container->getParameter('wallee_payment.plugin_dir') . '/Resources/views/');
                     $view->extendsTemplate('frontend/checkout/wallee_payment/confirm.tpl');
 
@@ -111,20 +105,6 @@ class Checkout implements SubscriberInterface
                 }
             }
         }
-    }
-
-    private function isPaymentMethodAvailable(OrderModel $order, PaymentMethodConfigurationModel $paymentMethodConfiguration)
-    {
-        try {
-            $possiblePaymentMethods = $this->transactionService->getPossiblePaymentMethods($order);
-            foreach ($possiblePaymentMethods as $possiblePaymentMethod) {
-                if ($possiblePaymentMethod->getId() == $paymentMethodConfiguration->getConfigurationId()) {
-                    return true;
-                }
-            }
-        } catch (\Exception $e) {
-        }
-        return false;
     }
 
     private function getUserFailureMessage()

@@ -73,7 +73,22 @@ class TransactionInfo extends AbstractService
      * @param Order $order
      * @return TransactionInfoModel
      */
-    public function updateTransactionInfo(\Wallee\Sdk\Model\Transaction $transaction, Order $order)
+    public function updateTransactionInfoByOrder(\Wallee\Sdk\Model\Transaction $transaction, Order $order)
+    {
+        return $this->updateTransactionInfo($transaction, $order->getId(), $order->getShop()->getId(), $order->getPayment()->getId(), $order->getCustomer());
+    }
+    
+    /**
+     * Stores the transaction data in the database.
+     *
+     * @param \Wallee\Sdk\Model\Transaction $transaction
+     * @param int $orderId
+     * @param int $shopId
+     * @param int $paymentId
+     * @param Customer $customer
+     * @return TransactionInfoModel
+     */
+    public function updateTransactionInfo(\Wallee\Sdk\Model\Transaction $transaction, $orderId, $shopId, $paymentId, Customer $customer)
     {
         $info = $this->modelManager->getRepository(TransactionInfoModel::class)->findOneBy([
             'spaceId' => $transaction->getLinkedSpaceId(),
@@ -84,8 +99,8 @@ class TransactionInfo extends AbstractService
         }
         $info->setTransactionId($transaction->getId());
         $info->setAuthorizationAmount($transaction->getAuthorizationAmount());
-        $info->setOrderId($order->getId());
-        $info->setShopId($order->getShop()->getId());
+        $info->setOrderId($orderId);
+        $info->setShopId($shopId);
         $info->setState($transaction->getState());
         $info->setSpaceId($transaction->getLinkedSpaceId());
         $info->setSpaceViewId($transaction->getSpaceViewId());
@@ -97,7 +112,7 @@ class TransactionInfo extends AbstractService
             ->getPaymentMethodConfiguration() != null ? $transaction->getPaymentConnectorConfiguration()
             ->getPaymentMethodConfiguration()
             ->getPaymentMethod() : null);
-        $info->setImage($this->getPaymentMethodImage($transaction, $order));
+        $info->setImage($this->getPaymentMethodImage($transaction, $paymentId));
         $info->setLabels($this->getTransactionLabels($transaction));
         if ($transaction->getState() == \Wallee\Sdk\Model\TransactionState::FAILED || $transaction->getState() == \Wallee\Sdk\Model\TransactionState::DECLINE) {
             $info->setFailureReason($transaction->getFailureReason() instanceof FailureReason ? $transaction->getFailureReason()->getDescription() : null);
@@ -105,7 +120,7 @@ class TransactionInfo extends AbstractService
         }
         $this->modelManager->persist($info);
         $this->modelManager->flush($info);
-        $this->updateCustomerData($order->getCustomer(), $transaction);
+        $this->updateCustomerData($customer, $transaction);
         return $info;
     }
     
@@ -189,16 +204,18 @@ class TransactionInfo extends AbstractService
      * Returns the payment method's image.
      *
      * @param \Wallee\Sdk\Model\Transaction $transaction
-     * @param Order $order
+     * @param int $paymentId
      * @return string
      */
-    private function getPaymentMethodImage(\Wallee\Sdk\Model\Transaction $transaction, Order $order)
+    private function getPaymentMethodImage(\Wallee\Sdk\Model\Transaction $transaction, $paymentId)
     {
         if ($transaction->getPaymentConnectorConfiguration() == null) {
-            $payment = $order->getPayment();
+            if ($paymentId == null) {
+                return null;
+            }
             /* @var PaymentMethodConfigurationModel $paymentMethodConfiguration */
             $paymentMethodConfiguration = $this->modelManager->getRepository(PaymentMethodConfigurationModel::class)->findOneBy([
-                'paymentId' => $payment->getId()
+                'paymentId' => $paymentId
             ]);
             if ($paymentMethodConfiguration instanceof PaymentMethodConfigurationModel) {
                 return $paymentMethodConfiguration->getImage();
@@ -230,11 +247,13 @@ class TransactionInfo extends AbstractService
         } elseif ($method != null) {
             return $method->getImagePath();
         } else {
-            $payment = $order->getPayment();
-                /* @var PaymentMethodConfigurationModel $paymentMethodConfiguration */
-                $paymentMethodConfiguration = $this->modelManager->getRepository(PaymentMethodConfigurationModel::class)->findOneBy([
-                    'paymentId' => $payment->getId()
-                ]);
+            if ($paymentId == null) {
+                return null;
+            }
+            /* @var PaymentMethodConfigurationModel $paymentMethodConfiguration */
+            $paymentMethodConfiguration = $this->modelManager->getRepository(PaymentMethodConfigurationModel::class)->findOneBy([
+                'paymentId' => $paymentId
+            ]);
             if ($paymentMethodConfiguration instanceof PaymentMethodConfigurationModel) {
                 return $paymentMethodConfiguration->getImage();
             } else {

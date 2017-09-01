@@ -13,18 +13,20 @@
 
 namespace WalleePayment\Components;
 
-use Shopware\Models\Order\Order;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Components\Plugin\ConfigReader;
+use Shopware\Models\Order\Order;
+use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use WalleePayment\Models\OrderTransactionMapping;
 use WalleePayment\Components\PaymentMethodConfiguration as PaymentMethodConfigurationService;
 use WalleePayment\Components\TransactionInfo as TransactionInfoService;
-use Shopware\Components\Plugin\ConfigReader;
+use WalleePayment\Models\OrderTransactionMapping;
 use Wallee\Sdk\Model\EntityQuery;
 use Wallee\Sdk\Model\EntityQueryFilter;
 use Wallee\Sdk\Model\EntityQueryFilterType;
-use Wallee\Sdk\Model\TransactionState;
 use Wallee\Sdk\Model\EntityQueryOrderByType;
+use Wallee\Sdk\Model\TransactionState;
+use Shopware\Models\Customer\Customer;
 
 class Transaction extends AbstractService
 {
@@ -33,13 +35,25 @@ class Transaction extends AbstractService
      *
      * @var \Wallee\Sdk\Model\Transaction[]
      */
-    private static $transactionCache = array();
+    private static $transactionByOrderCache = array();
+    
+    /**
+     *
+     * @var \Wallee\Sdk\Model\Transaction[]
+     */
+    private static $transactionByBasketCache = array();
 
     /**
      *
      * @var \Wallee\Sdk\Model\PaymentMethodConfiguration[]
      */
-    private static $possiblePaymentMethodCache = array();
+    private static $possiblePaymentMethodByOrderCache = array();
+    
+    /**
+     *
+     * @var \Wallee\Sdk\Model\PaymentMethodConfiguration[]
+     */
+    private static $possiblePaymentMethodByBasketCache = array();
 
     /**
      *
@@ -76,6 +90,12 @@ class Transaction extends AbstractService
      * @var TransactionInfoService
      */
     private $transactionInfoService;
+    
+    /**
+     *
+     * @var Session
+     */
+    private $sessionService;
 
     /**
      * The transaction API service.
@@ -95,7 +115,7 @@ class Transaction extends AbstractService
      * @param PaymentMethodConfigurationService $paymentMethodConfigurationService
      * @param TransactionInfoService $transactionInfoService
      */
-    public function __construct(ContainerInterface $container, ModelManager $modelManager, ConfigReader $configReader, ApiClient $apiClient, LineItem $lineItem, PaymentMethodConfigurationService $paymentMethodConfigurationService, TransactionInfoService $transactionInfoService)
+    public function __construct(ContainerInterface $container, ModelManager $modelManager, ConfigReader $configReader, ApiClient $apiClient, LineItem $lineItem, PaymentMethodConfigurationService $paymentMethodConfigurationService, TransactionInfoService $transactionInfoService, Session $sessionService)
     {
         parent::__construct($container);
         $this->container = $container;
@@ -105,6 +125,7 @@ class Transaction extends AbstractService
         $this->lineItem = $lineItem;
         $this->paymentMethodConfigurationService = $paymentMethodConfigurationService;
         $this->transactionInfoService = $transactionInfoService;
+        $this->sessionService = $sessionService;
         $this->transactionService = new \Wallee\Sdk\Service\TransactionService($this->apiClient);
     }
 
@@ -179,7 +200,7 @@ class Transaction extends AbstractService
      */
     public function getPossiblePaymentMethods(Order $order)
     {
-        if (! isset(self::$possiblePaymentMethodCache[$order->getId()]) || self::$possiblePaymentMethodCache[$order->getId()] == null) {
+        if (! isset(self::$possiblePaymentMethodByOrderCache[$order->getId()]) || self::$possiblePaymentMethodByOrderCache[$order->getId()] == null) {
             $transaction = $this->getTransactionByOrder($order);
             $paymentMethods = $this->transactionService->fetchPossiblePaymentMethods($transaction->getLinkedSpaceId(), $transaction->getId());
 
@@ -187,10 +208,33 @@ class Transaction extends AbstractService
                 $this->paymentMethodConfigurationService->updateData($paymentMethod);
             }
 
-            self::$possiblePaymentMethodCache[$order->getId()] = $paymentMethods;
+            self::$possiblePaymentMethodByOrderCache[$order->getId()] = $paymentMethods;
         }
 
-        return self::$possiblePaymentMethodCache[$order->getId()];
+        return self::$possiblePaymentMethodByOrderCache[$order->getId()];
+    }
+    
+    /**
+     * Returns the payment methods that can be used with the given basket.
+     *
+     * @param string $sessionId
+     * @return \Wallee\Sdk\Model\PaymentMethodConfiguration[]
+     */
+    public function getPossiblePaymentMethodsByBasket()
+    {
+        $sessionId = $this->sessionService->getSessionId();
+        if (! isset(self::$possiblePaymentMethodByBasketCache[$sessionId]) || self::$possiblePaymentMethodByBasketCache[$sessionId] == null) {
+            $transaction = $this->getTransactionByBasket();
+            $paymentMethods = $this->transactionService->fetchPossiblePaymentMethods($transaction->getLinkedSpaceId(), $transaction->getId());
+            
+            foreach ($paymentMethods as $paymentMethod) {
+                $this->paymentMethodConfigurationService->updateData($paymentMethod);
+            }
+            
+            self::$possiblePaymentMethodByBasketCache[$sessionId] = $paymentMethods;
+        }
+        
+        return self::$possiblePaymentMethodByBasketCache[$sessionId];
     }
 
     /**
@@ -203,7 +247,7 @@ class Transaction extends AbstractService
      */
     public function getTransactionByOrder(Order $order)
     {
-        if (! isset(self::$transactionCache[$order->getId()]) || self::$transactionCache[$order->getId()] == null) {
+        if (! isset(self::$transactionByOrderCache[$order->getId()]) || self::$transactionByOrderCache[$order->getId()] == null) {
             $orderTransactionMapping = $this->getOrderTransactionMapping($order);
             if ($orderTransactionMapping instanceof OrderTransactionMapping) {
                 $this->updateTransaction($order, $orderTransactionMapping->getTransactionId(), $orderTransactionMapping->getSpaceId());
@@ -211,7 +255,28 @@ class Transaction extends AbstractService
                 $this->createTransaction($order);
             }
         }
-        return self::$transactionCache[$order->getId()];
+        return self::$transactionByOrderCache[$order->getId()];
+    }
+    
+    /**
+     * Returns the transaction for the given basket.
+     *
+     * If no transaction exists, a new one is created.
+     *
+     * @return \Wallee\Sdk\Model\Transaction
+     */
+    public function getTransactionByBasket()
+    {
+        $sessionId = $this->sessionService->getSessionId();
+        if (! isset(self::$transactionByBasketCache[$sessionId]) || self::$transactionByBasketCache[$sessionId] == null) {
+            $orderTransactionMapping = $this->getBasketTransactionMapping();
+            if ($orderTransactionMapping instanceof OrderTransactionMapping) {
+                $this->updateBasketTransaction($orderTransactionMapping->getTransactionId(), $orderTransactionMapping->getSpaceId());
+            } else {
+                $this->createBasketTransaction();
+            }
+        }
+        return self::$transactionByBasketCache[$sessionId];
     }
 
     /**
@@ -222,7 +287,7 @@ class Transaction extends AbstractService
      */
     public function createTransaction(Order $order)
     {
-        $existingTransaction = $this->findExistingTransaction($order);
+        $existingTransaction = $this->findExistingTransaction($order->getShop(), $order->getCustomer());
         if ($existingTransaction instanceof \Wallee\Sdk\Model\Transaction) {
             return $this->updateTransaction($order, $existingTransaction->getId(), $existingTransaction->getLinkedSpaceId());
         } else {
@@ -236,14 +301,40 @@ class Transaction extends AbstractService
             $transaction = $this->transactionService->create($spaceId, $transaction);
             
             $this->updateOrCreateTransactionMapping($transaction, $order);
-            self::$transactionCache[$order->getId()] = $transaction;
+            self::$transactionByOrderCache[$order->getId()] = $transaction;
             return $transaction;
         }
     }
     
-    private function findExistingTransaction(Order $order)
+    /**
+     * Creates a transaction for the given basket.
+     *
+     * @return \Wallee\Sdk\Model\TransactionCreate
+     */
+    public function createBasketTransaction()
     {
-        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
+        $existingTransaction = $this->findExistingTransaction($this->container->get('shop'), $this->modelManager->getRepository(Customer::class)->find($this->container->get('session')->get('sUserId')));
+        if ($existingTransaction instanceof \Wallee\Sdk\Model\Transaction) {
+            return $this->updateBasketTransaction($existingTransaction->getId(), $existingTransaction->getLinkedSpaceId());
+        } else {
+            $transaction = new \Wallee\Sdk\Model\TransactionCreate();
+            $transaction->setCustomersPresence(\Wallee\Sdk\Model\CustomersPresence::VIRTUAL_PRESENT);
+            $this->assembleBasketTransactionData($transaction);
+            
+            $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $this->container->get('shop'));
+            $spaceId = $pluginConfig['spaceId'];
+            
+            $transaction = $this->transactionService->create($spaceId, $transaction);
+            
+            $this->updateOrCreateBasketTransactionMapping($transaction);
+            self::$transactionByBasketCache[$this->sessionService->getSessionId()] = $transaction;
+            return $transaction;
+        }
+    }
+    
+    private function findExistingTransaction(Shop $shop, Customer $customer)
+    {
+        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $shop);
         $spaceId = $pluginConfig['spaceId'];
         
         $query = new EntityQuery();
@@ -251,8 +342,8 @@ class Transaction extends AbstractService
         $filter->setType(EntityQueryFilterType::_AND);
         $filter->setChildren(array(
             $this->createEntityFilter('state', TransactionState::PENDING),
-            $this->createEntityFilter('customerId', $order->getCustomer()->getId()),
-            $this->createEntityFilter('customerEmailAddress', $order->getCustomer()->getEmail())
+            $this->createEntityFilter('customerId', $customer->getId()),
+            $this->createEntityFilter('customerEmailAddress', $customer->getEmail())
         ));
         $query->setFilter($filter);
         $query->setOrderBys([$this->createEntityOrderBy('createdOn', EntityQueryOrderByType::DESC)]);
@@ -284,7 +375,7 @@ class Transaction extends AbstractService
                 if ($transaction->getState() != \Wallee\Sdk\Model\TransactionState::PENDING) {
                     return $this->createTransaction($order);
                 }
-                $this->transactionInfoService->updateTransactionInfo($transaction, $order);
+                $this->transactionInfoService->updateTransactionInfoByOrder($transaction, $order);
                 
                 $pendingTransaction = new \Wallee\Sdk\Model\TransactionPending();
                 $pendingTransaction->setId($transaction->getId());
@@ -298,7 +389,42 @@ class Transaction extends AbstractService
                 }
                 
                 $this->updateOrCreateTransactionMapping($transaction, $order);
-                self::$transactionCache[$order->getId()] = $transaction;
+                self::$transactionByOrderCache[$order->getId()] = $transaction;
+                return $updatedTransaction;
+            } catch (\Wallee\Sdk\VersioningException $e) {
+                // Try to update the transaction again, if a versioning exception occurred.
+            }
+        }
+        throw new \Wallee\Sdk\VersioningException();
+    }
+    
+    /**
+     * Updates the transaction for the given basket.
+     *
+     * If the transaction is not in pending state, a new one is created.
+     *
+     * @param int $transactionId
+     * @param int $spaceId
+     * @return \Wallee\Sdk\Model\AbstractTransactionPending
+     */
+    public function updateBasketTransaction($transactionId, $spaceId)
+    {
+        for ($i = 0; $i < 5; $i++) {
+            try {
+                $transaction = $this->transactionService->read($spaceId, $transactionId);
+                if ($transaction->getState() != \Wallee\Sdk\Model\TransactionState::PENDING) {
+                    return $this->createBasketTransaction();
+                }
+                
+                $pendingTransaction = new \Wallee\Sdk\Model\TransactionPending();
+                $pendingTransaction->setId($transaction->getId());
+                $pendingTransaction->setVersion($transaction->getVersion());
+                $this->assembleBasketTransactionData($pendingTransaction);
+                
+                $updatedTransaction = $this->transactionService->update($spaceId, $pendingTransaction);
+                
+                $this->updateOrCreateBasketTransactionMapping($transaction);
+                self::$transactionByBasketCache[$this->sessionService->getSessionId()] = $transaction;
                 return $updatedTransaction;
             } catch (\Wallee\Sdk\VersioningException $e) {
                 // Try to update the transaction again, if a versioning exception occurred.
@@ -319,13 +445,15 @@ class Transaction extends AbstractService
             $transaction->setMerchantReference($order->getNumber());
         }
         $transaction->setCurrency($order->getCurrency());
-        $transaction->setBillingAddress($this->getBillingAddress($order));
-        $transaction->setShippingAddress($this->getShippingAddress($order));
+        $transaction->setBillingAddress($this->getBillingAddress($order->getCustomer()));
+        $transaction->setShippingAddress($this->getShippingAddress($order->getCustomer()));
         $transaction->setCustomerEmailAddress($order->getCustomer()
             ->getEmail());
         $transaction->setCustomerId($order->getCustomer()
             ->getId());
-        $transaction->setLanguage($this->getLanguage($order));
+        $transaction->setLanguage($order->getLanguageSubShop()
+            ->getLocale()
+            ->getLocale());
         if ($order->getDispatch() instanceof \Shopware\Models\Dispatch\Dispatch) {
             $transaction->setShippingMethod($this->fixLength($order->getDispatch()
                 ->getName(), 200));
@@ -346,42 +474,80 @@ class Transaction extends AbstractService
             $transaction->setFailedUrl($this->getUrl('WalleePaymentTransaction', 'failure', null, null, ['spaceId' => $pluginConfig['spaceId'], 'transactionId' => $transaction->getId()]));
         }
     }
+    
+    /**
+     * Assembles the transaction data for the given basket.
+     *
+     * @param \Wallee\Sdk\Model\AbstractTransactionPending $transaction
+     */
+    private function assembleBasketTransactionData(\Wallee\Sdk\Model\AbstractTransactionPending $transaction)
+    {
+        /* @var Shop $shop */
+        $shop = $this->container->get('shop');
+        
+        /* @var Customer $customer */
+        $customer = $this->modelManager->getRepository(Customer::class)->find($this->container->get('session')->get('sUserId'));
+        
+        $transaction->setCurrency(Shopware()->Modules()->System()->sCurrency['currency']);
+        $transaction->setBillingAddress($this->getBillingAddress($customer));
+        $transaction->setShippingAddress($this->getShippingAddress($customer));
+        $transaction->setCustomerEmailAddress($customer
+            ->getEmail());
+        $transaction->setCustomerId($customer
+            ->getId());
+        $transaction->setLanguage($shop->getLocale()->getLocale());
+        
+        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $shop);
+        $spaceViewId = $pluginConfig['spaceViewId'];
+        
+        if ($transaction instanceof \Wallee\Sdk\Model\TransactionCreate) {
+            $transaction->setSpaceViewId($spaceViewId);
+        }
+        
+        $transaction->setLineItems($this->lineItem->collectBasketLineItems());
+        $transaction->setAllowedPaymentMethodConfigurations([]);
+        
+        if (!($transaction instanceof \Wallee\Sdk\Model\TransactionCreate)) {
+            $transaction->setSuccessUrl($this->getUrl('WalleePaymentTransaction', 'success', null, null, ['spaceId' => $pluginConfig['spaceId'], 'transactionId' => $transaction->getId()]));
+            $transaction->setFailedUrl($this->getUrl('WalleePaymentTransaction', 'failure', null, null, ['spaceId' => $pluginConfig['spaceId'], 'transactionId' => $transaction->getId()]));
+        }
+    }
 
-    private function getBillingAddress(Order $order)
+    private function getBillingAddress(Customer $customer)
     {
         $billingAddressId = $this->container->get('session')->offsetGet('checkoutBillingAddressId', null);
         if (empty($billingAddressId)) {
-            $billingAddressId = $order->getCustomer()
+            $billingAddressId = $customer
                 ->getDefaultBillingAddress()
                 ->getId();
         }
-        $billingAddress = $this->modelManager->getRepository(\Shopware\Models\Customer\Address::class)->getOneByUser($billingAddressId, $order->getCustomer()
+        $billingAddress = $this->modelManager->getRepository(\Shopware\Models\Customer\Address::class)->getOneByUser($billingAddressId, $customer
             ->getId());
 
         $address = $this->getAddress($billingAddress);
-        if ($order->getCustomer()->getBirthday() instanceof \DateTime && $order->getCustomer()->getBirthday() != new \DateTime('0000-00-00')) {
-            $address->setDateOfBirth($order->getCustomer()
+        if ($customer->getBirthday() instanceof \DateTime && $customer->getBirthday() != new \DateTime('0000-00-00')) {
+            $address->setDateOfBirth($customer
                 ->getBirthday()
                 ->format(\DateTime::W3C));
         }
-        $address->setEmailAddress($order->getCustomer()
+        $address->setEmailAddress($customer
             ->getEmail());
         return $address;
     }
 
-    private function getShippingAddress(Order $order)
+    private function getShippingAddress(Customer $customer)
     {
         $shippingAddressId = $this->container->get('session')->offsetGet('checkoutShippingAddressId', null);
         if (empty($shippingAddressId)) {
-            $shippingAddressId = $order->getCustomer()
+            $shippingAddressId = $customer
                 ->getDefaultShippingAddress()
                 ->getId();
         }
-        $shippingAddress = $this->modelManager->getRepository(\Shopware\Models\Customer\Address::class)->getOneByUser($shippingAddressId, $order->getCustomer()
+        $shippingAddress = $this->modelManager->getRepository(\Shopware\Models\Customer\Address::class)->getOneByUser($shippingAddressId, $customer
             ->getId());
 
         $address = $this->getAddress($shippingAddress);
-        $address->setEmailAddress($order->getCustomer()
+        $address->setEmailAddress($customer
             ->getEmail());
         return $address;
     }
@@ -407,13 +573,6 @@ class Transaction extends AbstractService
         return $address;
     }
 
-    private function getLanguage(Order $order)
-    {
-        return $order->getLanguageSubShop()
-            ->getLocale()
-            ->getLocale();
-    }
-
     /**
      *
      * @param Order $order
@@ -433,6 +592,18 @@ class Transaction extends AbstractService
         return $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy($filter);
     }
     
+    /**
+     *
+     * @return OrderTransactionMapping
+     */
+    private function getBasketTransactionMapping()
+    {
+        $filter = [
+            'temporaryId' => $this->sessionService->getSessionId()
+        ];
+        return $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy($filter);
+    }
+    
     private function updateOrCreateTransactionMapping(\Wallee\Sdk\Model\Transaction $transaction, Order $order)
     {
         if ($order->getTemporaryId() != null) {
@@ -445,6 +616,7 @@ class Transaction extends AbstractService
             }
             $this->modelManager->flush();
         }
+        
         /* @var OrderTransactionMapping $orderTransactionMapping */
         $orderTransactionMappings = $this->modelManager->getRepository(OrderTransactionMapping::class)->findBy([
             'transactionId' => $transaction->getId(),
@@ -459,12 +631,50 @@ class Transaction extends AbstractService
         } else {
             $orderTransactionMapping = current($orderTransactionMappings);
         }
+        
         if (!($orderTransactionMapping instanceof OrderTransactionMapping)) {
             $orderTransactionMapping = new OrderTransactionMapping();
             $orderTransactionMapping->setSpaceId($transaction->getLinkedSpaceId());
             $orderTransactionMapping->setTransactionId($transaction->getId());
         }
         $orderTransactionMapping->setOrder($order);
+        $this->modelManager->persist($orderTransactionMapping);
+        $this->modelManager->flush($orderTransactionMapping);
+    }
+    
+    private function updateOrCreateBasketTransactionMapping(\Wallee\Sdk\Model\Transaction $transaction)
+    {
+        /* @var OrderTransactionMapping $orderTransactionMapping */
+        $orderTransactionMappings = $this->modelManager->getRepository(OrderTransactionMapping::class)->findBy([
+            'temporaryId' => $this->sessionService->getSessionId()
+        ]);
+        foreach ($orderTransactionMappings as $mapping) {
+            $this->modelManager->remove($mapping);
+        }
+        $this->modelManager->flush();
+        
+        /* @var OrderTransactionMapping $orderTransactionMapping */
+        $orderTransactionMappings = $this->modelManager->getRepository(OrderTransactionMapping::class)->findBy([
+            'transactionId' => $transaction->getId(),
+            'spaceId' => $transaction->getLinkedSpaceId()
+        ]);
+        if (count($orderTransactionMappings) > 1) {
+            foreach ($orderTransactionMappings as $mapping) {
+                $this->modelManager->remove($mapping);
+            }
+            $this->modelManager->flush();
+            $orderTransactionMapping = null;
+        } else {
+            $orderTransactionMapping = current($orderTransactionMappings);
+        }
+        
+        if (!($orderTransactionMapping instanceof OrderTransactionMapping)) {
+            $orderTransactionMapping = new OrderTransactionMapping();
+            $orderTransactionMapping->setSpaceId($transaction->getLinkedSpaceId());
+            $orderTransactionMapping->setTransactionId($transaction->getId());
+        }
+        $orderTransactionMapping->setTemporaryId($this->sessionService->getSessionId());
+        $orderTransactionMapping->setShop($this->container->get('shop'));
         $this->modelManager->persist($orderTransactionMapping);
         $this->modelManager->flush($orderTransactionMapping);
     }
