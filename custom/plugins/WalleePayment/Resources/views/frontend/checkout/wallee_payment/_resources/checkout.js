@@ -49,6 +49,7 @@ ShopwareWallee.Checkout = {
                 }
             });
             this.handler.create(container, $.proxy(function(validationResult) {
+            		this.hideErrors();
                 if (validationResult.success) {
                     $.ajax({
                         url: saveOrderUrl,
@@ -66,6 +67,9 @@ ShopwareWallee.Checkout = {
                         }
                     })
                 } else {
+                		if (validationResult.errors) {
+                			this.showErrors(validationResult.errors);
+                		}
                     this.unblockCheckoutButton();
                 }
             }, this), $.proxy(function() {
@@ -81,6 +85,21 @@ ShopwareWallee.Checkout = {
             args.unshift(originalFunction);
             return wrapper.apply(object, args);
         };
+    },
+    
+    showErrors: function(errors){
+    		var element = $('.wallee-payment-validation-failure-message');
+        element.find('.alert--list').html('');
+        $.each(errors, function(index, error){
+            element.find('.alert--list').append('<li class="list--entry">' + error + '</li>');
+        });
+        element.show();
+        $(window).scrollTop(0);
+    },
+    
+    hideErrors: function(){
+    		var element = $('.wallee-payment-validation-failure-message');
+    		element.hide();
     },
     
     blockCheckoutButton: function(){

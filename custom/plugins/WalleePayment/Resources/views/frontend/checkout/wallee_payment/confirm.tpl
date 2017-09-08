@@ -42,4 +42,7 @@
 	{if $walleePaymentFailureMessage}
 		{include file="frontend/_includes/messages.tpl" type="error" content=$walleePaymentFailureMessage}
 	{/if}
+	<div class="wallee-payment-validation-failure-message" style="display: none;">
+		{include file="frontend/_includes/messages.tpl" type="error" content=""}
+	</div>
 {/block}
