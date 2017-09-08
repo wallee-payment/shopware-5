@@ -91,9 +91,14 @@ class TransactionInfo extends AbstractService
     public function updateTransactionInfo(\Wallee\Sdk\Model\Transaction $transaction, $orderId, $shopId, $paymentId, Customer $customer)
     {
         $info = $this->modelManager->getRepository(TransactionInfoModel::class)->findOneBy([
-            'spaceId' => $transaction->getLinkedSpaceId(),
-            'transactionId' => $transaction->getId()
+            'orderId' => $orderId
         ]);
+        if (! ($info instanceof TransactionInfoModel)) {
+            $info = $this->modelManager->getRepository(TransactionInfoModel::class)->findOneBy([
+                'spaceId' => $transaction->getLinkedSpaceId(),
+                'transactionId' => $transaction->getId()
+            ]);
+        }
         if (! ($info instanceof TransactionInfoModel)) {
             $info = new TransactionInfoModel();
         }
