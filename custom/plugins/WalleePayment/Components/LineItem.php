@@ -65,7 +65,7 @@ class LineItem extends AbstractService
 
     /**
      * Returns the line items for the given order.
-     * 
+     *
      * @param Order $order
      * @throws \Exception
      * @return \Wallee\Sdk\Model\LineItemCreate[]
@@ -127,11 +127,12 @@ class LineItem extends AbstractService
     
     /**
      * Returns the line items for the currency user's basket.
-     * 
+     *
      * @throws \Exception
      * @return \Wallee\Sdk\Model\LineItemCreate
      */
-    public function collectBasketLineItems() {
+    public function collectBasketLineItems()
+    {
         $lineItems = [];
         
         $basketData = Shopware()->Modules()->Basket()->sGetBasketData();
@@ -248,7 +249,7 @@ class LineItem extends AbstractService
     }
 
     /**
-     * 
+     *
      * @param Order $order
      * @param Detail $detail
      * @return float
@@ -259,7 +260,7 @@ class LineItem extends AbstractService
     }
     
     /**
-     * 
+     *
      * @param float $price
      * @param string $currency
      * @param int $quantity
@@ -277,7 +278,7 @@ class LineItem extends AbstractService
     }
 
     /**
-     * 
+     *
      * @param int $mode
      * @param float $price
      * @return string
@@ -304,7 +305,7 @@ class LineItem extends AbstractService
     }
 
     /**
-     * 
+     *
      * @param float $rate
      * @param string $title
      * @return \Shopware\Models\Tax\Tax
@@ -318,7 +319,7 @@ class LineItem extends AbstractService
     }
 
     /**
-     * 
+     *
      * @param float $inputTaxRate
      * @return \Shopware\Models\Tax\Tax
      */
@@ -353,7 +354,7 @@ class LineItem extends AbstractService
     }
 
     /**
-     * 
+     *
      * @param Order $order
      * @return \Shopware\Models\Tax\Tax
      */
@@ -363,7 +364,7 @@ class LineItem extends AbstractService
     }
     
     /**
-     * 
+     *
      * @param float $priceIncludingTax
      * @param float $priceExcludingTax
      * @return \Shopware\Models\Tax\Tax
@@ -376,17 +377,18 @@ class LineItem extends AbstractService
     }
     
     /**
-     * 
+     *
      * @return boolean
      */
-    private function isNet() {
+    private function isNet()
+    {
         $taxId = Shopware()->Modules()->System()->sUSERGROUPDATA['tax'];
         $customerGroupId = Shopware()->Modules()->System()->sUSERGROUPDATA['id'];
         return ($this->container->get('config')->get('sARTICLESOUTPUTNETTO') && !$taxId) || (!$taxId && $customerGroupId);
     }
     
     /**
-     * 
+     *
      * @return boolean
      */
     private function isTaxFree()
@@ -438,5 +440,4 @@ class LineItem extends AbstractService
         $lineItem->setName($this->fixLength($lineItem->getName(), 40));
         return $lineItem;
     }
-    
 }

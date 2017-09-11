@@ -115,7 +115,8 @@ class RiskManagement implements SubscriberInterface
         return $args->getReturn();
     }
     
-    public function onAfterValidation(\Enlight_Hook_HookArgs $args) {
+    public function onAfterValidation(\Enlight_Hook_HookArgs $args)
+    {
         $returnValue = $args->getReturn();
         
         if (!is_array($returnValue) || $this->registry->get('disable_risk_management') === true) {
@@ -151,7 +152,8 @@ class RiskManagement implements SubscriberInterface
         return $args->getReturn();
     }
     
-    private function isPaymentMethodAvailable(\Shopware\Models\Payment\Payment $payment) {
+    private function isPaymentMethodAvailable(\Shopware\Models\Payment\Payment $payment)
+    {
         $order = $this->sessionService->getTemporaryOrder();
         $shop = ($order instanceof OrderModel ? $order->getShop() : $this->container->get('shop'));
         $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $shop);
@@ -168,10 +170,10 @@ class RiskManagement implements SubscriberInterface
                     $possiblePaymentMethods = $this->transactionService->getPossiblePaymentMethods($order);
                 } elseif (Shopware()->Modules()->Basket()->sCountBasket() >= 1
                     && $this->container->get('session')->offsetGet('sUserId') != null) {
-                        // It is important to disable the risk management here to not end up in an infinite recursion.
+                    // It is important to disable the risk management here to not end up in an infinite recursion.
                         $this->registry->set('disable_risk_management', true);
-                        $possiblePaymentMethods = $this->transactionService->getPossiblePaymentMethodsByBasket();
-                        $this->registry->set('disable_risk_management', false);
+                    $possiblePaymentMethods = $this->transactionService->getPossiblePaymentMethodsByBasket();
+                    $this->registry->set('disable_risk_management', false);
                 } else {
                     return true;
                 }
@@ -185,5 +187,4 @@ class RiskManagement implements SubscriberInterface
         }
         return false;
     }
-    
 }

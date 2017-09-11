@@ -124,5 +124,4 @@ class Checkout implements SubscriberInterface
         }
         return null;
     }
-
 }

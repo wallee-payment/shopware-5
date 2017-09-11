@@ -53,7 +53,8 @@ Ext.define('Shopware.apps.WalleePaymentTransaction.view.transaction.Details', {
             complete: '{s name=transaction/button/complete}Complete{/s}',
             deny: '{s name=transaction/button/delivery_indication_deny}Deny{/s}',
             accept: '{s name=transaction/button/delivery_indication_accept}Accept{/s}',
-            transaction: '{s name=transaction/button/transaction_link}View in Wallee{/s}'
+            transaction: '{s name=transaction/button/transaction_link}View in Wallee{/s}',
+            update: '{s name=transaction/button/update}Update{/s}',
         }
     },
     
@@ -72,7 +73,8 @@ Ext.define('Shopware.apps.WalleePaymentTransaction.view.transaction.Details', {
             'voidTransaction',
             'acceptDeliveryIndication',
             'denyDeliveryIndication',
-            'completeTransaction'
+            'completeTransaction',
+            'updateTransaction'
         );
     },
     
@@ -302,6 +304,15 @@ Ext.define('Shopware.apps.WalleePaymentTransaction.view.transaction.Details', {
         var me = this;
         
         var buttons = [{ xtype: 'component', flex: 1 }];
+        
+        buttons.push({
+            text: me.snippets.button.update,
+            action: 'updateTransaction',
+            cls: 'secondary',
+            handler: function() {
+                me.fireEvent('updateTransaction', me.record, me);
+            }
+        });
         
         if (me.record.get('canVoid')) {
             buttons.push({

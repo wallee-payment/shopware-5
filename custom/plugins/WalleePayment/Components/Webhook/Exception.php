@@ -15,5 +15,4 @@ namespace WalleePayment\Components\Webhook;
 
 class Exception extends \Exception
 {
-    
 }

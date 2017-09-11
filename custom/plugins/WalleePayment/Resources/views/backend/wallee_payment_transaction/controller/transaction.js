@@ -27,7 +27,8 @@ Ext.define('Shopware.apps.WalleePaymentTransaction.controller.Transaction', {
             completed: '{s name=transaction/message/complete_success}The transaction has been completed.{/s}',
             denied: '{s name=transaction/message/delivery_indication_deny}The payment has been denied.{/s}',
             accepted: '{s name=transaction/message/delivery_indication_accept}The payment has been accepted.{/s}',
-            exception: '{s name=message/error}There has been an exception.{/s}'
+            exception: '{s name=message/error}There has been an exception.{/s}',
+            updated: '{s name=transaction/message/update_success}The transaction has been updated.{/s}',
         },
         growlTitle: '{s name=growl_title}Wallee Payment{/s}'
     },
@@ -42,7 +43,8 @@ Ext.define('Shopware.apps.WalleePaymentTransaction.controller.Transaction', {
                 voidTransaction: me.onVoidTransaction,
                 denyDeliveryIndication: me.onDenyDeliveryIndication,
                 acceptDeliveryIndication: me.onAcceptDeliveryIndication,
-                completeTransaction: me.onCompleteTransaction
+                completeTransaction: me.onCompleteTransaction,
+                updateTransaction: me.onUpdateTransaction
             },
             'wallee-payment-transaction-line-items': {
                 updateLineItems: me.onUpdateLineItems
@@ -134,6 +136,13 @@ Ext.define('Shopware.apps.WalleePaymentTransaction.controller.Transaction', {
             me.process(record, view, '{url controller="WalleePaymentTransaction" action="accept"}',
                     me.snippets.message.accepted, me.snippets.message.exception);
         }
+    },
+    
+    onUpdateTransaction: function(record, view) {
+    		var me = this;
+    		
+    		me.process(record, view, '{url controller="WalleePaymentTransaction" action="update"}',
+                    me.snippets.message.updated, me.snippets.message.exception);
     },
     
     process: function(record, view, url, successText, failureText){

@@ -180,6 +180,26 @@ class Shopware_Controllers_Backend_WalleePaymentTransaction extends Backend impl
             ));
         }
     }
+    
+    public function updateAction()
+    {
+        $id = $this->Request()->getParam('id');
+        /* @var TransactionInfo $transactionInfo */
+        $transactionInfo = $this->getModelManager()
+            ->getRepository(TransactionInfo::class)
+            ->find($id);
+        
+        try {
+            $this->get('wallee_payment.payment')->fetchPaymentStatus($transactionInfo->getSpaceId(), $transactionInfo->getTransactionId());
+            $this->View()->assign(array(
+                'success' => true
+            ));
+        } catch (\Exception $e) {
+            $this->View()->assign(array(
+                'success' => false
+            ));
+        }
+    }
 
     public function downloadInvoiceAction()
     {

@@ -44,6 +44,15 @@ class Shopware_Controllers_Frontend_WalleePaymentTransaction extends Frontend
     {
         $this->get('modules')->Order()->sDeleteTemporaryOrder();
         $this->get('wallee_payment.basket')->deleteBasket();
+        
+        $spaceId = $this->Request()->getParam('spaceId');
+        $transactionId = $this->Request()->getParam('transactionId');
+        if (!empty($spaceId) && !empty($transactionId)) {
+            /* @var \WalleePayment\Components\Payment $paymentService */
+            $paymentService = $this->get('wallee_payment.payment');
+            $paymentService->fetchPaymentStatus($spaceId, $transactionId);
+        }
+        
         $this->redirect([
             'controller' => 'checkout',
             'action' => 'finish'
@@ -55,6 +64,10 @@ class Shopware_Controllers_Frontend_WalleePaymentTransaction extends Frontend
         $spaceId = $this->Request()->getParam('spaceId');
         $transactionId = $this->Request()->getParam('transactionId');
         if (!empty($spaceId) && !empty($transactionId)) {
+            /* @var \WalleePayment\Components\Payment $paymentService */
+            $paymentService = $this->get('wallee_payment.payment');
+            $paymentService->fetchPaymentStatus($spaceId, $transactionId);
+            
             /* @var TransactionInfo $transactionInfo */
             $transactionInfo = $this->getModelManager()
                 ->getRepository(TransactionInfo::class)
