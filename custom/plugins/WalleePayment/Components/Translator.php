@@ -76,7 +76,7 @@ class Translator
         }
 
         $primaryLanguage = $this->languageProvider->findPrimary($language);
-        if (isset($translatedString[$primaryLanguage->getIetfCode()])) {
+        if ($primaryLanguage !== false && isset($translatedString[$primaryLanguage->getIetfCode()])) {
             return $translatedString[$primaryLanguage->getIetfCode()];
         }
 
