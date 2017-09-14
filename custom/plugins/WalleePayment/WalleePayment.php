@@ -37,13 +37,14 @@ class WalleePayment extends Plugin
     public function install(InstallContext $context)
     {
         parent::install($context);
-        $this->installSchema();
+        $this->updateSchema();
         $this->installWidgets($context);
     }
 
     public function update(UpdateContext $context)
     {
         parent::update($context);
+        $this->updateSchema();
     }
 
     public function uninstall(UninstallContext $context)
@@ -71,27 +72,26 @@ class WalleePayment extends Plugin
             require_once $this->getPath() . '/vendor/autoload.php';
         }
     }
-
-    private function installSchema()
+    
+    private function getModelClasses()
     {
-        $tool = new SchemaTool($this->container->get('models'));
-        $classes = [
+        return [
             $this->container->get('models')->getClassMetadata(PaymentMethodConfiguration::class),
             $this->container->get('models')->getClassMetadata(TransactionInfo::class),
             $this->container->get('models')->getClassMetadata(OrderTransactionMapping::class)
         ];
-        $tool->updateSchema($classes, true);
+    }
+
+    private function updateSchema()
+    {
+        $tool = new SchemaTool($this->container->get('models'));
+        $tool->updateSchema($this->getModelClasses(), true);
     }
 
     private function uninstallSchema()
     {
         $tool = new SchemaTool($this->container->get('models'));
-        $classes = [
-            $this->container->get('models')->getClassMetadata(PaymentMethodConfiguration::class),
-            $this->container->get('models')->getClassMetadata(TransactionInfo::class),
-            $this->container->get('models')->getClassMetadata(OrderTransactionMapping::class)
-        ];
-        $tool->dropSchema($classes);
+        $tool->dropSchema($this->getModelClasses());
     }
 
     private function installWidgets(InstallContext $context)

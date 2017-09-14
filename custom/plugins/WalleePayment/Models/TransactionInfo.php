@@ -69,7 +69,7 @@ class TransactionInfo extends ModelEntity
     private $spaceViewId;
 
     /**
-     * @ORM\Column(name="language", type="string", nullable=false)
+     * @ORM\Column(name="language", type="string", nullable=true)
      *
      * @var string $language
      */
