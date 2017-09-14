@@ -15,6 +15,12 @@ namespace WalleePayment\Components;
 
 class Resource
 {
+    
+    /**
+     *
+     * @var \WalleePayment\Components\Provider\Language
+     */
+    private $languageProvider;
 
     /**
      *
@@ -25,10 +31,12 @@ class Resource
     /**
      * Constructor.
      *
+     * @param \WalleePayment\Components\Provider\Language $languageProvider
      * @param string $baseGatewayUrl
      */
-    public function __construct($baseGatewayUrl)
+    public function __construct(\WalleePayment\Components\Provider\Language $languageProvider, $baseGatewayUrl)
     {
+        $this->languageProvider = $languageProvider;
         $this->baseGatewayUrl = $baseGatewayUrl;
     }
 
@@ -44,7 +52,7 @@ class Resource
     public function getResourceUrl($path, $language = null, $spaceId = null, $spaceViewId = null)
     {
         $url = $this->baseGatewayUrl;
-        if (! empty($language)) {
+        if (! empty($language) && $this->getLanguage($language)) {
             $url .= '/' . str_replace('_', '-', $language);
         }
 
@@ -58,5 +66,14 @@ class Resource
 
         $url .= '/resource/' . $path;
         return $url;
+    }
+    
+    private function getLanguage($shopLanguageCode)
+    {
+        if ($this->languageProvider->find($shopLanguageCode) !== false) {
+            return $shopLanguageCode;
+        } else {
+            return null;
+        }
     }
 }

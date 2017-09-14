@@ -679,7 +679,8 @@ class Transaction extends AbstractService
         $this->modelManager->flush($orderTransactionMapping);
     }
     
-    private function getLanguage($shopLanguageCode) {
+    private function getLanguage($shopLanguageCode)
+    {
         if ($this->container->get('wallee_payment.provider.language')->find($shopLanguageCode) !== false) {
             return $shopLanguageCode;
         } else {

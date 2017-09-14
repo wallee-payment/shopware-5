@@ -75,6 +75,7 @@
         </service>
         
         <service id="wallee_payment.resource" class="WalleePayment\Components\Resource">
+        		<argument type="service" id="wallee_payment.provider.language" />
             <argument type="string">%wallee_payment.base_gateway_url%</argument>
         </service>
         
