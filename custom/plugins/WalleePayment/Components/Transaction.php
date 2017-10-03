@@ -464,6 +464,7 @@ class Transaction extends AbstractService
         
         if ($transaction instanceof \Wallee\Sdk\Model\TransactionCreate) {
             $transaction->setSpaceViewId($spaceViewId);
+            $transaction->setAutoConfirmationEnabled(false);
         }
 
         $transaction->setLineItems($this->lineItem->collectLineItems($order));
