@@ -25,6 +25,8 @@ use WalleePayment\Models\OrderTransactionMapping;
 use WalleePayment\Components\Registry;
 use Shopware\Components\Plugin\ConfigReader;
 use Shopware\Models\Order\Status;
+use Shopware\Models\Payment\Payment;
+use Shopware\Models\Shop\Shop;
 
 class Order implements SubscriberInterface
 {
@@ -74,6 +76,7 @@ class Order implements SubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
+            'Shopware_Modules_Order_SaveOrder_FilterParams' => 'onFilterParams',
             'Shopware_Modules_Order_SaveOrder_ProcessDetails' => 'onSaveOrder',
             'Shopware_Modules_Order_SendMail_Create' => 'onOrderCreateMail',
             'Shopware_Modules_Order_SendMail_Send' => 'onOrderSendMail'
@@ -101,6 +104,25 @@ class Order implements SubscriberInterface
         $this->sessionService = $sessionService;
         $this->registry = $registry;
     }
+    
+    public function onFilterParams(\Enlight_Event_EventArgs $args)
+    {
+        $params = $args->getReturn();
+        $paymentId = $params['paymentID'];
+        if ($paymentId != null) {
+            $payment = $this->modelManager->find(Payment::class, $paymentId);
+            /* @var Plugin $plugin */
+            $plugin = $this->modelManager->getRepository(Plugin::class)->findOneBy([
+                'name' => $this->container->getParameter('wallee_payment.plugin_name')
+            ]);
+            if ($payment instanceof \Shopware\Models\Payment\Payment && $plugin->getId() == $payment->getPluginId()) {
+                $shop = $this->modelManager->getRepository(Shop::class)->find($params['subshopID']);
+                $params['status'] = $this->getPendingOrderStatusId($shop);
+                $args->setReturn($params);
+            }
+        }
+        return $args->getReturn();
+    }
 
     public function onSaveOrder(\Enlight_Event_EventArgs $args)
     {
@@ -115,8 +137,8 @@ class Order implements SubscriberInterface
                 'name' => $this->container->getParameter('wallee_payment.plugin_name')
             ]);
             if ($order->getPayment() instanceof \Shopware\Models\Payment\Payment && $plugin->getId() == $order->getPayment()->getPluginId()) {
-                $order->setOrderStatus($this->getStatus($this->getPendingOrderStatusId($order)));
-                $this->modelManager->flush($order);
+                //$order->setOrderStatus($this->getStatus($this->getPendingOrderStatusId($order)));
+                //$this->modelManager->flush($order);
                 /* @var OrderTransactionMapping $orderTransactionMapping */
                 $orderTransactionMapping = $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy([
                     'orderId' => $order->getId(),
@@ -202,14 +224,9 @@ class Order implements SubscriberInterface
         return $args->getReturn();
     }
     
-    private function getStatus($statusId)
+    private function getPendingOrderStatusId(Shop $shop)
     {
-        return $this->modelManager->getRepository(Status::class)->find($statusId);
-    }
-    
-    private function getPendingOrderStatusId(OrderModel $order)
-    {
-        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
+        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $shop);
         $status = $pluginConfig['orderStatusPending'];
         if ($status === null || $status === '' || !is_numeric($status)) {
             return Status::ORDER_STATE_CLARIFICATION_REQUIRED;
