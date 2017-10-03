@@ -14,7 +14,7 @@
 namespace WalleePayment\Components;
 
 use Shopware\Components\Model\ModelManager;
-use Shopware\Recovery\Common\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Wallee\Sdk\Model\Transaction as TransactionModel;
 use Wallee\Sdk\Model\TransactionInvoice;
 use WalleePayment\Subscriber\Webhook\Transaction as TransactionWebhookService;
