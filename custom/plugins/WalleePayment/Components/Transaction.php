@@ -451,9 +451,9 @@ class Transaction extends AbstractService
             ->getEmail());
         $transaction->setCustomerId($order->getCustomer()
             ->getId());
-        $transaction->setLanguage($this->getLanguage($order->getLanguageSubShop()
+        $transaction->setLanguage($order->getLanguageSubShop()
             ->getLocale()
-            ->getLocale()));
+            ->getLocale());
         if ($order->getDispatch() instanceof \Shopware\Models\Dispatch\Dispatch) {
             $transaction->setShippingMethod($this->fixLength($order->getDispatch()
                 ->getName(), 200));
@@ -496,7 +496,7 @@ class Transaction extends AbstractService
             ->getEmail());
         $transaction->setCustomerId($customer
             ->getId());
-        $transaction->setLanguage($this->getLanguage($shop->getLocale()->getLocale()));
+        $transaction->setLanguage($shop->getLocale()->getLocale());
         
         $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $shop);
         $spaceViewId = $pluginConfig['spaceViewId'];
@@ -678,14 +678,5 @@ class Transaction extends AbstractService
         $orderTransactionMapping->setShop($this->container->get('shop'));
         $this->modelManager->persist($orderTransactionMapping);
         $this->modelManager->flush($orderTransactionMapping);
-    }
-    
-    private function getLanguage($shopLanguageCode)
-    {
-        if ($this->container->get('wallee_payment.provider.language')->find($shopLanguageCode) !== false) {
-            return $shopLanguageCode;
-        } else {
-            return null;
-        }
     }
 }
