@@ -90,6 +90,43 @@ class TransactionInfo extends AbstractService
      */
     public function updateTransactionInfo(\Wallee\Sdk\Model\Transaction $transaction, $orderId, $shopId, $paymentId, Customer $customer)
     {
+        try {
+            $info = $this->loadTransactionInfo($transaction, $orderId);
+            if (! ($info instanceof TransactionInfoModel)) {
+                $info = new TransactionInfoModel();
+            }
+            $info->setTransactionId($transaction->getId());
+            $info->setAuthorizationAmount($transaction->getAuthorizationAmount());
+            $info->setOrderId($orderId);
+            $info->setShopId($shopId);
+            $info->setState($transaction->getState());
+            $info->setSpaceId($transaction->getLinkedSpaceId());
+            $info->setSpaceViewId($transaction->getSpaceViewId());
+            $info->setLanguage($transaction->getLanguage());
+            $info->setCurrency($transaction->getCurrency());
+            $info->setConnectorId($transaction->getPaymentConnectorConfiguration() != null ? $transaction->getPaymentConnectorConfiguration()
+                ->getConnector() : null);
+            $info->setPaymentMethodId($transaction->getPaymentConnectorConfiguration() != null && $transaction->getPaymentConnectorConfiguration()
+                ->getPaymentMethodConfiguration() != null ? $transaction->getPaymentConnectorConfiguration()
+                ->getPaymentMethodConfiguration()
+                ->getPaymentMethod() : null);
+            $info->setImage($this->getPaymentMethodImage($transaction, $paymentId));
+            $info->setLabels($this->getTransactionLabels($transaction));
+            if ($transaction->getState() == \Wallee\Sdk\Model\TransactionState::FAILED || $transaction->getState() == \Wallee\Sdk\Model\TransactionState::DECLINE) {
+                $info->setFailureReason($transaction->getFailureReason() instanceof FailureReason ? $transaction->getFailureReason()->getDescription() : null);
+                $info->setUserFailureMessage($transaction->getUserFailureMessage());
+            }
+            $this->modelManager->persist($info);
+            $this->modelManager->flush($info);
+            $this->updateCustomerData($customer, $transaction);
+            return $info;
+        } catch (\PDOException $e) {
+            return $this->loadTransactionInfo($transaction, $orderId);
+        }
+    }
+    
+    private function loadTransactionInfo(\Wallee\Sdk\Model\Transaction $transaction, $orderId)
+    {
         $info = $this->modelManager->getRepository(TransactionInfoModel::class)->findOneBy([
             'orderId' => $orderId
         ]);
@@ -99,33 +136,6 @@ class TransactionInfo extends AbstractService
                 'transactionId' => $transaction->getId()
             ]);
         }
-        if (! ($info instanceof TransactionInfoModel)) {
-            $info = new TransactionInfoModel();
-        }
-        $info->setTransactionId($transaction->getId());
-        $info->setAuthorizationAmount($transaction->getAuthorizationAmount());
-        $info->setOrderId($orderId);
-        $info->setShopId($shopId);
-        $info->setState($transaction->getState());
-        $info->setSpaceId($transaction->getLinkedSpaceId());
-        $info->setSpaceViewId($transaction->getSpaceViewId());
-        $info->setLanguage($transaction->getLanguage());
-        $info->setCurrency($transaction->getCurrency());
-        $info->setConnectorId($transaction->getPaymentConnectorConfiguration() != null ? $transaction->getPaymentConnectorConfiguration()
-            ->getConnector() : null);
-        $info->setPaymentMethodId($transaction->getPaymentConnectorConfiguration() != null && $transaction->getPaymentConnectorConfiguration()
-            ->getPaymentMethodConfiguration() != null ? $transaction->getPaymentConnectorConfiguration()
-            ->getPaymentMethodConfiguration()
-            ->getPaymentMethod() : null);
-        $info->setImage($this->getPaymentMethodImage($transaction, $paymentId));
-        $info->setLabels($this->getTransactionLabels($transaction));
-        if ($transaction->getState() == \Wallee\Sdk\Model\TransactionState::FAILED || $transaction->getState() == \Wallee\Sdk\Model\TransactionState::DECLINE) {
-            $info->setFailureReason($transaction->getFailureReason() instanceof FailureReason ? $transaction->getFailureReason()->getDescription() : null);
-            $info->setUserFailureMessage($transaction->getUserFailureMessage());
-        }
-        $this->modelManager->persist($info);
-        $this->modelManager->flush($info);
-        $this->updateCustomerData($customer, $transaction);
         return $info;
     }
     
