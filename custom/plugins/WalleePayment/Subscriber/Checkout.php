@@ -53,7 +53,9 @@ class Checkout implements SubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            'Shopware_Controllers_Frontend_Checkout::confirmAction::after' => 'onConfirmAction'
+            'Shopware_Controllers_Frontend_Checkout::preDispatch::after' => 'onPreDispatch',
+            'Shopware_Controllers_Frontend_Checkout::confirmAction::after' => 'onConfirmAction',
+            'Shopware_Controllers_Frontend_Checkout::getMinimumCharge::after' => 'onGetMinimumCharge'
         ];
     }
 
@@ -71,6 +73,18 @@ class Checkout implements SubscriberInterface
         $this->modelManager = $modelManager;
         $this->transactionService = $transactionService;
         $this->sessionService = $sessionService;
+    }
+    
+    public function onPreDispatch(\Enlight_Hook_HookArgs $args)
+    {
+        /* @var \Shopware_Controllers_Frontend_Checkout $checkoutController */
+        $checkoutController = $args->getSubject();
+        
+        if ($checkoutController->Request()->getActionName() != 'finish') {
+            /* @var \Enlight_Components_Session_Namespace $session */
+            $session = $this->container->get('session');
+            $session['wallee_payment.success'] = false;
+        }
     }
 
     public function onConfirmAction(\Enlight_Hook_HookArgs $args)
@@ -123,5 +137,15 @@ class Checkout implements SubscriberInterface
             }
         }
         return null;
+    }
+    
+    public function onGetMinimumCharge(\Enlight_Hook_HookArgs $args)
+    {
+        /* @var \Enlight_Components_Session_Namespace $session */
+        $session = $this->container->get('session');
+        if ($session['wallee_payment.success'] === true) {
+            $args->setReturn(false);
+        }
+        return $args->getReturn();
     }
 }

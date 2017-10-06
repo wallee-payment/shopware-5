@@ -53,6 +53,10 @@ class Shopware_Controllers_Frontend_WalleePaymentTransaction extends Frontend
             $paymentService->fetchPaymentStatus($spaceId, $transactionId);
         }
         
+        /* @var \Enlight_Components_Session_Namespace $session */
+        $session = $this->get('session');
+        $session['wallee_payment.success'] = true;
+        
         $this->redirect([
             'controller' => 'checkout',
             'action' => 'finish'
