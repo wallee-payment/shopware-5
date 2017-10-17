@@ -236,20 +236,17 @@ class Transaction extends AbstractOrderRelatedSubscriber
 
     private function sendOrderEmail(Order $order)
     {
-        /* @var OrderTransactionMapping $orderTransactionMapping */
-        $orderTransactionMapping = $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy([
-            'orderId' => $order->getId()
-        ]);
         $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
         $sendOrderEmail = $pluginConfig['orderEmail'];
-        if ($sendOrderEmail && !$orderTransactionMapping->isOrderEmailSent()) {
+        $orderEmailData = $this->modelManager->getRepository(OrderTransactionMapping::class)->createNamedQuery('getOrderEmailData')->setParameter('orderId', $order->getId())->getResult();
+        if ($sendOrderEmail && (!isset($orderEmailData[0]['orderEmailSent']) || !$orderEmailData[0]['orderEmailSent'])) {
             /* @var sOrder $orderModule */
             $orderModule = $this->container->get('modules')->Order();
             $sUserDataBackup = $orderModule->sUserData;
-            $orderModule->sUserData = $orderTransactionMapping->getOrderEmailVariables()['sUserData'];
+            $orderModule->sUserData = $orderEmailData[0]['orderEmailVariables']['sUserData'];
             try {
                 $this->registry->set('force_order_email', true);
-                $orderModule->sendMail($orderTransactionMapping->getOrderEmailVariables()['variables']);
+                $orderModule->sendMail($orderEmailData[0]['orderEmailVariables']['variables']);
                 $this->registry->remove('force_order_email');
             } catch (\Exception $e) {
             }

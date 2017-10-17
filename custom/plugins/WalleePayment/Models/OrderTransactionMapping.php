@@ -26,6 +26,24 @@ use Shopware\Models\Shop\Shop;
  *      }
  * )
  * @ORM\Entity
+ * @ORM\NamedQueries({
+ *      @ORM\NamedQuery(
+ *          name="getOrderEmailSent",
+ *          query="SELECT m.orderEmailSent FROM WalleePayment\Models\OrderTransactionMapping m WHERE m.orderId = :orderId"
+ *      ),
+ *      @ORM\NamedQuery(
+ *          name="getOrderEmailData",
+ *          query="SELECT m.orderEmailSent, m.orderEmailVariables FROM WalleePayment\Models\OrderTransactionMapping m WHERE m.orderId = :orderId"
+ *      ),
+ *      @ORM\NamedQuery(
+ *          name="updateOrderEmailSent",
+ *          query="UPDATE WalleePayment\Models\OrderTransactionMapping m SET m.orderEmailSent = true, m.orderEmailVariables = null WHERE m.orderId = :orderId"
+ *      ),
+ *      @ORM\NamedQuery(
+ *          name="lock",
+ *          query="UPDATE WalleePayment\Models\OrderTransactionMapping m SET m.lockedAt = CURRENT_TIMESTAMP() WHERE m.orderId = :orderId"
+ *      )
+ * })
  */
 class OrderTransactionMapping extends ModelEntity
 {
@@ -110,7 +128,7 @@ class OrderTransactionMapping extends ModelEntity
      * @var \DateTime $lockedAt
      */
     private $lockedAt = null;
-
+    
     /**
      *
      * @return int
@@ -217,10 +235,5 @@ class OrderTransactionMapping extends ModelEntity
     {
         $this->orderEmailVariables = $orderEmailVariables;
     }
-
-    public function lock()
-    {
-        $this->lockedAt = new \DateTime('now');
-        return $this;
-    }
+    
 }

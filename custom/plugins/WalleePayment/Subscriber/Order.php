@@ -175,10 +175,7 @@ class Order implements SubscriberInterface
                 $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
                 $sendOrderEmail = $pluginConfig['orderEmail'];
                 if (!$sendOrderEmail) {
-                    $orderTransactionMapping->setOrderEmailSent(true);
-                    $orderTransactionMapping->setOrderEmailVariables(null);
-                    $this->modelManager->persist($orderTransactionMapping);
-                    $this->modelManager->flush($orderTransactionMapping);
+                    $this->modelManager->getRepository(OrderTransactionMapping::class)->createNamedQuery('updateOrderEmailSent')->setParameter('orderId', $order->getId())->execute();
                 } elseif ($orderTransactionMapping->getOrderEmailVariables() == null) {
                     $variables = $args->getVariables();
                     $variables['sBookingID'] = $orderTransactionMapping->getTransactionId();
@@ -206,18 +203,12 @@ class Order implements SubscriberInterface
                 'name' => $this->container->getParameter('wallee_payment.plugin_name')
             ]);
             if ($order->getPayment() instanceof \Shopware\Models\Payment\Payment && $plugin->getId() == $order->getPayment()->getPluginId()) {
-                /* @var OrderTransactionMapping $orderTransactionMapping */
-                $orderTransactionMapping = $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy([
-                    'orderId' => $order->getId()
-                ]);
-                if ($orderTransactionMapping->isOrderEmailSent() || $this->registry->get('force_order_email') == null) {
+                $orderEmailData = $this->modelManager->getRepository(OrderTransactionMapping::class)->createNamedQuery('getOrderEmailSent')->setParameter('orderId', $order->getId())->getResult();
+                if ((isset($orderEmailData[0]['orderEmailSent']) && $orderEmailData[0]['orderEmailSent']) || $this->registry->get('force_order_email') == null) {
                     // Disable sending of order email.
                     $args->setReturn(true);
                 } else {
-                    $orderTransactionMapping->setOrderEmailSent(true);
-                    $orderTransactionMapping->setOrderEmailVariables(null);
-                    $this->modelManager->persist($orderTransactionMapping);
-                    $this->modelManager->flush($orderTransactionMapping);
+                    $this->modelManager->getRepository(OrderTransactionMapping::class)->createNamedQuery('updateOrderEmailSent')->setParameter('orderId', $order->getId())->execute();
                 }
             }
         }

@@ -57,9 +57,7 @@ abstract class AbstractOrderRelatedSubscriber extends AbstractSubscriber
                 if (! ($orderTransactionMapping instanceof OrderTransactionMapping) || $orderTransactionMapping->getTransactionId() != $this->getTransactionId($entity)) {
                     return;
                 }
-
-                $orderTransactionMapping->lock();
-                $this->modelManager->flush($orderTransactionMapping);
+                $this->modelManager->getRepository(OrderTransactionMapping::class)->createNamedQuery('lock')->setParameter('orderId', $order->getId())->execute();
 
                 $order = $this->modelManager->getRepository(Order::class)->find($order->getId());
 
