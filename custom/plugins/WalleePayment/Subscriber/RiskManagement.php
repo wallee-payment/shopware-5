@@ -19,7 +19,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Shopware\Components\Model\ModelManager;
 use WalleePayment\Components\Transaction as TransactionService;
 use WalleePayment\Components\Session as SessionService;
-use Shopware\Models\Order\Order as OrderModel;
 use Shopware\Models\Plugin\Plugin;
 use WalleePayment\Models\PaymentMethodConfiguration as PaymentMethodConfigurationModel;
 use Shopware\Components\Plugin\ConfigReader;
@@ -154,9 +153,7 @@ class RiskManagement implements SubscriberInterface
     
     private function isPaymentMethodAvailable(\Shopware\Models\Payment\Payment $payment)
     {
-        $order = $this->sessionService->getTemporaryOrder();
-        $shop = ($order instanceof OrderModel ? $order->getShop() : $this->container->get('shop'));
-        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $shop);
+        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $this->container->get('shop'));
         $spaceId = $pluginConfig['spaceId'];
         /* @var PaymentMethodConfigurationModel $configuration */
         $configuration = $this->modelManager->getRepository(PaymentMethodConfigurationModel::class)->findOneBy([
@@ -166,9 +163,7 @@ class RiskManagement implements SubscriberInterface
         if ($configuration instanceof PaymentMethodConfigurationModel) {
             try {
                 $possiblePaymentMethods = [];
-                if ($order instanceof OrderModel) {
-                    $possiblePaymentMethods = $this->transactionService->getPossiblePaymentMethods($order);
-                } elseif (Shopware()->Modules()->Basket()->sCountBasket() >= 1
+                if (Shopware()->Modules()->Basket()->sCountBasket() >= 1
                     && $this->container->get('session')->offsetGet('sUserId') != null) {
                     // It is important to disable the risk management here to not end up in an infinite recursion.
                         $this->registry->set('disable_risk_management', true);

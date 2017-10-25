@@ -186,9 +186,9 @@ class Transaction extends AbstractService
      * @param Order $order
      * @return string
      */
-    public function getJavaScriptUrl(Order $order)
+    public function getJavaScriptUrl()
     {
-        $transaction = $this->getTransactionByOrder($order);
+        $transaction = $this->getTransactionByBasket();
         return $this->transactionService->buildJavaScriptUrl($transaction->getLinkedSpaceId(), $transaction->getId());
     }
 

@@ -20,8 +20,8 @@ use Shopware\Models\Plugin\Plugin;
 use WalleePayment\Components\Transaction as TransactionService;
 use WalleePayment\Components\Session as SessionService;
 use WalleePayment\Models\PaymentMethodConfiguration as PaymentMethodConfigurationModel;
-use Shopware\Models\Order\Order as OrderModel;
 use WalleePayment\Models\TransactionInfo;
+use Shopware\Models\Payment\Payment;
 
 class Checkout implements SubscriberInterface
 {
@@ -94,9 +94,10 @@ class Checkout implements SubscriberInterface
 
         $view = $checkoutController->View();
 
-        $order = $this->sessionService->getTemporaryOrder();
-        if ($order instanceof OrderModel) {
-            $payment = $order->getPayment();
+        $paymentData = $checkoutController->getSelectedPayment();
+        if ($paymentData != false && isset($paymentData['id'])) {
+            /* @var Payment $payment */
+            $payment = $this->modelManager->getRepository(Payment::class)->find($paymentData['id']);
             /* @var Plugin $plugin */
             $plugin = $this->modelManager->getRepository(Plugin::class)->findOneBy([
                 'name' => $this->container->getParameter('wallee_payment.plugin_name')
@@ -109,7 +110,7 @@ class Checkout implements SubscriberInterface
                     $view->addTemplateDir($this->container->getParameter('wallee_payment.plugin_dir') . '/Resources/views/');
                     $view->extendsTemplate('frontend/checkout/wallee_payment/confirm.tpl');
 
-                    $view->assign('walleePaymentJavascriptUrl', $this->transactionService->getJavaScriptUrl($order));
+                    $view->assign('walleePaymentJavascriptUrl', $this->transactionService->getJavaScriptUrl());
                     $view->assign('walleePaymentConfigurationId', $paymentMethodConfiguration->getConfigurationId());
 
                     $userFailureMessage = $this->getUserFailureMessage();
