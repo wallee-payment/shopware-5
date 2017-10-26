@@ -77,10 +77,11 @@ class LineItem extends AbstractService
         $details = $order->getDetails();
         foreach ($details as $detail) {
             /* @var Detail $detail */
+            
             $type = $this->getType($detail->getMode(), $detail->getPrice());
             $lineItem = new \Wallee\Sdk\Model\LineItemCreate();
             $lineItem->setAmountIncludingTax($this->roundAmount($this->getOrderAmountIncludingTax($order, $detail), $order->getCurrency()));
-            $lineItem->setName($detail->getArticleName());
+            $lineItem->setName($this->getArticleName($detail->getArticleId()));
             $lineItem->setQuantity($detail->getQuantity());
             $lineItem->setShippingRequired($type == \Wallee\Sdk\Model\LineItemType::PRODUCT && ! $detail->getEsdArticle());
             $lineItem->setSku($detail->getArticleNumber());
@@ -91,6 +92,7 @@ class LineItem extends AbstractService
             ]);
             $lineItem->setType($type);
             $lineItem->setUniqueId($detail->getId());
+            $lineItem->setAttributes($this->getAttributes($detail->getArticleNumber()));
             $lineItems[] = $this->cleanLineItem($lineItem);
         }
 
@@ -178,13 +180,13 @@ class LineItem extends AbstractService
                 $tax = $this->modelManager->getRepository(Tax::class)->find($basketRow['taxID']);
             }
             
-            $basketRow['articlename'] = Shopware()->Modules()->System()->sMODULES['sArticles']->sOptimizeText(strip_tags(html_entity_decode($basketRow['articlename'])));
+            $basketRow['additional_details']['articleName'] = Shopware()->Modules()->System()->sMODULES['sArticles']->sOptimizeText(strip_tags(html_entity_decode($basketRow['additional_details']['articleName'])));
             
             $type = $this->getType($basketRow['modus'], $basketRow['priceNumeric']);
             
             $lineItem = new \Wallee\Sdk\Model\LineItemCreate();
             $lineItem->setAmountIncludingTax($this->roundAmount($this->getAmountIncludingTax($basketRow['priceNumeric'], $currency, $basketRow['quantity'], $basketRow['tax_rate'], $net && ! $taxfree), $currency));
-            $lineItem->setName($basketRow['articlename']);
+            $lineItem->setName($basketRow['additional_details']['articleName']);
             $lineItem->setQuantity($basketRow['quantity']);
             $lineItem->setShippingRequired($type == \Wallee\Sdk\Model\LineItemType::PRODUCT && ! $basketRow['esdarticle']);
             $lineItem->setSku($basketRow['ordernumber']);
@@ -194,6 +196,7 @@ class LineItem extends AbstractService
             ]);
             $lineItem->setType($type);
             $lineItem->setUniqueId($index++);
+            $lineItem->setAttributes($this->getAttributes($basketRow['ordernumber']));
             $lineItems[] = $this->cleanLineItem($lineItem);
         }
         
@@ -303,7 +306,46 @@ class LineItem extends AbstractService
                 return \Wallee\Sdk\Model\LineItemType::PRODUCT;
         }
     }
-
+    
+    /**
+     *
+     * @param int $articleId
+     * @return string
+     */
+    private function getArticleName($articleId)
+    {
+        /* @var \Shopware\Models\Article\Article $article */
+        $article = Shopware()->Models()->getRepository(\Shopware\Models\Article\Article::class)->find($articleId);
+        return $article->getName();
+    }
+    
+    /**
+     *
+     * @param string $articleNumber
+     * @return array
+     */
+    private function getAttributes($articleNumber)
+    {
+        /* @var \Shopware\Models\Article\Detail $article */
+        $article = Shopware()->Models()->getRepository(\Shopware\Models\Article\Detail::class)->findOneBy(['number' => $articleNumber]);
+        
+        $options = [];
+        foreach ($article->getConfiguratorOptions() as $option) {
+            /* @var \Shopware\Models\Article\Configurator\Option $option */
+            $options[$option->getGroup()->getPosition()] = $option;
+        }
+        ksort($options);
+        
+        $attributes = [];
+        foreach ($options as $option) {
+            $attribute = new \Wallee\Sdk\Model\LineItemAttributeCreate();
+            $attribute->setLabel($option->getGroup()->getName());
+            $attribute->setValue($option->getName());
+            $attributes['option_' . $option->getId()] = $attribute;
+        }
+        return $attributes;
+    }
+    
     /**
      *
      * @param float $rate

@@ -235,5 +235,4 @@ class OrderTransactionMapping extends ModelEntity
     {
         $this->orderEmailVariables = $orderEmailVariables;
     }
-    
 }
