@@ -93,6 +93,10 @@ class Checkout implements SubscriberInterface
         $checkoutController = $args->getSubject();
 
         $view = $checkoutController->View();
+        if (empty($view->sUserLoggedIn)) {
+            // When the customer is not logged in, we don't do anything.
+            return;
+        }
 
         $paymentData = $checkoutController->getSelectedPayment();
         if ($paymentData != false && isset($paymentData['id'])) {
