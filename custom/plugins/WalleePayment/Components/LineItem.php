@@ -92,7 +92,10 @@ class LineItem extends AbstractService
             ]);
             $lineItem->setType($type);
             $lineItem->setUniqueId($detail->getId());
-            $lineItem->setAttributes($this->getAttributes($detail->getArticleNumber()));
+            $attributes = $this->getAttributes($detail->getArticleNumber());
+            if (!empty($attributes)) {
+                $lineItem->setAttributes($attributes);
+            }
             $lineItems[] = $this->cleanLineItem($lineItem);
         }
 
@@ -196,7 +199,10 @@ class LineItem extends AbstractService
             ]);
             $lineItem->setType($type);
             $lineItem->setUniqueId($index++);
-            $lineItem->setAttributes($this->getAttributes($basketRow['ordernumber']));
+            $attributes = $this->getAttributes($basketRow['ordernumber']);
+            if (!empty($attributes)) {
+                $lineItem->setAttributes($attributes);
+            }
             $lineItems[] = $this->cleanLineItem($lineItem);
         }
         
