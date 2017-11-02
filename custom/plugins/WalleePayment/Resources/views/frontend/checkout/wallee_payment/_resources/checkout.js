@@ -67,9 +67,10 @@ ShopwareWallee.Checkout = {
                         }
                     })
                 } else {
-                		if (validationResult.errors) {
-                			this.showErrors(validationResult.errors);
-                		}
+                    $(window).scrollTop($('#' + container).offset().top);
+            		if (validationResult.errors) {
+            			this.showErrors(validationResult.errors);
+            		}
                     this.unblockCheckoutButton();
                 }
             }, this), $.proxy(function() {
