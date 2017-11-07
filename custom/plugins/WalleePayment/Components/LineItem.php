@@ -81,7 +81,7 @@ class LineItem extends AbstractService
             $type = $this->getType($detail->getMode(), $detail->getPrice());
             $lineItem = new \Wallee\Sdk\Model\LineItemCreate();
             $lineItem->setAmountIncludingTax($this->roundAmount($this->getOrderAmountIncludingTax($order, $detail), $order->getCurrency()));
-            $lineItem->setName($this->getArticleName($detail->getArticleId()));
+            $lineItem->setName($this->getArticleName($detail));
             $lineItem->setQuantity($detail->getQuantity());
             $lineItem->setShippingRequired($type == \Wallee\Sdk\Model\LineItemType::PRODUCT && ! $detail->getEsdArticle());
             $lineItem->setSku($detail->getArticleNumber());
@@ -183,13 +183,16 @@ class LineItem extends AbstractService
                 $tax = $this->modelManager->getRepository(Tax::class)->find($basketRow['taxID']);
             }
             
-            $basketRow['additional_details']['articleName'] = Shopware()->Modules()->System()->sMODULES['sArticles']->sOptimizeText(strip_tags(html_entity_decode($basketRow['additional_details']['articleName'])));
+            $articleName = $basketRow['articlename'];
+            if (isset($basketRow['additional_details']['articleName']) && !empty($basketRow['additional_details']['articleName'])) {
+                $articleName = Shopware()->Modules()->System()->sMODULES['sArticles']->sOptimizeText(strip_tags(html_entity_decode($basketRow['additional_details']['articleName'])));
+            }
             
             $type = $this->getType($basketRow['modus'], $basketRow['priceNumeric']);
             
             $lineItem = new \Wallee\Sdk\Model\LineItemCreate();
             $lineItem->setAmountIncludingTax($this->roundAmount($this->getAmountIncludingTax($basketRow['priceNumeric'], $currency, $basketRow['quantity'], $basketRow['tax_rate'], $net && ! $taxfree), $currency));
-            $lineItem->setName($basketRow['additional_details']['articleName']);
+            $lineItem->setName($articleName);
             $lineItem->setQuantity($basketRow['quantity']);
             $lineItem->setShippingRequired($type == \Wallee\Sdk\Model\LineItemType::PRODUCT && ! $basketRow['esdarticle']);
             $lineItem->setSku($basketRow['ordernumber']);
@@ -315,14 +318,18 @@ class LineItem extends AbstractService
     
     /**
      *
-     * @param int $articleId
+     * @param Detail $detail
      * @return string
      */
-    private function getArticleName($articleId)
+    private function getArticleName($detail)
     {
         /* @var \Shopware\Models\Article\Article $article */
-        $article = Shopware()->Models()->getRepository(\Shopware\Models\Article\Article::class)->find($articleId);
-        return $article->getName();
+        $article = Shopware()->Models()->getRepository(\Shopware\Models\Article\Article::class)->find($detail->getArticleId());
+        if ($article instanceof \Shopware\Models\Article\Article) {
+            return $article->getName();
+        } else {
+            return $detail->getArticleName();
+        }
     }
     
     /**
@@ -336,9 +343,11 @@ class LineItem extends AbstractService
         $article = Shopware()->Models()->getRepository(\Shopware\Models\Article\Detail::class)->findOneBy(['number' => $articleNumber]);
         
         $options = [];
-        foreach ($article->getConfiguratorOptions() as $option) {
-            /* @var \Shopware\Models\Article\Configurator\Option $option */
-            $options[$option->getGroup()->getPosition()] = $option;
+        if ($article instanceof \Shopware\Models\Article\Detail) {
+            foreach ($article->getConfiguratorOptions() as $option) {
+                /* @var \Shopware\Models\Article\Configurator\Option $option */
+                $options[$option->getGroup()->getPosition()] = $option;
+            }
         }
         ksort($options);
         
