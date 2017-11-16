@@ -5,7 +5,7 @@ This repository contains the Shopware plugin that enables to process payments wi
 
 ## Requirements
 
-* [Shopware](https://shopware.com/) 5.2.0 or later
+* [Shopware](https://shopware.com/) 5.2.17 or later
 * [PHP](http://php.net/) 5.6.4 or later
 
 ## Documentation
