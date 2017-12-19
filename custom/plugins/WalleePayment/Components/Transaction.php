@@ -369,11 +369,15 @@ class Transaction extends AbstractService
      */
     public function updateTransaction(Order $order, $transactionId, $spaceId, $confirm = false)
     {
+        $lastException = null;
+        $this->apiClient->setConnectionTimeout(5);
         for ($i = 0; $i < 5; $i++) {
             try {
                 $transaction = $this->transactionService->read($spaceId, $transactionId);
                 if ($transaction->getState() != \Wallee\Sdk\Model\TransactionState::PENDING) {
-                    return $this->createTransaction($order);
+                    $newTransaction = $this->createTransaction($order);
+                    $this->apiClient->setConnectionTimeout(20);
+                    return $newTransaction;
                 }
                 $this->transactionInfoService->updateTransactionInfoByOrder($transaction, $order);
                 
@@ -390,12 +394,18 @@ class Transaction extends AbstractService
                 
                 $this->updateOrCreateTransactionMapping($transaction, $order);
                 self::$transactionByOrderCache[$order->getId()] = $transaction;
+                $this->apiClient->setConnectionTimeout(20);
                 return $updatedTransaction;
             } catch (\Wallee\Sdk\VersioningException $e) {
                 // Try to update the transaction again, if a versioning exception occurred.
+                $lastException = $e;
+            } catch (\Wallee\Sdk\Http\ConnectionException $e) {
+                // Try to update the transaction again, if a connection exception occurred.
+                $lastException = $e;
             }
         }
-        throw new \Wallee\Sdk\VersioningException();
+        $this->apiClient->setConnectionTimeout(20);
+        throw $lastException;
     }
     
     /**
@@ -586,8 +596,7 @@ class Transaction extends AbstractService
         ];
         if ($order->getTemporaryId() != null) {
             $filter = [
-                'temporaryId' => $order->getTemporaryId(),
-                'shopId' => $order->getShop()->getId()
+                'temporaryId' => $order->getTemporaryId()
             ];
         }
         return $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy($filter);

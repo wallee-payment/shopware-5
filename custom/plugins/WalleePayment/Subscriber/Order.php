@@ -141,14 +141,15 @@ class Order implements SubscriberInterface
                 //$this->modelManager->flush($order);
                 /* @var OrderTransactionMapping $orderTransactionMapping */
                 $orderTransactionMapping = $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy([
-                    'orderId' => $order->getId(),
-                    'shopId' => $order->getShop()->getId()
+                    'orderId' => $order->getId()
                 ]);
                 if (!($orderTransactionMapping instanceof OrderTransactionMapping)) {
                     $orderTransactionMapping = $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy([
-                        'temporaryId' => $this->sessionService->getSessionId(),
-                        'shopId' => $order->getShop()->getId()
+                        'temporaryId' => $this->sessionService->getSessionId()
                     ]);
+                }
+                if (!($orderTransactionMapping instanceof OrderTransactionMapping)) {
+                    throw new \Exception('No order transaction mapping found for order ' . $order->getId() . ' and temporaryId ' . $this->sessionService->getSessionId());
                 }
                 $this->transactionService->updateTransaction($order, $orderTransactionMapping->getTransactionId(), $orderTransactionMapping->getSpaceId(), true);
             }
