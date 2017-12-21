@@ -138,7 +138,9 @@ class Transaction extends AbstractService
      */
     public function getTransaction($spaceId, $transactionId)
     {
-        return $this->transactionService->read($spaceId, $transactionId);
+        return $this->callApi($this->apiClient, function() use ($spaceId, $transactionId) {
+            return $this->transactionService->read($spaceId, $transactionId);
+        });
     }
 
     /**
@@ -161,7 +163,9 @@ class Transaction extends AbstractService
      */
     public function getLineItemVersion($spaceId, $transactionId)
     {
-        return $this->transactionService->getLatestTransactionLineItemVersion($spaceId, $transactionId);
+        return $this->callApi($this->apiClient, function() use ($spaceId, $transactionId) {
+            return $this->transactionService->getLatestTransactionLineItemVersion($spaceId, $transactionId);
+        });
     }
 
     /**
@@ -189,7 +193,9 @@ class Transaction extends AbstractService
     public function getJavaScriptUrl()
     {
         $transaction = $this->getTransactionByBasket();
-        return $this->transactionService->buildJavaScriptUrl($transaction->getLinkedSpaceId(), $transaction->getId());
+        return $this->callApi($this->apiClient, function() use ($transaction) {
+            return $this->transactionService->buildJavaScriptUrl($transaction->getLinkedSpaceId(), $transaction->getId());
+        });
     }
 
     /**
@@ -202,7 +208,9 @@ class Transaction extends AbstractService
     {
         if (! isset(self::$possiblePaymentMethodByOrderCache[$order->getId()]) || self::$possiblePaymentMethodByOrderCache[$order->getId()] == null) {
             $transaction = $this->getTransactionByOrder($order);
-            $paymentMethods = $this->transactionService->fetchPossiblePaymentMethods($transaction->getLinkedSpaceId(), $transaction->getId());
+            $paymentMethods = $this->callApi($this->apiClient, function() use ($transaction) {
+                return $this->transactionService->fetchPossiblePaymentMethods($transaction->getLinkedSpaceId(), $transaction->getId());
+            });
 
             foreach ($paymentMethods as $paymentMethod) {
                 $this->paymentMethodConfigurationService->updateData($paymentMethod);
@@ -225,7 +233,9 @@ class Transaction extends AbstractService
         $sessionId = $this->sessionService->getSessionId();
         if (! isset(self::$possiblePaymentMethodByBasketCache[$sessionId]) || self::$possiblePaymentMethodByBasketCache[$sessionId] == null) {
             $transaction = $this->getTransactionByBasket();
-            $paymentMethods = $this->transactionService->fetchPossiblePaymentMethods($transaction->getLinkedSpaceId(), $transaction->getId());
+            $paymentMethods = $this->callApi($this->apiClient, function() use ($transaction) {
+                return $this->transactionService->fetchPossiblePaymentMethods($transaction->getLinkedSpaceId(), $transaction->getId());
+            });
             
             foreach ($paymentMethods as $paymentMethod) {
                 $this->paymentMethodConfigurationService->updateData($paymentMethod);
@@ -283,13 +293,14 @@ class Transaction extends AbstractService
      * Creates a transaction for the given order.
      *
      * @param Order $order
+     * @param boolean $confirm
      * @return \Wallee\Sdk\Model\TransactionCreate
      */
-    public function createTransaction(Order $order)
+    public function createTransaction(Order $order, $confirm = false)
     {
         $existingTransaction = $this->findExistingTransaction($order->getShop(), $order->getCustomer());
         if ($existingTransaction instanceof \Wallee\Sdk\Model\Transaction) {
-            return $this->updateTransaction($order, $existingTransaction->getId(), $existingTransaction->getLinkedSpaceId());
+            return $this->updateTransaction($order, $existingTransaction->getId(), $existingTransaction->getLinkedSpaceId(), $confirm);
         } else {
             $transaction = new \Wallee\Sdk\Model\TransactionCreate();
             $transaction->setCustomersPresence(\Wallee\Sdk\Model\CustomersPresence::VIRTUAL_PRESENT);
@@ -348,7 +359,9 @@ class Transaction extends AbstractService
         $query->setFilter($filter);
         $query->setOrderBys([$this->createEntityOrderBy('createdOn', EntityQueryOrderByType::DESC)]);
         $query->setNumberOfEntities(1);
-        $transactions = $this->transactionService->search($spaceId, $query);
+        $transactions = $this->callApi($this->apiClient, function() use ($spaceId, $query) {
+            $this->transactionService->search($spaceId, $query);
+        });
         if (is_array($transactions) && !empty($transactions)) {
             return current($transactions);
         } else {
@@ -369,43 +382,29 @@ class Transaction extends AbstractService
      */
     public function updateTransaction(Order $order, $transactionId, $spaceId, $confirm = false)
     {
-        $lastException = null;
-        $this->apiClient->setConnectionTimeout(5);
-        for ($i = 0; $i < 5; $i++) {
-            try {
-                $transaction = $this->transactionService->read($spaceId, $transactionId);
-                if ($transaction->getState() != \Wallee\Sdk\Model\TransactionState::PENDING) {
-                    $newTransaction = $this->createTransaction($order);
-                    $this->apiClient->setConnectionTimeout(20);
-                    return $newTransaction;
-                }
-                $this->transactionInfoService->updateTransactionInfoByOrder($transaction, $order);
-                
-                $pendingTransaction = new \Wallee\Sdk\Model\TransactionPending();
-                $pendingTransaction->setId($transaction->getId());
-                $pendingTransaction->setVersion($transaction->getVersion());
-                $this->assembleTransactionData($pendingTransaction, $order);
-                
-                if ($confirm) {
-                    $updatedTransaction = $this->transactionService->confirm($spaceId, $pendingTransaction);
-                } else {
-                    $updatedTransaction = $this->transactionService->update($spaceId, $pendingTransaction);
-                }
-                
-                $this->updateOrCreateTransactionMapping($transaction, $order);
-                self::$transactionByOrderCache[$order->getId()] = $transaction;
+        return $this->callApi($this->apiClient, function() use ($order, $transactionId, $spaceId, $confirm) {
+            $transaction = $this->transactionService->read($spaceId, $transactionId);
+            if ($transaction->getState() != \Wallee\Sdk\Model\TransactionState::PENDING) {
+                $newTransaction = $this->createTransaction($order);
                 $this->apiClient->setConnectionTimeout(20);
-                return $updatedTransaction;
-            } catch (\Wallee\Sdk\VersioningException $e) {
-                // Try to update the transaction again, if a versioning exception occurred.
-                $lastException = $e;
-            } catch (\Wallee\Sdk\Http\ConnectionException $e) {
-                // Try to update the transaction again, if a connection exception occurred.
-                $lastException = $e;
+                return $newTransaction;
             }
-        }
-        $this->apiClient->setConnectionTimeout(20);
-        throw $lastException;
+            $this->transactionInfoService->updateTransactionInfoByOrder($transaction, $order);
+            
+            $pendingTransaction = new \Wallee\Sdk\Model\TransactionPending();
+            $pendingTransaction->setId($transaction->getId());
+            $pendingTransaction->setVersion($transaction->getVersion());
+            $this->assembleTransactionData($pendingTransaction, $order);
+            
+            if ($confirm) {
+                $updatedTransaction = $this->transactionService->confirm($spaceId, $pendingTransaction);
+            } else {
+                $updatedTransaction = $this->transactionService->update($spaceId, $pendingTransaction);
+            }
+            
+            $this->updateOrCreateTransactionMapping($transaction, $order);
+            self::$transactionByOrderCache[$order->getId()] = $transaction;
+        });
     }
     
     /**
@@ -419,28 +418,23 @@ class Transaction extends AbstractService
      */
     public function updateBasketTransaction($transactionId, $spaceId)
     {
-        for ($i = 0; $i < 5; $i++) {
-            try {
-                $transaction = $this->transactionService->read($spaceId, $transactionId);
-                if ($transaction->getState() != \Wallee\Sdk\Model\TransactionState::PENDING) {
-                    return $this->createBasketTransaction();
-                }
-                
-                $pendingTransaction = new \Wallee\Sdk\Model\TransactionPending();
-                $pendingTransaction->setId($transaction->getId());
-                $pendingTransaction->setVersion($transaction->getVersion());
-                $this->assembleBasketTransactionData($pendingTransaction);
-                
-                $updatedTransaction = $this->transactionService->update($spaceId, $pendingTransaction);
-                
-                $this->updateOrCreateBasketTransactionMapping($transaction);
-                self::$transactionByBasketCache[$this->sessionService->getSessionId()] = $transaction;
-                return $updatedTransaction;
-            } catch (\Wallee\Sdk\VersioningException $e) {
-                // Try to update the transaction again, if a versioning exception occurred.
+        return $this->callApi($this->apiClient, function() use ($transactionId, $spaceId) {
+            $transaction = $this->transactionService->read($spaceId, $transactionId);
+            if ($transaction->getState() != \Wallee\Sdk\Model\TransactionState::PENDING) {
+                return $this->createBasketTransaction();
             }
-        }
-        throw new \Wallee\Sdk\VersioningException();
+            
+            $pendingTransaction = new \Wallee\Sdk\Model\TransactionPending();
+            $pendingTransaction->setId($transaction->getId());
+            $pendingTransaction->setVersion($transaction->getVersion());
+            $this->assembleBasketTransactionData($pendingTransaction);
+            
+            $updatedTransaction = $this->transactionService->update($spaceId, $pendingTransaction);
+            
+            $this->updateOrCreateBasketTransactionMapping($transaction);
+            self::$transactionByBasketCache[$this->sessionService->getSessionId()] = $transaction;
+            return $updatedTransaction;
+        });
     }
     
     /**

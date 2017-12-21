@@ -15,7 +15,12 @@ namespace WalleePayment\Components\Provider;
 
 abstract class AbstractProvider
 {
-
+    /**
+     *
+     * @var \Wallee\Sdk\ApiClient
+     */
+    protected $apiClient;
+    
     /**
      *
      * @var \Zend_Cache_Core
@@ -26,8 +31,9 @@ abstract class AbstractProvider
     
     private $data = null;
 
-    public function __construct(\Zend_Cache_Core $cache, $cacheKey)
+    public function __construct(\Wallee\Sdk\ApiClient $apiClient, \Zend_Cache_Core $cache, $cacheKey)
     {
+        $this->apiClient = $apiClient;
         $this->cache = $cache;
         $this->cacheKey = $cacheKey;
     }
@@ -86,12 +92,32 @@ abstract class AbstractProvider
         if ($cachedData) {
             $this->data = $cachedData;
         } else {
+            $fetchedData = $this->callApi(function(){
+                return $this->fetchData();
+            });
             $this->data = array();
-            foreach ($this->fetchData() as $entry) {
+            foreach ($fetchedData as $entry) {
                 $this->data[$this->getId($entry)] = $entry;
             }
 
             $this->cache->save($this->data, $this->cacheKey);
         }
+    }
+    
+    private function callApi($callback) {
+        $lastException = null;
+        $this->apiClient->setConnectionTimeout(5);
+        for ($i = 0; $i < 5; $i++) {
+            try {
+                return $callback();
+            } catch (\Wallee\Sdk\VersioningException $e) {
+                $lastException = $e;
+            } catch (\Wallee\Sdk\Http\ConnectionException $e) {
+                $lastException = $e;
+            } finally {
+                $this->apiClient->setConnectionTimeout(20);
+            }
+        }
+        throw $lastException;
     }
 }

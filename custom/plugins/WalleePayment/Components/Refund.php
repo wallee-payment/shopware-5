@@ -56,13 +56,15 @@ class Refund extends AbstractService
      */
     public function getRefunds($spaceId, $transactionId)
     {
-        $query = new EntityQuery();
-        $query->setFilter($this->createEntityFilter('transaction.id', $transactionId));
-        $query->setOrderBys([
-            $this->createEntityOrderBy('createdOn', \Wallee\Sdk\Model\EntityQueryOrderByType::DESC)
-        ]);
-        $query->setNumberOfEntities(50);
-        return $this->refundService->search($spaceId, $query);
+        return $this->callApi($this->refundService->getApiClient(), function() use ($spaceId, $transactionId) {
+            $query = new EntityQuery();
+            $query->setFilter($this->createEntityFilter('transaction.id', $transactionId));
+            $query->setOrderBys([
+                $this->createEntityOrderBy('createdOn', \Wallee\Sdk\Model\EntityQueryOrderByType::DESC)
+            ]);
+            $query->setNumberOfEntities(50);
+            return $this->refundService->search($spaceId, $query);
+        });
     }
 
     /**

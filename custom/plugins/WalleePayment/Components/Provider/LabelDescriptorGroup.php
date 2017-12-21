@@ -22,12 +22,6 @@ class LabelDescriptorGroup extends AbstractProvider
 {
 
     /**
-     *
-     * @var \Wallee\Sdk\ApiClient
-     */
-    private $apiClient;
-
-    /**
      * Constructor.
      *
      * @param \Wallee\Sdk\ApiClient $apiClient
@@ -35,8 +29,7 @@ class LabelDescriptorGroup extends AbstractProvider
      */
     public function __construct(ApiClient $apiClient, \Zend_Cache_Core $cache)
     {
-        parent::__construct($cache, 'wallee_payment_label_descriptor_groups');
-        $this->apiClient = $apiClient->getInstance();
+        parent::__construct($apiClient->getInstance(), $cache, 'wallee_payment_label_descriptor_groups');
     }
 
     /**

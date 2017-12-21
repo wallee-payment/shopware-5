@@ -55,9 +55,11 @@ class Invoice extends AbstractService
      */
     public function getInvoice($spaceId, $transactionId)
     {
-        $query = new EntityQuery();
-        $query->setFilter($this->createEntityFilter('completion.lineItemVersion.transaction.id', $transactionId));
-        $query->setNumberOfEntities(1);
-        return current($this->invoiceService->search($spaceId, $query));
+        return $this->callApi($this->invoiceService->getApiClient(), function() use ($spaceId, $transactionId) {
+            $query = new EntityQuery();
+            $query->setFilter($this->createEntityFilter('completion.lineItemVersion.transaction.id', $transactionId));
+            $query->setNumberOfEntities(1);
+            return current($this->invoiceService->search($spaceId, $query));
+        });
     }
 }

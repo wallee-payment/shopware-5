@@ -197,22 +197,24 @@ class TransactionInfo extends AbstractService
      */
     private function getChargeAttempt(\Wallee\Sdk\Model\Transaction $transaction)
     {
-        $chargeAttemptService = new \Wallee\Sdk\Service\ChargeAttemptService($this->apiClient);
-        $query = new \Wallee\Sdk\Model\EntityQuery();
-        $filter = new \Wallee\Sdk\Model\EntityQueryFilter();
-        $filter->setType(\Wallee\Sdk\Model\EntityQueryFilterType::_AND);
-        $filter->setChildren(array(
-            $this->createEntityFilter('charge.transaction.id', $transaction->getId()),
-            $this->createEntityFilter('state', \Wallee\Sdk\Model\ChargeAttemptState::SUCCESSFUL)
-        ));
-        $query->setFilter($filter);
-        $query->setNumberOfEntities(1);
-        $result = $chargeAttemptService->search($transaction->getLinkedSpaceId(), $query);
-        if ($result != null && ! empty($result)) {
-            return current($result);
-        } else {
-            return null;
-        }
+        return $this->callApi($this->apiClient, function() use ($transaction) {
+            $chargeAttemptService = new \Wallee\Sdk\Service\ChargeAttemptService($this->apiClient);
+            $query = new \Wallee\Sdk\Model\EntityQuery();
+            $filter = new \Wallee\Sdk\Model\EntityQueryFilter();
+            $filter->setType(\Wallee\Sdk\Model\EntityQueryFilterType::_AND);
+            $filter->setChildren(array(
+                $this->createEntityFilter('charge.transaction.id', $transaction->getId()),
+                $this->createEntityFilter('state', \Wallee\Sdk\Model\ChargeAttemptState::SUCCESSFUL)
+            ));
+            $query->setFilter($filter);
+            $query->setNumberOfEntities(1);
+            $result = $chargeAttemptService->search($transaction->getLinkedSpaceId(), $query);
+            if ($result != null && ! empty($result)) {
+                return current($result);
+            } else {
+                return null;
+            }
+        });
     }
 
     /**

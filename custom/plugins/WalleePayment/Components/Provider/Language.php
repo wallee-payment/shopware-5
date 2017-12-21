@@ -21,16 +21,9 @@ use WalleePayment\Components\ApiClient;
 class Language extends AbstractProvider
 {
 
-    /**
-     *
-     * @var \Wallee\Sdk\ApiClient
-     */
-    private $apiClient;
-
     public function __construct(ApiClient $apiClient, \Zend_Cache_Core $cache)
     {
-        parent::__construct($cache, 'wallee_payment_languages');
-        $this->apiClient = $apiClient->getInstance();
+        parent::__construct($apiClient->getInstance(), $cache, 'wallee_payment_languages');
     }
 
     /**

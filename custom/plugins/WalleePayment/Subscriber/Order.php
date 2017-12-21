@@ -148,10 +148,11 @@ class Order implements SubscriberInterface
                         'temporaryId' => $this->sessionService->getSessionId()
                     ]);
                 }
-                if (!($orderTransactionMapping instanceof OrderTransactionMapping)) {
-                    throw new \Exception('No order transaction mapping found for order ' . $order->getId() . ' and temporaryId ' . $this->sessionService->getSessionId());
+                if ($orderTransactionMapping instanceof OrderTransactionMapping) {
+                    $this->transactionService->updateTransaction($order, $orderTransactionMapping->getTransactionId(), $orderTransactionMapping->getSpaceId(), true);
+                } else {
+                    $this->transactionService->createTransaction($order, true);
                 }
-                $this->transactionService->updateTransaction($order, $orderTransactionMapping->getTransactionId(), $orderTransactionMapping->getSpaceId(), true);
             }
         }
     }

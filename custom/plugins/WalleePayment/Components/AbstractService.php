@@ -98,4 +98,30 @@ abstract class AbstractService
     {
         return mb_substr($string, 0, $maxLength, 'UTF-8');
     }
+    
+    /**
+     * In case a \Wallee\Sdk\Http\ConnectionException or a \Wallee\Sdk\VersioningException occurs, the {@code $callback} function is called again.
+     * 
+     * @param \Wallee\Sdk\ApiClient $apiClient
+     * @param function $callback
+     * @throws \Wallee\Sdk\Http\ConnectionException
+     * @throws \Wallee\Sdk\VersioningException
+     * @return mixed
+     */
+    protected function callApi(\Wallee\Sdk\ApiClient $apiClient, $callback) {
+        $lastException = null;
+        $apiClient->setConnectionTimeout(5);
+        for ($i = 0; $i < 5; $i++) {
+            try {
+                return $callback();
+            } catch (\Wallee\Sdk\VersioningException $e) {
+                $lastException = $e;
+            } catch (\Wallee\Sdk\Http\ConnectionException $e) {
+                $lastException = $e;
+            } finally {
+                $apiClient->setConnectionTimeout(20);
+            }
+        }
+        throw $lastException;
+    }
 }

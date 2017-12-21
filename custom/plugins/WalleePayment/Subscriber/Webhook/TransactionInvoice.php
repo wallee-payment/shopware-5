@@ -52,7 +52,9 @@ class TransactionInvoice extends AbstractOrderRelatedSubscriber
      */
     protected function loadEntity(WebhookRequest $request)
     {
-        return $this->transactionInvoiceService->read($request->getSpaceId(), $request->getEntityId());
+        return $this->callApi($this->transactionInvoiceService->getApiClient(), function() use ($request) {
+            return $this->transactionInvoiceService->read($request->getSpaceId(), $request->getEntityId());
+        });
     }
 
     /**
