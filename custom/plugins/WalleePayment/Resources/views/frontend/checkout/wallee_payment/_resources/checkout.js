@@ -82,7 +82,7 @@ ShopwareWallee.Checkout = {
     wrap: function(object, functionName, wrapper){
         var originalFunction = $.proxy(object[functionName], object);
         return function(){
-            var args = arguments;
+            var args = Array.prototype.slice.call(arguments);
             args.unshift(originalFunction);
             return wrapper.apply(object, args);
         };
