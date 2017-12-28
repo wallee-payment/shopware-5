@@ -122,6 +122,8 @@ class TransactionInfo extends AbstractService
             return $info;
         } catch (\PDOException $e) {
             return $this->loadTransactionInfo($transaction, $orderId);
+        } catch (\Doctrine\DBAL\DBALException $e) {
+            return $this->loadTransactionInfo($transaction, $orderId);
         }
     }
     

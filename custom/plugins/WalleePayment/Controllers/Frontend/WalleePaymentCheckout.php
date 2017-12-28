@@ -31,6 +31,7 @@ class Shopware_Controllers_Frontend_WalleePaymentCheckout extends Shopware_Contr
 
     public function saveOrderAction()
     {
+        ob_start();
         $this->_orderNumber = null;
         $backup = $this->get('wallee_payment.basket')->backupBasket();
         $this->finishAction();
@@ -38,10 +39,12 @@ class Shopware_Controllers_Frontend_WalleePaymentCheckout extends Shopware_Contr
         if ($this->_orderNumber != null) {
             $this->get('wallee_payment.registry')->set('disable_risk_management', true);
             $this->get('modules')->Order()->sCreateTemporaryOrder();
+            ob_clean();
             echo json_encode([
                 'result' => 'success'
             ]);
         }
+        ob_end_flush();
     }
     
     public function saveOrder()
