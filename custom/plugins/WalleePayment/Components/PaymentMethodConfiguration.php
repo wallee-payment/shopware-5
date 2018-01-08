@@ -111,9 +111,7 @@ class PaymentMethodConfiguration
             $model->setConfigurationName($configuration->getName());
             $model->setTitle($configuration->getResolvedTitle());
             $model->setDescription($configuration->getResolvedDescription());
-            $model->setImage($configuration->getImageResourcePath() != null ? $configuration->getImageResourcePath()
-                ->getPath() : $this->paymentMethodProvider->find($configuration->getPaymentMethod())
-                ->getImagePath());
+            $model->setImage($this->getImagePath($configuration->getResolvedImageUrl()));
             $model->setSortOrder($configuration->getSortOrder());
             $this->modelManager->persist($model);
             $this->modelManager->flush();
@@ -162,9 +160,7 @@ class PaymentMethodConfiguration
                     $method->setState($this->getConfigurationState($configuration));
                     $method->setTitle($configuration->getResolvedTitle());
                     $method->setDescription($configuration->getResolvedDescription());
-                    $method->setImage($configuration->getImageResourcePath() != null ? $configuration->getImageResourcePath()
-                        ->getPath() : $this->paymentMethodProvider->find($configuration->getPaymentMethod())
-                        ->getImagePath());
+                    $method->setImage($this->getImagePath($configuration->getResolvedImageUrl()));
                     $method->setSortOrder($configuration->getSortOrder());
                     $this->modelManager->persist($method);
                 }
@@ -213,6 +209,15 @@ class PaymentMethodConfiguration
             $configuration->setPayment($payment);
             $this->modelManager->persist($configuration);
         }
+    }
+
+    /**
+     * @param string $resolvedImageUrl
+     * @return string
+     */
+    private function getImagePath($resolvedImageUrl) {
+        $index = strpos($resolvedImageUrl, 'resource/');
+        return substr($resolvedImageUrl, $index + strlen('resource/'));
     }
 
     /**
