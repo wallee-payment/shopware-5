@@ -254,15 +254,10 @@ class TransactionInfo extends AbstractService
             ->getPaymentMethodConfiguration()
             ->getPaymentMethod()) : null;
 
-        if ($connector != null && $connector->getPaymentMethodBrand() != null) {
-            return $connector->getPaymentMethodBrand()->getImagePath();
-        } elseif ($transaction->getPaymentConnectorConfiguration()->getPaymentMethodConfiguration() != null && $transaction->getPaymentConnectorConfiguration()
-                ->getPaymentMethodConfiguration()
-                ->getImageResourcePath() != null) {
-            return $transaction->getPaymentConnectorConfiguration()
+        if ($transaction->getPaymentConnectorConfiguration()->getPaymentMethodConfiguration() != null) {
+            return $this->getImagePath($transaction->getPaymentConnectorConfiguration()
                     ->getPaymentMethodConfiguration()
-                    ->getImageResourcePath()
-                    ->getPath();
+                    ->getResolvedImageUrl());
         } elseif ($method != null) {
             return $method->getImagePath();
         } else {
@@ -279,6 +274,15 @@ class TransactionInfo extends AbstractService
                 return null;
             }
         }
+    }
+    
+    /**
+     * @param string $resolvedImageUrl
+     * @return string
+     */
+    private function getImagePath($resolvedImageUrl) {
+        $index = strpos($resolvedImageUrl, 'resource/');
+        return substr($resolvedImageUrl, $index + strlen('resource/'));
     }
 
     /**
