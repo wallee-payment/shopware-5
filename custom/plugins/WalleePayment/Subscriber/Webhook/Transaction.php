@@ -125,31 +125,35 @@ class Transaction extends AbstractOrderRelatedSubscriber
             'transactionId' => $transaction->getId()
         ]);
         if (!($transactionInfo instanceof TransactionInfo)) {
-            throw new \WalleePayment\Components\Webhook\Exception();
+            $this->transactionInfoService->updateTransactionInfoByOrder($transaction, $order);
+            $this->processTransaction($order, $transaction);
+        } elseif ($transaction->getState() != $transactionInfo->getState()) {
+            $this->processTransaction($order, $transaction);
         }
-        if ($transaction->getState() != $transactionInfo->getState()) {
-            switch ($transaction->getState()) {
-                case \Wallee\Sdk\Model\TransactionState::AUTHORIZED:
-                    $this->authorize($order, $transaction);
-                    break;
-                case \Wallee\Sdk\Model\TransactionState::DECLINE:
-                    $this->decline($order, $transaction);
-                    break;
-                case \Wallee\Sdk\Model\TransactionState::FAILED:
-                    $this->failed($order, $transaction);
-                    break;
-                case \Wallee\Sdk\Model\TransactionState::FULFILL:
-                    $this->fulfill($order, $transaction);
-                    break;
-                case \Wallee\Sdk\Model\TransactionState::VOIDED:
-                    $this->voided($order, $transaction);
-                    break;
-                case \Wallee\Sdk\Model\TransactionState::COMPLETED:
-                    $this->complete($order, $transaction);
-                    break;
-                default:
-                    break;
-            }
+    }
+
+    private function processTransaction(Order $order, $transaction) {
+        switch ($transaction->getState()) {
+            case \Wallee\Sdk\Model\TransactionState::AUTHORIZED:
+                $this->authorize($order, $transaction);
+                break;
+            case \Wallee\Sdk\Model\TransactionState::DECLINE:
+                $this->decline($order, $transaction);
+                break;
+            case \Wallee\Sdk\Model\TransactionState::FAILED:
+                $this->failed($order, $transaction);
+                break;
+            case \Wallee\Sdk\Model\TransactionState::FULFILL:
+                $this->fulfill($order, $transaction);
+                break;
+            case \Wallee\Sdk\Model\TransactionState::VOIDED:
+                $this->voided($order, $transaction);
+                break;
+            case \Wallee\Sdk\Model\TransactionState::COMPLETED:
+                $this->complete($order, $transaction);
+                break;
+            default:
+                break;
         }
     }
 
