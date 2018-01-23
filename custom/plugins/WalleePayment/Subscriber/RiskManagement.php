@@ -26,31 +26,31 @@ use WalleePayment\Components\Registry;
 
 class RiskManagement implements SubscriberInterface
 {
-
+    
     /**
      *
      * @var ContainerInterface
      */
     private $container;
-
+    
     /**
      *
      * @var ModelManager
      */
     private $modelManager;
-
+    
     /**
      *
      * @var ConfigReader
      */
     private $configReader;
-
+    
     /**
      *
      * @var TransactionService
      */
     private $transactionService;
-
+    
     /**
      *
      * @var SessionService
@@ -61,15 +61,15 @@ class RiskManagement implements SubscriberInterface
      * @var Registry
      */
     private $registry;
-
+    
     public static function getSubscribedEvents()
     {
         return [
-            'sAdmin::sManageRisks::after' => 'onAfterManageRisk',
+            'Shopware_Modules_Admin_GetPaymentMeans_DataFilter' => 'onDataFilter',
             'sAdmin::sValidateStep3::after' => 'onAfterValidation'
         ];
     }
-
+    
     /**
      * Constructor.
      *
@@ -89,28 +89,55 @@ class RiskManagement implements SubscriberInterface
         $this->sessionService = $sessionService;
         $this->registry = $registry;
     }
-
-    public function onAfterManageRisk(\Enlight_Hook_HookArgs $args)
+    
+    public function onDataFilter(\Enlight_Event_EventArgs $args)
     {
-        $returnValue = $args->getReturn();
-
-        if ($returnValue || $this->registry->get('disable_risk_management') === true) {
-            $args->setReturn($returnValue);
+        $paymentMeans = $args->getReturn();
+        
+        if ($this->registry->get('disable_risk_management') === true) {
             return $args->getReturn();
         }
         
-        $parameters = $args->getArgs();
-        $paymentId = $parameters[0];
-        if ($paymentId != null) {
-            $payment = $this->modelManager->find(Payment::class, $paymentId);
-            /* @var Plugin $plugin */
-            $plugin = $this->modelManager->getRepository(Plugin::class)->findOneBy([
-                'name' => $this->container->getParameter('wallee_payment.plugin_name')
-            ]);
-            if ($payment instanceof \Shopware\Models\Payment\Payment && $plugin->getId() == $payment->getPluginId()) {
-                $args->setReturn(! $this->isPaymentMethodAvailable($payment));
-            }
-        }
+            if (Shopware()->Modules()->Basket()->sCountBasket() >= 1
+                && $this->container->get('session')->offsetGet('sUserId') != null) {
+                    $possiblePaymentMethodIds = [];
+                    
+                    // It is important to disable the risk management here to not end up in an infinite recursion.
+                    $this->registry->set('disable_risk_management', true);
+                    $possiblePaymentMethods = [];
+                    try {
+                        $possiblePaymentMethods = $this->transactionService->getPossiblePaymentMethodsByBasket();
+                    } catch (\Exception $e) {
+                    }
+                    $this->registry->set('disable_risk_management', false);
+                    
+                    foreach ($possiblePaymentMethods as $possiblePaymentMethod) {
+                        $possiblePaymentMethodIds[] = $possiblePaymentMethod->getId();
+                    }
+                    
+                    /* @var Plugin $plugin */
+                    $plugin = $this->modelManager->getRepository(Plugin::class)->findOneBy([
+                        'name' => $this->container->getParameter('wallee_payment.plugin_name')
+                    ]);
+                    $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $this->container->get('shop'));
+                    $spaceId = $pluginConfig['spaceId'];
+                    
+                    $filteredPaymentMeans = [];
+                    foreach ($paymentMeans as $paymentMean) {
+                        /* @var PaymentMethodConfigurationModel $configuration */
+                        $configuration = $this->modelManager->getRepository(PaymentMethodConfigurationModel::class)->findOneBy([
+                            'paymentId' => $paymentMean['id'],
+                            'spaceId' => $spaceId
+                        ]);
+                        if ($configuration instanceof PaymentMethodConfigurationModel
+                            && !in_array($configuration->getConfigurationId(), $possiblePaymentMethodIds)) {
+                                continue;
+                            }
+                            $filteredPaymentMeans[] = $paymentMean;
+                    }
+                    $args->setReturn($filteredPaymentMeans);
+                }
+        
         return $args->getReturn();
     }
     
@@ -139,8 +166,8 @@ class RiskManagement implements SubscriberInterface
                         ],
                         'sErrorMessages' => [
                             $this->container->get('snippets')
-                                ->getNamespace('frontend/checkout/error_messages')
-                                ->get('ConfirmInfoPaymentBlocked')
+                            ->getNamespace('frontend/checkout/error_messages')
+                            ->get('ConfirmInfoPaymentBlocked')
                         ]
                     );
                 }
@@ -165,21 +192,19 @@ class RiskManagement implements SubscriberInterface
                 $possiblePaymentMethods = [];
                 if (Shopware()->Modules()->Basket()->sCountBasket() >= 1
                     && $this->container->get('session')->offsetGet('sUserId') != null) {
-                    // It is important to disable the risk management here to not end up in an infinite recursion.
-                        $this->registry->set('disable_risk_management', true);
-                    $possiblePaymentMethods = $this->transactionService->getPossiblePaymentMethodsByBasket();
-                    $this->registry->set('disable_risk_management', false);
-                } else {
-                    return true;
-                }
-                foreach ($possiblePaymentMethods as $possiblePaymentMethod) {
-                    if ($possiblePaymentMethod->getId() == $configuration->getConfigurationId()) {
+                        $possiblePaymentMethods = $this->transactionService->getPossiblePaymentMethodsByBasket();
+                    } else {
                         return true;
                     }
-                }
+                    foreach ($possiblePaymentMethods as $possiblePaymentMethod) {
+                        if ($possiblePaymentMethod->getId() == $configuration->getConfigurationId()) {
+                            return true;
+                        }
+                    }
             } catch (\Exception $e) {
             }
         }
         return false;
     }
+    
 }
