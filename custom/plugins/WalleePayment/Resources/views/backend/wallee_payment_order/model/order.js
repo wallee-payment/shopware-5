@@ -10,6 +10,7 @@
  */
 
 //{namespace name=backend/wallee_payment/main}
-//{block name="backend/order/model/order/fields" append}
+//{block name="backend/order/model/order/fields"}
+//{$smarty.block.parent}
 	{ name: 'wallee_payment', type: 'boolean' },
 //{/block}

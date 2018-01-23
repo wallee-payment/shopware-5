@@ -11,7 +11,7 @@
  */
 #}
 
-{block name='frontend_account_order_item_repeat_order' prepend}
+{block name='frontend_account_order_item_repeat_order'}
 	{if $offerPosition.walleeTransaction && ($offerPosition.walleeTransaction.canDownloadInvoice || $offerPosition.walleeTransaction.canDownloadPackingSlip)}
 		<div class="panel--tr is--odd">
 			<div class="panel--td">
@@ -28,4 +28,5 @@
 			</div>
 		</div>
 	{/if}
+	{$smarty.block.parent}
 {/block}

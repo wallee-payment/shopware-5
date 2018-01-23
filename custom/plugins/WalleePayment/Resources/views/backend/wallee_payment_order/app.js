@@ -9,7 +9,8 @@
  * @link https://github.com/wallee-payment/shopware
  */
 
-//{block name="backend/order/application" append}
+//{block name="backend/order/application"}
+	//{$smarty.block.parent}
     //{include file="backend/wallee_payment_index/components/CTemplate.js"}
     //{include file="backend/wallee_payment_index/components/ComponentColumn.js"}
 	//{include file="backend/wallee_payment_transaction/controller/refund.js"}

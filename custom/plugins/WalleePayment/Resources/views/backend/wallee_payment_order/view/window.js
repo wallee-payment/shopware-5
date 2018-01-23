@@ -15,7 +15,8 @@
  * @author Simon Schurter
  */
 
-//{block name="backend/order/view/detail/window" append}
+//{block name="backend/order/view/detail/window"}
+//{$smarty.block.parent}
 //{namespace name=backend/wallee_payment/main}
 Ext.define('Shopware.apps.Order.PluginWalleePayment.view.window.TransactionTab', {
     
