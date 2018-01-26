@@ -56,7 +56,7 @@ class Refund extends AbstractService
      */
     public function getRefunds($spaceId, $transactionId)
     {
-        return $this->callApi($this->refundService->getApiClient(), function() use ($spaceId, $transactionId) {
+        return $this->callApi($this->refundService->getApiClient(), function () use ($spaceId, $transactionId) {
             $query = new EntityQuery();
             $query->setFilter($this->createEntityFilter('transaction.id', $transactionId));
             $query->setOrderBys([

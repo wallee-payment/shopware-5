@@ -132,7 +132,8 @@ class Transaction extends AbstractOrderRelatedSubscriber
         }
     }
 
-    private function processTransaction(Order $order, $transaction) {
+    private function processTransaction(Order $order, $transaction)
+    {
         switch ($transaction->getState()) {
             case \Wallee\Sdk\Model\TransactionState::AUTHORIZED:
                 $this->authorize($order, $transaction);

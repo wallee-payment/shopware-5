@@ -53,7 +53,7 @@ class DeliveryIndication extends AbstractOrderRelatedSubscriber
      */
     protected function loadEntity(WebhookRequest $request)
     {
-        return $this->callApi($this->deliveryIndicationService->getApiClient(), function() use ($request) {
+        return $this->callApi($this->deliveryIndicationService->getApiClient(), function () use ($request) {
             $this->deliveryIndicationService->read($request->getSpaceId(), $request->getEntityId());
         });
     }

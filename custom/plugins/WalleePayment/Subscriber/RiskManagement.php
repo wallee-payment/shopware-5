@@ -98,45 +98,45 @@ class RiskManagement implements SubscriberInterface
             return $args->getReturn();
         }
         
-            if (Shopware()->Modules()->Basket()->sCountBasket() >= 1
+        if (Shopware()->Modules()->Basket()->sCountBasket() >= 1
                 && $this->container->get('session')->offsetGet('sUserId') != null) {
-                    $possiblePaymentMethodIds = [];
+            $possiblePaymentMethodIds = [];
                     
                     // It is important to disable the risk management here to not end up in an infinite recursion.
                     $this->registry->set('disable_risk_management', true);
-                    $possiblePaymentMethods = [];
-                    try {
-                        $possiblePaymentMethods = $this->transactionService->getPossiblePaymentMethodsByBasket();
-                    } catch (\Exception $e) {
-                    }
-                    $this->registry->set('disable_risk_management', false);
+            $possiblePaymentMethods = [];
+            try {
+                $possiblePaymentMethods = $this->transactionService->getPossiblePaymentMethodsByBasket();
+            } catch (\Exception $e) {
+            }
+            $this->registry->set('disable_risk_management', false);
                     
-                    foreach ($possiblePaymentMethods as $possiblePaymentMethod) {
-                        $possiblePaymentMethodIds[] = $possiblePaymentMethod->getId();
-                    }
+            foreach ($possiblePaymentMethods as $possiblePaymentMethod) {
+                $possiblePaymentMethodIds[] = $possiblePaymentMethod->getId();
+            }
                     
                     /* @var Plugin $plugin */
                     $plugin = $this->modelManager->getRepository(Plugin::class)->findOneBy([
                         'name' => $this->container->getParameter('wallee_payment.plugin_name')
                     ]);
-                    $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $this->container->get('shop'));
-                    $spaceId = $pluginConfig['spaceId'];
+            $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $this->container->get('shop'));
+            $spaceId = $pluginConfig['spaceId'];
                     
-                    $filteredPaymentMeans = [];
-                    foreach ($paymentMeans as $paymentMean) {
-                        /* @var PaymentMethodConfigurationModel $configuration */
+            $filteredPaymentMeans = [];
+            foreach ($paymentMeans as $paymentMean) {
+                /* @var PaymentMethodConfigurationModel $configuration */
                         $configuration = $this->modelManager->getRepository(PaymentMethodConfigurationModel::class)->findOneBy([
                             'paymentId' => $paymentMean['id'],
                             'spaceId' => $spaceId
                         ]);
-                        if ($configuration instanceof PaymentMethodConfigurationModel
+                if ($configuration instanceof PaymentMethodConfigurationModel
                             && !in_array($configuration->getConfigurationId(), $possiblePaymentMethodIds)) {
-                                continue;
-                            }
-                            $filteredPaymentMeans[] = $paymentMean;
-                    }
-                    $args->setReturn($filteredPaymentMeans);
+                    continue;
                 }
+                $filteredPaymentMeans[] = $paymentMean;
+            }
+            $args->setReturn($filteredPaymentMeans);
+        }
         
         return $args->getReturn();
     }
@@ -192,19 +192,18 @@ class RiskManagement implements SubscriberInterface
                 $possiblePaymentMethods = [];
                 if (Shopware()->Modules()->Basket()->sCountBasket() >= 1
                     && $this->container->get('session')->offsetGet('sUserId') != null) {
-                        $possiblePaymentMethods = $this->transactionService->getPossiblePaymentMethodsByBasket();
-                    } else {
+                    $possiblePaymentMethods = $this->transactionService->getPossiblePaymentMethodsByBasket();
+                } else {
+                    return true;
+                }
+                foreach ($possiblePaymentMethods as $possiblePaymentMethod) {
+                    if ($possiblePaymentMethod->getId() == $configuration->getConfigurationId()) {
                         return true;
                     }
-                    foreach ($possiblePaymentMethods as $possiblePaymentMethod) {
-                        if ($possiblePaymentMethod->getId() == $configuration->getConfigurationId()) {
-                            return true;
-                        }
-                    }
+                }
             } catch (\Exception $e) {
             }
         }
         return false;
     }
-    
 }

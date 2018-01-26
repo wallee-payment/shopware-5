@@ -204,7 +204,8 @@ class PaymentMethodConfiguration
                 'description' => $description,
                 'active' => $configuration->getState() == PaymentMethodConfigurationModel::STATE_ACTIVE,
                 'position' => $configuration->getSortOrder(),
-                'additionalDescription' => '<img width="50" src="' . $this->resource->getResourceUrl($configuration->getImage(), $defaultLanguage, $configuration->getSpaceId()) . '" /><div>' . $this->translator->translate($configuration->getDescription(), $defaultLanguage) . '</div>'
+                'additionalDescription' => '<img width="50" src="' . $this->resource->getResourceUrl($configuration->getImage(), $defaultLanguage, $configuration->getSpaceId()) . '" /><div>' . $this->translator->translate($configuration->getDescription(), $defaultLanguage) . '</div>',
+                'action' => 'WalleePaymentPay'
             ]);
             $configuration->setPayment($payment);
             $this->modelManager->persist($configuration);
@@ -215,7 +216,8 @@ class PaymentMethodConfiguration
      * @param string $resolvedImageUrl
      * @return string
      */
-    private function getImagePath($resolvedImageUrl) {
+    private function getImagePath($resolvedImageUrl)
+    {
         $index = strpos($resolvedImageUrl, 'resource/');
         return substr($resolvedImageUrl, $index + strlen('resource/'));
     }

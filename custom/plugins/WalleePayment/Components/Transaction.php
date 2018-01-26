@@ -138,7 +138,7 @@ class Transaction extends AbstractService
      */
     public function getTransaction($spaceId, $transactionId)
     {
-        return $this->callApi($this->apiClient, function() use ($spaceId, $transactionId) {
+        return $this->callApi($this->apiClient, function () use ($spaceId, $transactionId) {
             return $this->transactionService->read($spaceId, $transactionId);
         });
     }
@@ -163,7 +163,7 @@ class Transaction extends AbstractService
      */
     public function getLineItemVersion($spaceId, $transactionId)
     {
-        return $this->callApi($this->apiClient, function() use ($spaceId, $transactionId) {
+        return $this->callApi($this->apiClient, function () use ($spaceId, $transactionId) {
             return $this->transactionService->getLatestTransactionLineItemVersion($spaceId, $transactionId);
         });
     }
@@ -193,7 +193,7 @@ class Transaction extends AbstractService
     public function getJavaScriptUrl()
     {
         $transaction = $this->getTransactionByBasket();
-        return $this->callApi($this->apiClient, function() use ($transaction) {
+        return $this->callApi($this->apiClient, function () use ($transaction) {
             return $this->transactionService->buildJavaScriptUrl($transaction->getLinkedSpaceId(), $transaction->getId());
         });
     }
@@ -208,7 +208,7 @@ class Transaction extends AbstractService
     {
         if (! isset(self::$possiblePaymentMethodByOrderCache[$order->getId()]) || self::$possiblePaymentMethodByOrderCache[$order->getId()] == null) {
             $transaction = $this->getTransactionByOrder($order);
-            $paymentMethods = $this->callApi($this->apiClient, function() use ($transaction) {
+            $paymentMethods = $this->callApi($this->apiClient, function () use ($transaction) {
                 return $this->transactionService->fetchPossiblePaymentMethods($transaction->getLinkedSpaceId(), $transaction->getId());
             });
 
@@ -233,7 +233,7 @@ class Transaction extends AbstractService
         $sessionId = $this->sessionService->getSessionId();
         if (! isset(self::$possiblePaymentMethodByBasketCache[$sessionId]) || self::$possiblePaymentMethodByBasketCache[$sessionId] == null) {
             $transaction = $this->getTransactionByBasket();
-            $paymentMethods = $this->callApi($this->apiClient, function() use ($transaction) {
+            $paymentMethods = $this->callApi($this->apiClient, function () use ($transaction) {
                 return $this->transactionService->fetchPossiblePaymentMethods($transaction->getLinkedSpaceId(), $transaction->getId());
             });
             
@@ -359,7 +359,7 @@ class Transaction extends AbstractService
         $query->setFilter($filter);
         $query->setOrderBys([$this->createEntityOrderBy('createdOn', EntityQueryOrderByType::DESC)]);
         $query->setNumberOfEntities(1);
-        $transactions = $this->callApi($this->apiClient, function() use ($spaceId, $query) {
+        $transactions = $this->callApi($this->apiClient, function () use ($spaceId, $query) {
             $this->transactionService->search($spaceId, $query);
         });
         if (is_array($transactions) && !empty($transactions)) {
@@ -382,7 +382,7 @@ class Transaction extends AbstractService
      */
     public function updateTransaction(Order $order, $transactionId, $spaceId, $confirm = false)
     {
-        return $this->callApi($this->apiClient, function() use ($order, $transactionId, $spaceId, $confirm) {
+        return $this->callApi($this->apiClient, function () use ($order, $transactionId, $spaceId, $confirm) {
             $transaction = $this->transactionService->read($spaceId, $transactionId);
             if ($transaction->getState() != \Wallee\Sdk\Model\TransactionState::PENDING) {
                 $newTransaction = $this->createTransaction($order);
@@ -418,7 +418,7 @@ class Transaction extends AbstractService
      */
     public function updateBasketTransaction($transactionId, $spaceId)
     {
-        return $this->callApi($this->apiClient, function() use ($transactionId, $spaceId) {
+        return $this->callApi($this->apiClient, function () use ($transactionId, $spaceId) {
             $transaction = $this->transactionService->read($spaceId, $transactionId);
             if ($transaction->getState() != \Wallee\Sdk\Model\TransactionState::PENDING) {
                 return $this->createBasketTransaction();

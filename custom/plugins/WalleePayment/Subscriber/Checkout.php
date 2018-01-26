@@ -124,6 +124,11 @@ class Checkout implements SubscriberInterface
                 }
             }
         }
+
+        $walleeErrors = $checkoutController->Request()->getParam('walleeErrors');
+        if (!empty($walleeErrors)) {
+            $view->assign('walleePaymentFailureMessage', $walleeErrors);
+        }
     }
 
     private function getUserFailureMessage()

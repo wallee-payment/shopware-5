@@ -101,14 +101,15 @@ abstract class AbstractService
     
     /**
      * In case a \Wallee\Sdk\Http\ConnectionException or a \Wallee\Sdk\VersioningException occurs, the {@code $callback} function is called again.
-     * 
+     *
      * @param \Wallee\Sdk\ApiClient $apiClient
      * @param function $callback
      * @throws \Wallee\Sdk\Http\ConnectionException
      * @throws \Wallee\Sdk\VersioningException
      * @return mixed
      */
-    protected function callApi(\Wallee\Sdk\ApiClient $apiClient, $callback) {
+    protected function callApi(\Wallee\Sdk\ApiClient $apiClient, $callback)
+    {
         $lastException = null;
         $apiClient->setConnectionTimeout(5);
         for ($i = 0; $i < 5; $i++) {

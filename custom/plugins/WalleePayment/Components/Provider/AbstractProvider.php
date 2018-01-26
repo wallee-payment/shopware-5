@@ -92,7 +92,7 @@ abstract class AbstractProvider
         if ($cachedData) {
             $this->data = $cachedData;
         } else {
-            $fetchedData = $this->callApi(function(){
+            $fetchedData = $this->callApi(function () {
                 return $this->fetchData();
             });
             $this->data = array();
@@ -104,7 +104,8 @@ abstract class AbstractProvider
         }
     }
     
-    private function callApi($callback) {
+    private function callApi($callback)
+    {
         $lastException = null;
         $this->apiClient->setConnectionTimeout(5);
         for ($i = 0; $i < 5; $i++) {

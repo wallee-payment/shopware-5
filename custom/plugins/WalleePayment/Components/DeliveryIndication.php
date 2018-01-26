@@ -62,7 +62,7 @@ class DeliveryIndication extends AbstractService
      */
     public function getDeliveryIndication(TransactionInfoModel $transactionInfo)
     {
-        return $this->callApi($this->deliveryIndicationService->getApiClient(), function() use ($transactionInfo) {
+        return $this->callApi($this->deliveryIndicationService->getApiClient(), function () use ($transactionInfo) {
             $query = new \Wallee\Sdk\Model\EntityQuery();
             $query->setFilter($this->createEntityFilter('transaction.id', $transactionInfo->getTransactionId()));
             $result = $this->deliveryIndicationService->search($transactionInfo->getSpaceId(), $query);

@@ -27,7 +27,8 @@ abstract class AbstractSubscriber implements SubscriberInterface
      * @throws \Wallee\Sdk\VersioningException
      * @return mixed
      */
-    protected function callApi(\Wallee\Sdk\ApiClient $apiClient, $callback) {
+    protected function callApi(\Wallee\Sdk\ApiClient $apiClient, $callback)
+    {
         $lastException = null;
         $apiClient->setConnectionTimeout(5);
         for ($i = 0; $i < 5; $i++) {
@@ -43,5 +44,4 @@ abstract class AbstractSubscriber implements SubscriberInterface
         }
         throw $lastException;
     }
-    
 }

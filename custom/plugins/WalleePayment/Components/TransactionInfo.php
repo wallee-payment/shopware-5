@@ -199,7 +199,7 @@ class TransactionInfo extends AbstractService
      */
     private function getChargeAttempt(\Wallee\Sdk\Model\Transaction $transaction)
     {
-        return $this->callApi($this->apiClient, function() use ($transaction) {
+        return $this->callApi($this->apiClient, function () use ($transaction) {
             $chargeAttemptService = new \Wallee\Sdk\Service\ChargeAttemptService($this->apiClient);
             $query = new \Wallee\Sdk\Model\EntityQuery();
             $filter = new \Wallee\Sdk\Model\EntityQueryFilter();
@@ -280,7 +280,8 @@ class TransactionInfo extends AbstractService
      * @param string $resolvedImageUrl
      * @return string
      */
-    private function getImagePath($resolvedImageUrl) {
+    private function getImagePath($resolvedImageUrl)
+    {
         $index = strpos($resolvedImageUrl, 'resource/');
         return substr($resolvedImageUrl, $index + strlen('resource/'));
     }
