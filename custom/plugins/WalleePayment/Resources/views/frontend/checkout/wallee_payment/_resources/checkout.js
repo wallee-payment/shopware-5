@@ -55,6 +55,7 @@ ShopwareWallee.Checkout = {
                         url: saveOrderUrl,
                         data: $('#confirm--form').serializeArray(),
                         dataType: 'json',
+                        method: 'POST',
                         success: $.proxy(function(response){
                         		if (response.result == 'success') {
                         			this.handler.submit();
