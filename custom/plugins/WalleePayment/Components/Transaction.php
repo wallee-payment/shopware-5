@@ -41,7 +41,7 @@ class Transaction extends AbstractService
      *
      * @var \Wallee\Sdk\Model\Transaction[]
      */
-    private static $transactionByBasketCache = array();
+    private static $transactionByBasketCache = null;
 
     /**
      *
@@ -53,7 +53,7 @@ class Transaction extends AbstractService
      *
      * @var \Wallee\Sdk\Model\PaymentMethodConfiguration[]
      */
-    private static $possiblePaymentMethodByBasketCache = array();
+    private static $possiblePaymentMethodByBasketCache = null;
 
     /**
      *
@@ -225,13 +225,11 @@ class Transaction extends AbstractService
     /**
      * Returns the payment methods that can be used with the given basket.
      *
-     * @param string $sessionId
      * @return \Wallee\Sdk\Model\PaymentMethodConfiguration[]
      */
     public function getPossiblePaymentMethodsByBasket()
     {
-        $sessionId = $this->sessionService->getSessionId();
-        if (! isset(self::$possiblePaymentMethodByBasketCache[$sessionId]) || self::$possiblePaymentMethodByBasketCache[$sessionId] == null) {
+        if (self::$possiblePaymentMethodByBasketCache == null) {
             $transaction = $this->getTransactionByBasket();
             $paymentMethods = $this->callApi($this->apiClient, function () use ($transaction) {
                 return $this->transactionService->fetchPossiblePaymentMethods($transaction->getLinkedSpaceId(), $transaction->getId());
@@ -241,10 +239,10 @@ class Transaction extends AbstractService
                 $this->paymentMethodConfigurationService->updateData($paymentMethod);
             }
             
-            self::$possiblePaymentMethodByBasketCache[$sessionId] = $paymentMethods;
+            self::$possiblePaymentMethodByBasketCache = $paymentMethods;
         }
         
-        return self::$possiblePaymentMethodByBasketCache[$sessionId];
+        return self::$possiblePaymentMethodByBasketCache;
     }
 
     /**
@@ -277,8 +275,7 @@ class Transaction extends AbstractService
      */
     public function getTransactionByBasket()
     {
-        $sessionId = $this->sessionService->getSessionId();
-        if (! isset(self::$transactionByBasketCache[$sessionId]) || self::$transactionByBasketCache[$sessionId] == null) {
+        if (self::$transactionByBasketCache == null) {
             $orderTransactionMapping = $this->getBasketTransactionMapping();
             if ($orderTransactionMapping instanceof OrderTransactionMapping) {
                 $this->updateBasketTransaction($orderTransactionMapping->getTransactionId(), $orderTransactionMapping->getSpaceId());
@@ -286,7 +283,7 @@ class Transaction extends AbstractService
                 $this->createBasketTransaction();
             }
         }
-        return self::$transactionByBasketCache[$sessionId];
+        return self::$transactionByBasketCache;
     }
 
     /**
@@ -338,7 +335,7 @@ class Transaction extends AbstractService
             $transaction = $this->transactionService->create($spaceId, $transaction);
             
             $this->updateOrCreateBasketTransactionMapping($transaction);
-            self::$transactionByBasketCache[$this->sessionService->getSessionId()] = $transaction;
+            self::$transactionByBasketCache = $transaction;
             return $transaction;
         }
     }
@@ -432,7 +429,7 @@ class Transaction extends AbstractService
             $updatedTransaction = $this->transactionService->update($spaceId, $pendingTransaction);
             
             $this->updateOrCreateBasketTransactionMapping($transaction);
-            self::$transactionByBasketCache[$this->sessionService->getSessionId()] = $transaction;
+            self::$transactionByBasketCache = $transaction;
             return $updatedTransaction;
         });
     }
@@ -648,9 +645,10 @@ class Transaction extends AbstractService
     
     private function updateOrCreateBasketTransactionMapping(\Wallee\Sdk\Model\Transaction $transaction)
     {
+        $sessionId = $this->sessionService->getSessionId();
         /* @var OrderTransactionMapping $orderTransactionMapping */
         $orderTransactionMappings = $this->modelManager->getRepository(OrderTransactionMapping::class)->findBy([
-            'temporaryId' => $this->sessionService->getSessionId()
+            'temporaryId' => $sessionId
         ]);
         foreach ($orderTransactionMappings as $mapping) {
             $this->modelManager->remove($mapping);
@@ -677,7 +675,7 @@ class Transaction extends AbstractService
             $orderTransactionMapping->setSpaceId($transaction->getLinkedSpaceId());
             $orderTransactionMapping->setTransactionId($transaction->getId());
         }
-        $orderTransactionMapping->setTemporaryId($this->sessionService->getSessionId());
+        $orderTransactionMapping->setTemporaryId($sessionId);
         $orderTransactionMapping->setShop($this->container->get('shop'));
         $this->modelManager->persist($orderTransactionMapping);
         $this->modelManager->flush($orderTransactionMapping);

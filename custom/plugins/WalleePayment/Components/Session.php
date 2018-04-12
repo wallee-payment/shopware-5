@@ -63,7 +63,7 @@ class Session
      */
     public function getSessionId()
     {
-        $sessionId = $this->container->get('session')->offsetGet('sessionId');
+        $sessionId = $this->container->get('Session')->get('sessionId');
         if (empty($sessionId)) {
             $sessionId = session_id();
         }

@@ -159,9 +159,14 @@ class LineItem extends AbstractService
             }
         }
         
-        if (isset($basketData['AmountNumeric']) && !empty($basketData['AmountNumeric'])
-            && isset($shippingcosts['brutto'])) {
-            $basketData['AmountNumeric'] += $shippingcosts['brutto'];
+        $basketTotalAmount = 0;
+        if (isset($basketData['AmountWithTaxNumeric']) && !empty($basketData['AmountWithTaxNumeric'])) {
+            $basketTotalAmount = $basketData['AmountWithTaxNumeric'];
+        } elseif (isset($basketData['AmountNumeric']) && !empty($basketData['AmountNumeric'])) {
+            $basketTotalAmount = $basketData['AmountNumeric'];
+        }
+        if ($basketTotalAmount > 0 && isset($shippingcosts['brutto'])) {
+            $basketTotalAmount += $shippingcosts['brutto'];
         }
         
         $index = 1;
@@ -237,8 +242,8 @@ class LineItem extends AbstractService
         }
         
         $lineItemTotalAmount = $this->getTotalAmountIncludingTax($lineItems);
-        if (abs($lineItemTotalAmount - $basketData['AmountNumeric']) > 0.0001) {
-            throw new \Exception('The line item total amount of ' . $lineItemTotalAmount . ' does not match the basket\'s invoice amount of ' . $basketData['AmountNumeric'] . '.');
+        if (abs($lineItemTotalAmount - $basketTotalAmount) > 0.0001) {
+            throw new \Exception('The line item total amount of ' . $lineItemTotalAmount . ' does not match the basket\'s invoice amount of ' . $basketData['AmountWithTaxNumeric'] . '.');
         }
         
         return $lineItems;
