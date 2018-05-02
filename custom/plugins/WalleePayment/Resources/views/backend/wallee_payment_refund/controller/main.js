@@ -1,12 +1,11 @@
 /**
- * Wallee Shopware
+ * wallee Shopware
  *
- * This Shopware extension enables to process payments with Wallee (https://wallee.com/).
+ * This Shopware extension enables to process payments with wallee (https://www.wallee.com/).
  *
  * @package Wallee_Payment
  * @author customweb GmbH (http://www.customweb.com/)
  * @license http://www.apache.org/licenses/LICENSE-2.0  Apache Software License (ASL 2.0)
- * @link https://github.com/wallee-payment/shopware
  */
 
 //{block name="backend/wallee_payment_refund/controller/main"}
@@ -28,7 +27,7 @@ Ext.define('Shopware.apps.WalleePaymentRefund.controller.Main', {
             successMessage: '{s name=refund/message/create_success}The refund has been successfully created.{/s}',
             failureMessage: '{s name=refund/message/create_failure}An error has occurred while creating the refund.{/s}'
         },
-        growlTitle: '{s name=growl_title}Wallee Payment{/s}'
+        growlTitle: '{s name=growl_title}wallee Payment{/s}'
     },
     
     mainWindow: null,

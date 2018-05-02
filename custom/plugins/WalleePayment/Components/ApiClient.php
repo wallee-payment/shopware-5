@@ -1,14 +1,13 @@
 <?php
 
 /**
- * Wallee Shopware
+ * wallee Shopware
  *
- * This Shopware extension enables to process payments with Wallee (https://wallee.com/).
+ * This Shopware extension enables to process payments with wallee (https://www.wallee.com/).
  *
  * @package Wallee_Payment
  * @author customweb GmbH (http://www.customweb.com/)
  * @license http://www.apache.org/licenses/LICENSE-2.0  Apache Software License (ASL 2.0)
- * @link https://github.com/wallee-payment/shopware
  */
 
 namespace WalleePayment\Components;
@@ -49,7 +48,7 @@ class ApiClient
     }
 
     /**
-     * Returns the instance of the Wallee API client.
+     * Returns the instance of the wallee API client.
      *
      * @throws \Exception
      * @return \Wallee\Sdk\ApiClient
@@ -64,7 +63,7 @@ class ApiClient
                 $this->instance = new \Wallee\Sdk\ApiClient($userId, $applicationKey);
                 $this->instance->setBasePath($this->baseGatewayUrl . '/api');
             } else {
-                throw new \Exception('The Wallee API user data are incomplete.');
+                throw new \Exception('The wallee API user data are incomplete.');
             }
         }
         return $this->instance;

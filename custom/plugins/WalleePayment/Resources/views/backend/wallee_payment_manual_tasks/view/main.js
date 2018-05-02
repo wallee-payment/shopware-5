@@ -1,12 +1,11 @@
 /**
- * Wallee Shopware
+ * wallee Shopware
  *
- * This Shopware extension enables to process payments with Wallee (https://wallee.com/).
+ * This Shopware extension enables to process payments with wallee (https://www.wallee.com/).
  *
  * @package Wallee_Payment
  * @author customweb GmbH (http://www.customweb.com/)
  * @license http://www.apache.org/licenses/LICENSE-2.0  Apache Software License (ASL 2.0)
- * @link https://github.com/wallee-payment/shopware
  */
 
 //{namespace name=backend/wallee_payment/main}
@@ -16,12 +15,12 @@ Ext.define('Shopware.apps.WalleePaymentManualTasksWidget.view.Main', {
 
     alias: 'widget.wallee-payment-manual-tasks',
     
-    title: '{s name=manual_task/window/title}Wallee Payment - Manual Tasks{/s}',
+    title: '{s name=manual_task/window/title}wallee Payment - Manual Tasks{/s}',
     
     minHeight: 0,
 
     snippets: {
-        button: '{s name=manual_task/info_button}View in Wallee{/s}',
+        button: '{s name=manual_task/info_button}View in wallee{/s}',
         dataLabel: '{s name=manual_task/text}Number of manual tasks that need your attention{/s}'
     },
 

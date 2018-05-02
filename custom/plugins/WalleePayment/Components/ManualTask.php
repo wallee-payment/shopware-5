@@ -1,14 +1,13 @@
 <?php
 
 /**
- * Wallee Shopware
+ * wallee Shopware
  *
- * This Shopware extension enables to process payments with Wallee (https://wallee.com/).
+ * This Shopware extension enables to process payments with wallee (https://www.wallee.com/).
  *
  * @package Wallee_Payment
  * @author customweb GmbH (http://www.customweb.com/)
  * @license http://www.apache.org/licenses/LICENSE-2.0  Apache Software License (ASL 2.0)
- * @link https://github.com/wallee-payment/shopware
  */
 
 namespace WalleePayment\Components;
@@ -105,7 +104,7 @@ class ManualTask extends AbstractService
 
                     $this->cache->save($numberOfManualTasks, $this->cacheKey);
                 } catch (\Exception $e) {
-                    // If the number of manual tasks cannot be fetched from Wallee, it is ignored as not critical.
+                    // If the number of manual tasks cannot be fetched from wallee, it is ignored as not critical.
                 }
                 $spaceIds[] = $spaceId;
             }

@@ -1,14 +1,13 @@
 <?php
 
 /**
- * Wallee Shopware
+ * wallee Shopware
  *
- * This Shopware extension enables to process payments with Wallee (https://wallee.com/).
+ * This Shopware extension enables to process payments with wallee (https://www.wallee.com/).
  *
  * @package Wallee_Payment
  * @author customweb GmbH (http://www.customweb.com/)
  * @license http://www.apache.org/licenses/LICENSE-2.0  Apache Software License (ASL 2.0)
- * @link https://github.com/wallee-payment/shopware
  */
 
 namespace WalleePayment\Components\ArrayBuilder;
@@ -81,7 +80,7 @@ class Refund extends AbstractArrayBuilder
      */
     private function getLabelBuilders()
     {
-        /* @var LabelDescriptorProvider $labelDescriptorProvider */
+        /** @var \WalleePayment\Components\Provider\LabelDescriptorProvider $labelDescriptorProvider */
         $labelDescriptorProvider = $this->container->get('wallee_payment.provider.label_descriptor');
 
         $labels = [];
@@ -90,7 +89,7 @@ class Refund extends AbstractArrayBuilder
                 $labels[] = new LabelArrayBuilder($this->container, $label->getDescriptor(), $label->getContentAsString());
             }
         } catch (\Exception $e) {
-            // If label descriptors and label descriptor groups cannot be loaded from Wallee, the labels cannot be displayed.
+            // If label descriptors and label descriptor groups cannot be loaded from wallee, the labels cannot be displayed.
         }
         return $labels;
     }
