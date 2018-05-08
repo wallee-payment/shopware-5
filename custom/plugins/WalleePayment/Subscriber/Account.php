@@ -19,6 +19,8 @@ use Shopware\Components\Plugin\ConfigReader;
 use WalleePayment\Models\OrderTransactionMapping;
 use WalleePayment\Models\TransactionInfo;
 use WalleePayment\Components\TransactionInfo as TransactionInfoService;
+use Wallee\Sdk\Model\Refund;
+use Wallee\Sdk\Model\RefundState;
 
 class Account implements SubscriberInterface
 {
@@ -102,8 +104,46 @@ class Account implements SubscriberInterface
         return [
             'id' => $transactionInfo->getId(),
             'canDownloadInvoice' => $transactionInfo->canDownloadInvoice() && $this->isDownloadInvoiceAllowed($transactionInfo),
-            'canDownloadPackingSlip' => $transactionInfo->canDownloadPackingSlip() && $this->isDownloadPackingSlipAllowed($transactionInfo)
+            'canDownloadPackingSlip' => $transactionInfo->canDownloadPackingSlip() && $this->isDownloadPackingSlipAllowed($transactionInfo),
+            'canDownloadRefunds' => $this->isDownloadRefundAllowed($transactionInfo),
+            'refunds' => $this->getRefundVariables($transactionInfo)
         ];
+    }
+    
+    /**
+     * 
+     * @param TransactionInfo $transactionInfo
+     * @return array
+     */
+    private function getRefundVariables(TransactionInfo $transactionInfo)
+    {
+        $variables = [];
+        foreach ($this->getRefunds($transactionInfo) as $refund) {
+            $variables[] = [
+                'id' => $refund->getId(),
+                'date' => $refund->getCreatedOn(),
+                'amount' => $refund->getAmount(),
+                'canDownload' => ($refund->getState() == RefundState::SUCCESSFUL || $refund->getState() == RefundState::FAILED) && $this->isDownloadRefundAllowed($transactionInfo)
+            ];
+        }
+        return $variables;
+    }
+    
+    /**
+     *
+     * @param TransactionInfo $transactionInfo
+     * @return Refund[]|array
+     */
+    private function getRefunds(TransactionInfo $transactionInfo)
+    {
+        try {
+            $refunds = $this->container->get('wallee_payment.refund')->getRefunds($transactionInfo->getSpaceId(), $transactionInfo->getTransactionId());
+            if (is_array($refunds)) {
+                return $refunds;
+            }
+        } catch (\Exception $e) {
+        }
+        return [];
     }
 
     /**
@@ -132,6 +172,20 @@ class Account implements SubscriberInterface
         }
         $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $transactionInfo->getOrder()->getShop());
         return (boolean) $pluginConfig['customerDownloadPackingSlip'];
+    }
+    
+    /**
+     *
+     * @param TransactionInfo $transactionInfo
+     * @return boolean
+     */
+    private function isDownloadRefundAllowed(TransactionInfo $transactionInfo)
+    {
+        if ($transactionInfo->getOrder() == null) {
+            return false;
+        }
+        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $transactionInfo->getOrder()->getShop());
+        return (boolean) $pluginConfig['customerDownloadRefund'];
     }
 
     /**

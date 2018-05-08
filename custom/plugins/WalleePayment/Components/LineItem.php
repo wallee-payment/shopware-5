@@ -498,7 +498,7 @@ class LineItem extends AbstractService
     private function cleanLineItem(\Wallee\Sdk\Model\LineItemCreate $lineItem)
     {
         $lineItem->setSku($this->fixLength($lineItem->getSku(), 200));
-        $lineItem->setName($this->fixLength($lineItem->getName(), 40));
+        $lineItem->setName($this->fixLength($lineItem->getName(), 150));
         return $lineItem;
     }
 }

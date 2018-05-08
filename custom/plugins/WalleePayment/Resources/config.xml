@@ -76,6 +76,12 @@
         	<label lang="en">Customer Download: Packing Slip</label>
         	<value>1</value>
         </element>
+        <element type="boolean" scope="shop">
+        	<name>customerDownloadRefund</name>
+        	<label lang="de">Kunden-Download: Gutschrift</label>
+        	<label lang="en">Customer Download: Refund</label>
+        	<value>1</value>
+        </element>
         <element type="select" scope="shop">
         	<name>orderStatusPending</name>
         	<label lang="de">Bestell-Status: Ausstehend</label>

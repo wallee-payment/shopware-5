@@ -122,6 +122,22 @@ class Shopware_Controllers_Frontend_WalleePaymentTransaction extends Frontend
         $document = $service->getPackingSlip($transactionInfo->getSpaceId(), $transactionInfo->getTransactionId());
         $this->download($document);
     }
+    
+    public function downloadRefundAction()
+    {
+        /* @var TransactionInfo $transactionInfo */
+        $transactionInfo = $this->getModelManager()
+        ->getRepository(TransactionInfo::class)
+        ->find($this->Request()->getParam('id'));
+        
+        if (!$this->isAllowed($transactionInfo)) {
+            return $this->redirect(['controller' => 'account', 'action' => 'orders']);
+        }
+        
+        $service = new \Wallee\Sdk\Service\RefundService($this->get('wallee_payment.api_client')->getInstance());
+        $document = $service->getRefundDocument($transactionInfo->getSpaceId(), $this->Request()->getParam('refund'));
+        $this->download($document);
+    }
 
     /**
      *

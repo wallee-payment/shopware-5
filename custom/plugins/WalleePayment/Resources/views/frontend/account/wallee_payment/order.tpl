@@ -27,5 +27,41 @@
 			</div>
 		</div>
 	{/if}
+	{if $offerPosition.walleeTransaction.refunds  && $offerPosition.walleeTransaction.canDownloadRefunds}
+		<div class="panel--tr is--odd">
+			<div class="panel--td column--name">
+				<p class="is--strong">{s name="account/header/refunds" namespace="frontend/wallee_payment/main"}Refunds{/s}</p>
+				{foreach $offerPosition.walleeTransaction.refunds as $refund}
+					<p>
+                        {$refund.date|date}
+					</p>
+				{/foreach}
+			</div>
+			<div class="panel--td column--price">
+				<p>&nbsp;</p>
+				{foreach $offerPosition.walleeTransaction.refunds as $refund}
+					<p>
+						{if $offerPosition.currency_position == "32"}
+                            {$offerPosition.currency_html} {$refund.amount}
+                        {else}
+                            {$refund.amount} {$offerPosition.currency_html}
+                        {/if}
+					</p>
+				{/foreach}
+			</div>
+			<div class="panel--td column--total">
+				<p>&nbsp;</p>
+				{foreach $offerPosition.walleeTransaction.refunds as $refund}
+					<p>
+						{if $refund.canDownload}
+                        	<a href="{url controller='WalleePaymentTransaction' action='downloadRefund' id=$offerPosition.walleeTransaction.id refund=$refund.id}" title="{s name="account/button/download" namespace="frontend/wallee_payment/main"}Download{/s}">
+								{s name="account/button/download" namespace="frontend/wallee_payment/main"}Download{/s}
+							</a>
+                        {/if}
+					</p>
+				{/foreach}
+			</div>
+		</div>
+	{/if}
 	{$smarty.block.parent}
 {/block}
