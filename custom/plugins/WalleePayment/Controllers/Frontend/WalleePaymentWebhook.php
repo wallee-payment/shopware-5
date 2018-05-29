@@ -27,19 +27,14 @@ class Shopware_Controllers_Frontend_WalleePaymentWebhook extends Frontend implem
     {
         parent::preDispatch();
 
-        $this->Front()->throwExceptions(true);
-
-        $this->Front()
-            ->Plugins()
-            ->Json()
-            ->setRenderer(true);
+        $this->Front()->Plugins()->ViewRenderer()->setNoRender();
     }
 
     public function handleAction()
     {
         $this->Response()->setHttpResponseCode(500);
         try {
-            $request = new WebhookRequest(json_decode($this->Request()->getRawBody()));
+            $request = $this->getWebhookRequest();
             $this->get('events')->notify('Wallee_Payment_Webhook_' . $request->getListenerEntityTechnicalName(), [
                 'request' => $request
             ]);
@@ -47,7 +42,21 @@ class Shopware_Controllers_Frontend_WalleePaymentWebhook extends Frontend implem
                 $this->Response()->setHttpResponseCode(200);
             }
         } catch (\WalleePayment\Components\Webhook\Exception $e) {
-            $this->Response()->setHttpResponseCode(500);
+            echo $e->getMessage();
+        } catch (\Exception $e) {
+            echo $e->getMessage();
         }
+    }
+    
+    private function getWebhookRequest() {
+        $data = $this->Request()->getRawBody();
+        if (empty($data)) {
+            throw new \Exception('Empty request data.');
+        }
+        $decodedData = json_decode($data);
+        if (json_last_error() != JSON_ERROR_NONE) {
+            throw new \Exception('Invalid request data.');
+        }
+        return new WebhookRequest($decodedData);
     }
 }
