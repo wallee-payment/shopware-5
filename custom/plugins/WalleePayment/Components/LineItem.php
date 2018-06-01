@@ -159,7 +159,7 @@ class LineItem extends AbstractService
         }
         
         $basketTotalAmount = 0;
-        if (isset($basketData['AmountWithTaxNumeric']) && !empty($basketData['AmountWithTaxNumeric'])) {
+        if (isset($basketData['AmountWithTaxNumeric']) && !empty($basketData['AmountWithTaxNumeric']) && !$this->isTaxFree()) {
             $basketTotalAmount = $basketData['AmountWithTaxNumeric'];
         } elseif (isset($basketData['AmountNumeric']) && !empty($basketData['AmountNumeric'])) {
             $basketTotalAmount = $basketData['AmountNumeric'];
@@ -242,7 +242,7 @@ class LineItem extends AbstractService
         
         $lineItemTotalAmount = $this->getTotalAmountIncludingTax($lineItems);
         if (abs($lineItemTotalAmount - $basketTotalAmount) > 0.0001) {
-            throw new \Exception('The line item total amount of ' . $lineItemTotalAmount . ' does not match the basket\'s invoice amount of ' . $basketData['AmountWithTaxNumeric'] . '.');
+            throw new \Exception('The line item total amount of ' . $lineItemTotalAmount . ' does not match the basket\'s invoice amount of ' . $basketTotalAmount . '.');
         }
         
         return $lineItems;
