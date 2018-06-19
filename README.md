@@ -10,7 +10,7 @@ This repository contains the Shopware plugin that enables to process payments wi
 
 ## Documentation
 
-* [Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware/1.0.19/docs/en/documentation.html))
+* [Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware/1.0.19/docs/en/documentation.html)
 
 ## License
 
