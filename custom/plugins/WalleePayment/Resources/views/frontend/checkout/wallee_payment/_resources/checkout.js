@@ -15,6 +15,7 @@ if (typeof ShopwareWallee == 'undefined') {
 ShopwareWallee.Checkout = {
     handler : null,
     checkoutButtonBackup: null,
+    blockSubmit: false,
 
     init : function(container, configurationId, saveOrderUrl) {
         this.checkoutButtonBackup = $('button[form="confirm--form"]').html();
@@ -32,7 +33,10 @@ ShopwareWallee.Checkout = {
     },
     
     onSubmit: function(){
-        this.handler.validate();
+        if (!this.blockSubmit) {
+        	this.blockSubmit = true;
+        	this.handler.validate();
+    	}
     },
 
     createHandler : function(container, configurationId, saveOrderUrl) {
@@ -65,13 +69,14 @@ ShopwareWallee.Checkout = {
                         error: function(){
                         		window.location.reload();
                         }
-                    })
+                    });
                 } else {
                     $(window).scrollTop($('#' + container).offset().top);
             		if (validationResult.errors) {
             			this.showErrors(validationResult.errors);
             		}
                     this.unblockCheckoutButton();
+                    this.blockSubmit = false;
                 }
             }, this), $.proxy(function() {
                 this.unblockCheckoutButton();
