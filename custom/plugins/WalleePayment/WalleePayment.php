@@ -99,7 +99,6 @@ class WalleePayment extends Plugin
         $widget = new Widget();
         $widget->setName('wallee-payment-manual-tasks');
         $widget->setPlugin($plugin);
-        $widget->setLabel('wallee Payment - Manual Tasks');
         $plugin->getWidgets()->add($widget);
     }
 

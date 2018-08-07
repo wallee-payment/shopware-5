@@ -5,14 +5,14 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 		<meta name="keywords" value="wallee, Shopware, Shopware Plugin, Payment, Payment Integration, Documentation"><meta name="description" value="The documentation for the Shopware plugin that enables processing payments with wallee.">		<link rel="canonical" href="https://plugin-documentation.wallee.com/wallee-payment/shopware/master/docs/en/documentation.html" />
-		<title>Shopware Documentation</title>
-		<link href="assets/base.css" rel="stylesheet" /> 
+		<title>wallee Shopware Documentation</title>
+		<link href="assets/base.css" rel="stylesheet" />
 	</head>
 	<body class="documentation">
 		<div class="layout-wrapper">
 							<div class="layout-title">
-					<h1>Shopware Documentation</h1>
-				</div>
+					<h1>wallee Shopware Documentation</h1>
+<h2>Documentation</h2>				</div>
 										<div class="layout-navigation">
 					<ul class="nav">
 	<li>
@@ -21,8 +21,8 @@
 		</a>
 	</li>
 	<li>
-		<a href="https://github.com/wallee-payment/shopware/tree/1.0.19/">
-			Download
+		<a href="https://github.com/wallee-payment/shopware/releases/tag/1.0.20/">
+			Source
 		</a>
 	</li>
 </ul>				</div>
@@ -37,21 +37,7 @@
 	</div>
 	<div class="chapter-body">
 					<div class="paragraph">
-<p>If you don&#8217;t already have one, create a <a href="https://www.wallee.com/">wallee</a> account and set up a space.</p>
-</div><div class="paragraph">
-<p>We recommend to use the wallee setup assistant for configuration. If you prefer to do the setup manually, follow these steps:</p>
-</div><div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Create an application user that is allowed to access the space you want to link the Shopware store to. Navigate to your wallee account &#8594; application user and create your application user. The user ID and the authentication key will be shown. Make sure to write this information down.</p>
-</li>
-<li>
-<p>Make sure that you grant the application user the necessary rights (Account Admin) in order for the Shopware plugin to be able to set up the necessary webhooks, payment methods etc.</p>
-</li>
-<li>
-<p>Set up at least one processor, one payment method and a connector configuration. More Information about the processor concept can be found in the <a href="https://app-wallee.com/doc/payment/processor-concept">wallee documentation</a>.</p>
-</li>
-</ol>
+<p>If you don&#8217;t already have one, create a <a href="https://www.wallee.com/">wallee</a> account.</p>
 </div>					</div>
 </div>	<div class="chapter" id="_installation">
 	<div class="chapter-title">
@@ -62,13 +48,13 @@
 					<div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Upload the plugin files to your store&#8217;s root directory using FTP/SSH.</p>
+<p>Upload the plugin files to your store&#8217;s root directory using FTP/SSH or you simply install the plugin directly from the Shopware plugin store.</p>
 </li>
 <li>
 <p>Login to the backend of your Shopware store.</p>
 </li>
 <li>
-<p>Open the Plugin Manager and install the wallee Payment plugin.</p>
+<p>Start the store&#8217;s Plugin Manager (Configuration &#8594; Plugin Manager) and open the part Installed. Click the plugin&#8217;s Install button to install it.</p>
 <div class="imageblock">
 <div class="content">
 <img src="resource/plugin-installation.png" alt="plugin installation"/>
@@ -76,7 +62,7 @@
 </div>
 </li>
 <li>
-<p>Activate the wallee Payment plugin.</p>
+<p>Activate the wallee Payment plugin from the Plugin Manager.</p>
 </li>
 <li>
 <p>Reload the page.</p>
@@ -103,10 +89,13 @@
 <p>Enter the wallee space ID and application user&#8217;s access information that you created before.</p>
 </li>
 <li>
-<p>Save the settings.</p>
+<p>Save the values by clicking on the Save button.</p>
 </li>
 <li>
 <p>Click on "Synchronize" to create the payment methods in the Shopware store and set up the necessary webhooks.</p>
+</li>
+<li>
+<p>Be aware that you link the payment methods to the shipping method, otherwise they can not be used in the checkout.</p>
 </li>
 </ol>
 </div>					</div>
@@ -129,14 +118,16 @@
 			<span class="title-number">5</span>FAQ					</h1>
 	</div>
 	<div class="chapter-body">
-							<div class="section" id="_the_payment_methods_are_not_showing_up">
+							<div class="section" id="_how_can_i_make_the_payment_methods_appear_in_the_checkout">
 	<div class="section-title">
 		<h2>
-			<span class="title-number">5.1</span>The payment methods are not showing up.					</h2>
+			<span class="title-number">5.1</span>How can I make the payment methods appear in the checkout?					</h2>
 	</div>
 	<div class="section-body">
 					<div class="paragraph">
 <p>Make sure that you synchronized the plugin&#8217;s settings by pressing the "Synchronize" button.</p>
+</div><div class="paragraph">
+<p>Check that the payment methods are linked to at least one shipping method.</p>
 </div><div class="paragraph">
 <p>If this does not solve the problem, it could be that you use a special fee or coupon module that we do not support. Try to disable this plugin and see if it helps.
 The payment methods are only displayed if the plugin&#8217;s total calculation matches the actual order total.</p>
@@ -158,7 +149,7 @@ The payment methods are only displayed if the plugin&#8217;s total calculation m
 	</div>
 	<div class="chapter-body">
 					<div class="paragraph">
-<p>If you have questions use the support form in your space.</p>
+<p>If you need help, feel free to contact our <a href="https://app-wallee.com/space/select?target=/support">support</a>.</p>
 </div>					</div>
 </div>																			</div>
 															</div>
@@ -194,9 +185,9 @@ The payment methods are only displayed if the plugin&#8217;s total calculation m
 			</a>
         	<ul  class="nav">
     		    			<li class="nav-level-2">
-	<a href="#_the_payment_methods_are_not_showing_up">
+	<a href="#_how_can_i_make_the_payment_methods_appear_in_the_checkout">
 		<span class="item-number">5.1</span>
-		<span class="item-title">The payment methods are not showing up.</span>
+		<span class="item-title">How can I make the payment methods appear in the checkout?</span>
 			</a>
     </li>    		    			<li class="nav-level-2">
 	<a href="#_how_can_i_change_the_look_and_feel_payment_method_name_emails_etc">
@@ -214,7 +205,7 @@ The payment methods are only displayed if the plugin&#8217;s total calculation m
 	</div>
 				</div>
 					</div>
-		
+
 		<script type="text/javascript" src="assets/jquery.js"></script>
 		<script type="text/javascript" src="assets/scrollspy.js"></script>
 		<script type="text/javascript" src="assets/sticky-kit.js"></script>
