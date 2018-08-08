@@ -191,9 +191,13 @@ class Transaction extends AbstractService
      */
     public function getJavaScriptUrl()
     {
-        $transaction = $this->getTransactionByBasket();
-        return $this->callApi($this->apiClient, function () use ($transaction) {
-            return $this->transactionService->buildJavaScriptUrl($transaction->getLinkedSpaceId(), $transaction->getId());
+        $orderTransactionMapping = $this->getBasketTransactionMapping();
+        if (!($orderTransactionMapping instanceof OrderTransactionMapping)) {
+            throw new \Exception('No order transaction mapping found to build javascript URL.');
+        }
+        
+        return $this->callApi($this->apiClient, function () use ($orderTransactionMapping) {
+            return $this->transactionService->buildJavaScriptUrl($orderTransactionMapping->getSpaceId(), $orderTransactionMapping->getTransactionId());
         });
     }
 
@@ -228,14 +232,23 @@ class Transaction extends AbstractService
      */
     public function getPossiblePaymentMethodsByBasket()
     {
+        /* @var \Enlight_Components_Session_Namespace $session */
+        $session = $this->container->get('session');
+        
         if (self::$possiblePaymentMethodByBasketCache == null) {
-            $transaction = $this->getTransactionByBasket();
-            $paymentMethods = $this->callApi($this->apiClient, function () use ($transaction) {
-                return $this->transactionService->fetchPossiblePaymentMethods($transaction->getLinkedSpaceId(), $transaction->getId());
-            });
-            
-            foreach ($paymentMethods as $paymentMethod) {
-                $this->paymentMethodConfigurationService->updateData($paymentMethod);
+            if (!$this->isBasketTransactionChanged() && isset($session['wallee_payment.possible_payment_methods']) && !empty($session['wallee_payment.possible_payment_methods'])) {
+                $paymentMethods = $session['wallee_payment.possible_payment_methods'];
+            } else {
+                $transaction = $this->getTransactionByBasket();
+                $paymentMethods = $this->callApi($this->apiClient, function () use ($transaction) {
+                    return $this->transactionService->fetchPossiblePaymentMethods($transaction->getLinkedSpaceId(), $transaction->getId());
+                });
+                
+                foreach ($paymentMethods as $paymentMethod) {
+                    $this->paymentMethodConfigurationService->updateData($paymentMethod);
+                }
+                
+                $session['wallee_payment.possible_payment_methods'] = $paymentMethods;
             }
             
             self::$possiblePaymentMethodByBasketCache = $paymentMethods;
@@ -425,12 +438,60 @@ class Transaction extends AbstractService
             $pendingTransaction->setVersion($transaction->getVersion());
             $this->assembleBasketTransactionData($pendingTransaction);
             
-            $updatedTransaction = $this->transactionService->update($spaceId, $pendingTransaction);
-            
-            $this->updateOrCreateBasketTransactionMapping($transaction);
-            self::$transactionByBasketCache = $transaction;
+            if ($this->isTransactionChanged($spaceId, $transactionId, $pendingTransaction)) {
+                $updatedTransaction = $this->transactionService->update($spaceId, $pendingTransaction);
+                $this->updateOrCreateBasketTransactionMapping($updatedTransaction);
+                $this->updateTransactionHash($spaceId, $transactionId, $pendingTransaction);
+                self::$transactionByBasketCache = $updatedTransaction;
+            } else {
+                self::$transactionByBasketCache = $transaction;
+            }
             return $updatedTransaction;
         });
+    }
+    
+    private function getTransactionHash() {
+        /* @var \Enlight_Components_Session_Namespace $session */
+        $session = $this->container->get('session');
+        if (isset($session['wallee_payment.basket_transaction_data']) && !empty($session['wallee_payment.basket_transaction_data'])) {
+            return $session['wallee_payment.basket_transaction_data'];
+        } else {
+            return null;
+        }
+    }
+    
+    private function updateTransactionHash($spaceId, $transactionId, \Wallee\Sdk\Model\AbstractTransactionPending $transaction) {
+        /* @var \Enlight_Components_Session_Namespace $session */
+        $session = $this->container->get('session');
+        $session['wallee_payment.basket_transaction_data'] = $this->generateTransactionHash($spaceId, $transactionId, $transaction);
+    }
+    
+    private function isBasketTransactionChanged() {
+        $orderTransactionMapping = $this->getBasketTransactionMapping();
+        if ($orderTransactionMapping instanceof OrderTransactionMapping) {
+            $transaction = new \Wallee\Sdk\Model\TransactionPending();
+            $transaction->setId((float) $orderTransactionMapping->getTransactionId());
+            $this->assembleBasketTransactionData($transaction);
+            return $this->isTransactionChanged($orderTransactionMapping->getSpaceId(), $orderTransactionMapping->getTransactionId(), $transaction);
+        } else {
+            return true;
+        }
+    }
+    
+    private function isTransactionChanged($spaceId, $transactionId, \Wallee\Sdk\Model\AbstractTransactionPending $transaction) {
+        $transactionHash = $this->getTransactionHash();
+        if ($transactionHash != null) {
+            return $this->generateTransactionHash($spaceId, $transactionId, $transaction) != $transactionHash;
+        } else {
+            return true;
+        }
+    }
+    
+    private function generateTransactionHash($spaceId, $transactionId, \Wallee\Sdk\Model\AbstractTransactionPending $transaction) {
+        $serializer = new \Wallee\Sdk\ObjectSerializer();
+        $sanitized = $serializer->sanitizeForSerialization($transaction);
+        unset($sanitized->version);
+        return $spaceId . '_' . $transactionId . '_' . \hash("sha256", \json_encode($sanitized));
     }
     
     /**
