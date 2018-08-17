@@ -200,6 +200,24 @@ class Transaction extends AbstractService
             return $this->transactionService->buildJavaScriptUrl($orderTransactionMapping->getSpaceId(), $orderTransactionMapping->getTransactionId());
         });
     }
+    
+    /**
+     * Returns the URL to wallee's payment page.
+     *
+     * @param Order $order
+     * @return string
+     */
+    public function getPaymentPageUrl()
+    {
+        $orderTransactionMapping = $this->getBasketTransactionMapping();
+        if (!($orderTransactionMapping instanceof OrderTransactionMapping)) {
+            throw new \Exception('No order transaction mapping found to build javascript URL.');
+        }
+        
+        return $this->callApi($this->apiClient, function () use ($orderTransactionMapping) {
+            return $this->transactionService->buildPaymentPageUrl($orderTransactionMapping->getSpaceId(), $orderTransactionMapping->getTransactionId());
+        });
+    }
 
     /**
      * Returns the payment methods that can be used with the given order.

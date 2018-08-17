@@ -15,7 +15,7 @@
 	<script type="text/javascript" src="{$walleePaymentJavascriptUrl}"></script>
 	<script type="text/javascript">
 	var ShopwareWalleeCheckoutInit = function(){
-		ShopwareWallee.Checkout.init('wallee_payment_method_form', '{$walleePaymentConfigurationId}', '{url controller='WalleePaymentCheckout' action='saveOrder'}');
+		ShopwareWallee.Checkout.init('wallee_payment_method_form', '{$walleePaymentConfigurationId}', '{url controller='WalleePaymentCheckout' action='saveOrder'}', '{$walleePaymentPageUrl}');
 	};
 	{if $theme.asyncJavascriptLoading}
 		if (typeof document.asyncReady == 'function') {

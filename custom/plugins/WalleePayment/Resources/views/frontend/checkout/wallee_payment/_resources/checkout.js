@@ -15,13 +15,19 @@ if (typeof ShopwareWallee == 'undefined') {
 ShopwareWallee.Checkout = {
     handler : null,
     checkoutButtonBackup: null,
+    paymentPageUrl: null,
+    saveOrderUrl: null,
     blockSubmit: false,
 
-    init : function(container, configurationId, saveOrderUrl) {
+    init : function(container, configurationId, saveOrderUrl, paymentPageUrl) {
+    	this.paymentPageUrl = paymentPageUrl + "&paymentMethodConfigurationId=" + configurationId;
+    	this.saveOrderUrl = saveOrderUrl;
         this.checkoutButtonBackup = $('button[form="confirm--form"]').html();
         
         this.attachListeners();
-        this.createHandler(container, configurationId, saveOrderUrl);
+        if (typeof window.IframeCheckoutHandler != "undefined") {
+        	this.createHandler(container, configurationId);
+        }
     },
     
     attachListeners: function(){
@@ -33,13 +39,19 @@ ShopwareWallee.Checkout = {
     },
     
     onSubmit: function(){
-        if (!this.blockSubmit) {
-        	this.blockSubmit = true;
-        	this.handler.validate();
+    	if (this.handler) {
+	        if (!this.blockSubmit) {
+	        	this.blockSubmit = true;
+	        	this.handler.validate();
+	    	}
+    	} else {
+    		this.createOrder(function(response){
+    			window.location.replace(this.paymentPageUrl);
+    		});
     	}
     },
 
-    createHandler : function(container, configurationId, saveOrderUrl) {
+    createHandler : function(container, configurationId) {
         this.blockCheckoutButton();
         if (!this.handler) {
             this.handler = window.IframeCheckoutHandler(configurationId);
@@ -54,21 +66,12 @@ ShopwareWallee.Checkout = {
             this.handler.create(container, $.proxy(function(validationResult) {
             		this.hideErrors();
                 if (validationResult.success) {
-                    $.ajax({
-                        url: saveOrderUrl,
-                        data: $('#confirm--form').serializeArray(),
-                        dataType: 'json',
-                        method: 'POST',
-                        success: $.proxy(function(response){
-                        		if (response.result == 'success') {
-                        			this.handler.submit();
-                        		} else {
-                        			window.location.reload();
-                        		}
-                        }, this),
-                        error: function(){
-                        		window.location.reload();
-                        }
+                	this.createOrder(function(response){
+                		if (response.result == 'success') {
+                			this.handler.submit();
+                		} else {
+                			window.location.reload();
+                		}
                     });
                 } else {
                     $(window).scrollTop($('#' + container).offset().top);
@@ -82,6 +85,19 @@ ShopwareWallee.Checkout = {
                 this.unblockCheckoutButton();
             }, this));
         }
+    },
+    
+    createOrder: function(onSuccess){
+    	$.ajax({
+            url: this.saveOrderUrl,
+            data: $('#confirm--form').serializeArray(),
+            dataType: 'json',
+            method: 'POST',
+            success: $.proxy(onSuccess, this),
+            error: function(){
+        		window.location.reload();
+            }
+        });
     },
     
     wrap: function(object, functionName, wrapper){

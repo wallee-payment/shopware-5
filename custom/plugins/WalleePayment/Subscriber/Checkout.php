@@ -114,6 +114,7 @@ class Checkout implements SubscriberInterface
                     $view->extendsTemplate('frontend/checkout/wallee_payment/confirm.tpl');
 
                     $view->assign('walleePaymentJavascriptUrl', $this->transactionService->getJavaScriptUrl());
+                    $view->assign('walleePaymentPageUrl', $this->transactionService->getPaymentPageUrl());
                     $view->assign('walleePaymentConfigurationId', $paymentMethodConfiguration->getConfigurationId());
 
                     $userFailureMessage = $this->getUserFailureMessage();

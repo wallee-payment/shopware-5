@@ -35,15 +35,15 @@
         </element>
         <element required="true" type="number">
             <name>applicationUserId</name>
-            <label lang="de">Applikationsbenutzer-Id</label>
-            <label lang="en">Application User Id</label>
+            <label lang="de">Benutzer-Id</label>
+            <label lang="en">User Id</label>
             <value></value>
             <description lang="en">The Application User needs to have full permissions in all spaces this shop is linked to.</description>
         </element>
         <element required="true" type="password">
             <name>applicationUserKey</name>
-            <label lang="de">Applikationsbenutzer-Schlüssel</label>
-            <label lang="en">Application User Secret Key</label>
+            <label lang="de">Authentication Key</label>
+            <label lang="en">Authentication Key</label>
             <value></value>
         </element>
         <element required="true" type="number" scope="shop">
