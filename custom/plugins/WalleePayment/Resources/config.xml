@@ -90,6 +90,20 @@
         	<store>Shopware.apps.Base.store.OrderStatus</store>
         </element>
         <element type="select" scope="shop">
+        	<name>orderStatusAuthorized</name>
+        	<label lang="de">Bestell-Status: Autorisiert</label>
+        	<label lang="en">Order Status: Authorized</label>
+        	<value>8</value>
+        	<store>Shopware.apps.Base.store.OrderStatus</store>
+        </element>
+        <element type="select" scope="shop">
+        	<name>orderStatusCompleted</name>
+        	<label lang="de">Bestell-Status: Verbucht</label>
+        	<label lang="en">Order Status: Completed</label>
+        	<value>8</value>
+        	<store>Shopware.apps.Base.store.OrderStatus</store>
+        </element>
+        <element type="select" scope="shop">
         	<name>orderStatusFulfill</name>
         	<label lang="de">Bestell-Status: Erfüllen</label>
         	<label lang="en">Order Status: Fulfill</label>

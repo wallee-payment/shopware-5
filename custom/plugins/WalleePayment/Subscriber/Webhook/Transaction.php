@@ -160,6 +160,7 @@ class Transaction extends AbstractOrderRelatedSubscriber
     private function authorize(Order $order, \Wallee\Sdk\Model\Transaction $transaction)
     {
         $order->setPaymentStatus($this->getStatus(Status::PAYMENT_STATE_RESERVED));
+        $order->setOrderStatus($this->getStatus($this->getAuthorizedOrderStatusId($order)));
         $this->modelManager->flush($order);
         $this->sendOrderEmail($order);
         $this->transactionInfoService->updateTransactionInfoByOrder($transaction, $order);
@@ -167,10 +168,11 @@ class Transaction extends AbstractOrderRelatedSubscriber
     
     private function complete(Order $order, \Wallee\Sdk\Model\Transaction $transaction)
     {
-        if ($order->getOrderStatus()->getId() == Status::PAYMENT_STATE_RESERVED) {
+        if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_RESERVED) {
             $order->setPaymentStatus($this->getStatus(Status::PAYMENT_STATE_COMPLETELY_INVOICED));
-            $this->modelManager->flush($order);
         }
+        $order->setOrderStatus($this->getStatus($this->getCompletedOrderStatusId($order)));
+        $this->modelManager->flush($order);
         $this->transactionInfoService->updateTransactionInfoByOrder($transaction, $order);
     }
 
@@ -198,6 +200,9 @@ class Transaction extends AbstractOrderRelatedSubscriber
 
     private function fulfill(Order $order, \Wallee\Sdk\Model\Transaction $transaction)
     {
+        if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_RESERVED) {
+            $order->setPaymentStatus($this->getStatus(Status::PAYMENT_STATE_COMPLETELY_INVOICED));
+        }
         $order->setOrderStatus($this->getStatus($this->getFulfillOrderStatusId($order)));
         $this->modelManager->flush($order);
         $this->sendOrderEmail($order);
@@ -217,6 +222,28 @@ class Transaction extends AbstractOrderRelatedSubscriber
         $status = $pluginConfig['orderStatusCancelled'];
         if ($status === null || $status === '' || !is_numeric($status)) {
             return Status::ORDER_STATE_CANCELLED_REJECTED;
+        } else {
+            return (int)$status;
+        }
+    }
+    
+    private function getAuthorizedOrderStatusId(Order $order)
+    {
+        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
+        $status = $pluginConfig['orderStatusAuthorized'];
+        if ($status === null || $status === '' || !is_numeric($status)) {
+            return Status::ORDER_STATE_CLARIFICATION_REQUIRED;
+        } else {
+            return (int)$status;
+        }
+    }
+    
+    private function getCompletedOrderStatusId(Order $order)
+    {
+        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
+        $status = $pluginConfig['orderStatusCompleted'];
+        if ($status === null || $status === '' || !is_numeric($status)) {
+            return Status::ORDER_STATE_CLARIFICATION_REQUIRED;
         } else {
             return (int)$status;
         }
