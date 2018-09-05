@@ -23,6 +23,7 @@ use WalleePayment\Models\OrderTransactionMapping;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use WalleePayment\Components\Registry;
 use Shopware\Components\Plugin\ConfigReader;
+use Psr\Log\LoggerInterface;
 
 class Transaction extends AbstractOrderRelatedSubscriber
 {
@@ -62,6 +63,11 @@ class Transaction extends AbstractOrderRelatedSubscriber
      * @var Registry
      */
     private $registry;
+    
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     /**
      *
@@ -71,8 +77,9 @@ class Transaction extends AbstractOrderRelatedSubscriber
      * @param TransactionService $transactionService
      * @param TransactionInfoService $transactionInfoService
      * @param Registry $registry
+     * @param LoggerInterface $logger
      */
-    public function __construct(ContainerInterface $container, ConfigReader $configReader, ModelManager $modelManager, TransactionService $transactionService, TransactionInfoService $transactionInfoService, Registry $registry)
+    public function __construct(ContainerInterface $container, ConfigReader $configReader, ModelManager $modelManager, TransactionService $transactionService, TransactionInfoService $transactionInfoService, Registry $registry, LoggerInterface $logger)
     {
         parent::__construct($modelManager);
         $this->container = $container;
@@ -80,6 +87,7 @@ class Transaction extends AbstractOrderRelatedSubscriber
         $this->transactionService = $transactionService;
         $this->transactionInfoService = $transactionInfoService;
         $this->registry = $registry;
+        $this->logger = $logger;
     }
 
     /**
@@ -280,6 +288,7 @@ class Transaction extends AbstractOrderRelatedSubscriber
                 $orderModule->sendMail($orderEmailData[0]['orderEmailVariables']['variables']);
                 $this->registry->remove('force_order_email');
             } catch (\Exception $e) {
+                $this->logger->critical($e);
             }
             $orderModule->sUserData = $sUserDataBackup;
         }

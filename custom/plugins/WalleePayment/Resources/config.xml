@@ -39,6 +39,7 @@
             <label lang="en">User Id</label>
             <value></value>
             <description lang="en">The Application User needs to have full permissions in all spaces this shop is linked to.</description>
+            <description lang="de">Der Applikationsbenutzer benötigt volle Zugriffsrechte auf alle Spaces, mit denen dieser Shop verlinkt ist.</description>
         </element>
         <element required="true" type="password">
             <name>applicationUserKey</name>
@@ -50,12 +51,6 @@
             <name>spaceId</name>
             <label lang="de">Space Id</label>
             <label lang="en">Space Id</label>
-            <value></value>
-        </element>
-        <element required="false" type="number" scope="shop">
-            <name>spaceViewId</name>
-            <label lang="de">Space View Id</label>
-            <label lang="en">Space View Id</label>
             <value></value>
         </element>
         <element type="boolean" scope="shop">
@@ -118,10 +113,18 @@
         	<store>Shopware.apps.Base.store.OrderStatus</store>
         </element>
         <element type="boolean" scope="shop">
-		<name>orderRemoveFailed</name>
-		<label lang="de">Fehlgeschlagene Bestellungen löschen</label>
-		<label lang="en">Delete failed orders</label>
-		<value>0</value>
+			<name>orderRemoveFailed</name>
+			<label lang="de">Fehlgeschlagene Bestellungen löschen</label>
+			<label lang="en">Delete failed orders</label>
+			<value>0</value>
+        </element>
+        <element required="false" type="number" scope="shop">
+            <name>spaceViewId</name>
+            <label lang="de">Space View Id</label>
+            <label lang="en">Space View Id</label>
+            <value></value>
+            <description lang="en">The Space View Id allows to control the styling of the payment form and the payment page. It allows in multistore setups to adapt the payment form to different styling per substore without requiring a dedicated space.</description>
+            <description lang="de">Mit der Space View-ID können Sie das Styling des Zahlungsformulars und der Bezahlseite steuern. In Multistore-Setups erlaubt dies das Anpassen des Bezahlformulars an die verschiedenen Styles der Substores, ohne mehrere Spaces erstellen zu müssen.</description>
         </element>
     </elements>
 </config>

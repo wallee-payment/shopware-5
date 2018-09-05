@@ -22,6 +22,7 @@ use Shopware\Models\Plugin\Plugin;
 use WalleePayment\Models\PaymentMethodConfiguration as PaymentMethodConfigurationModel;
 use Shopware\Components\Plugin\ConfigReader;
 use WalleePayment\Components\Registry;
+use Psr\Log\LoggerInterface;
 
 class RiskManagement implements SubscriberInterface
 {
@@ -61,6 +62,11 @@ class RiskManagement implements SubscriberInterface
      */
     private $registry;
     
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+    
     public static function getSubscribedEvents()
     {
         return [
@@ -78,8 +84,9 @@ class RiskManagement implements SubscriberInterface
      * @param TransactionService $transactionService
      * @param SessionService $sessionService
      * @param Registry $registry
+     * @param LoggerInterface $logger
      */
-    public function __construct(ContainerInterface $container, ModelManager $modelManager, ConfigReader $configReader, TransactionService $transactionService, SessionService $sessionService, Registry $registry)
+    public function __construct(ContainerInterface $container, ModelManager $modelManager, ConfigReader $configReader, TransactionService $transactionService, SessionService $sessionService, Registry $registry, LoggerInterface $logger)
     {
         $this->container = $container;
         $this->modelManager = $modelManager;
@@ -87,6 +94,7 @@ class RiskManagement implements SubscriberInterface
         $this->transactionService = $transactionService;
         $this->sessionService = $sessionService;
         $this->registry = $registry;
+        $this->logger = $logger;
     }
     
     public function onDataFilter(\Enlight_Event_EventArgs $args)
@@ -107,6 +115,7 @@ class RiskManagement implements SubscriberInterface
             try {
                 $possiblePaymentMethods = $this->transactionService->getPossiblePaymentMethodsByBasket();
             } catch (\Exception $e) {
+                $this->logger->critical($e);
             }
             $this->registry->set('disable_risk_management', false);
                     
@@ -201,6 +210,7 @@ class RiskManagement implements SubscriberInterface
                     }
                 }
             } catch (\Exception $e) {
+                $this->logger->critical($e);
             }
         }
         return false;
