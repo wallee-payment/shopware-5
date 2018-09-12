@@ -13,19 +13,9 @@
 use WalleePayment\Components\Webhook\Request as WebhookRequest;
 use Shopware\Components\CSRFWhitelistAware;
 use WalleePayment\Components\Controller\Frontend;
-use Psr\Log\LoggerInterface;
 
 class Shopware_Controllers_Frontend_WalleePaymentWebhook extends Frontend implements CSRFWhitelistAware
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-    
-    public function __construct(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-    }
     
     public function getWhitelistedCSRFActions()
     {
@@ -53,10 +43,10 @@ class Shopware_Controllers_Frontend_WalleePaymentWebhook extends Frontend implem
                 $this->Response()->setHttpResponseCode(200);
             }
         } catch (\WalleePayment\Components\Webhook\Exception $e) {
-            $this->logger->critical($e);
+            $this->get('corelogger')->critical($e);
             echo $e->getMessage();
         } catch (\Exception $e) {
-            $this->logger->critical($e);
+            $this->get('corelogger')->critical($e);
             echo $e->getMessage();
         }
     }

@@ -63,6 +63,12 @@ ShopwareWallee.Checkout = {
             			});
                 }
             });
+            this.handler.setEnableSubmitCallback($.proxy(function(){
+            	this.enableCheckoutButton();
+            }, this));
+            this.handler.setDisableSubmitCallback($.proxy(function(){
+            	this.disableCheckoutButton();
+            }, this));
             this.handler.create(container, $.proxy(function(validationResult) {
             		this.hideErrors();
                 if (validationResult.success) {
@@ -122,6 +128,16 @@ ShopwareWallee.Checkout = {
     hideErrors: function(){
     		var element = $('.wallee-payment-validation-failure-message');
     		element.hide();
+    },
+    
+    enableCheckoutButton: function(){
+    	var element = $('button[form="confirm--form"]');
+    	element.removeAttr('disabled');
+    },
+    
+    disableCheckoutButton: function(){
+    	var element = $('button[form="confirm--form"]');
+    	element.prop('disabled', true);
     },
     
     blockCheckoutButton: function(){

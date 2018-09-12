@@ -201,6 +201,7 @@
 	        	<argument type="service" id="wallee_payment.transaction" />
 	        	<argument type="service" id="wallee_payment.session" />
 	        	<argument type="service" id="wallee_payment.registry" />
+	        	<argument type="service" id="corelogger" />
 	        	<tag name="shopware.event_subscriber" />
         </service>
         
@@ -224,6 +225,7 @@
             <argument type="service" id="wallee_payment.transaction" />
             <argument type="service" id="wallee_payment.transaction_info" />
             <argument type="service" id="wallee_payment.registry" />
+            <argument type="service" id="corelogger"/>
             <tag name="shopware.event_subscriber" />
         </service>
         
