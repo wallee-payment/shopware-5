@@ -21,7 +21,7 @@
 		</a>
 	</li>
 	<li>
-		<a href="https://github.com/wallee-payment/shopware/releases/tag/1.0.25/">
+		<a href="https://github.com/wallee-payment/shopware/releases/tag/1.0.26/">
 			Source
 		</a>
 	</li>
@@ -97,7 +97,7 @@
 <div class="title">Note</div>
 </td>
 <td class="content">
-Payment methods will only be available in your store once you assign them to shipping method(s).  see <a href="#_payment_method_configuration">Payment method configuration</a>
+Payment methods will only be available in your store once you assign them to shipping method(s).  See <a href="#_payment_method_configuration">Payment method configuration</a>
 </td>
 </tr>
 </table>
@@ -224,6 +224,14 @@ When the completion is pending in wallee the order will stay in pending state.
 <div class="content">
 <img src="resource/capture-transaction.png" alt="capture transaction"/>
 </div>
+</div><div class="paragraph">
+<p><strong>Deferred payment completion</strong></p>
+</div><div class="paragraph">
+<p>Retailers often have the case that they want to authorize transactions only and start the fulfillment process once all items are shippable. This is also possible with wallee.</p>
+</div><div class="paragraph">
+<p>However, certain processes should be followed. If you have configured payment completion to be deferred you should capture the transaction before you initiate the shipment
+as it can always happen that a completion fails. If you want to be sure that you do not ship items for which you have not been paid you should postpone the shipment until
+the fulfill state is reached. Initially the transaction will be in the <code>Authorized</code> state in wallee and <code>Clarification required</code> in Shopware. If you want to start the fulfillment process make sure you initiate the completion process as described above. Once the completion was successful the order will switch into the <code>Fulfill</code> state in wallee and into <code>Processing</code> state in Shopware. You can now start the fulfillment process.</p>
 </div>					</div>
 </div>					<div class="section" id="_void_a_transaction">
 	<div class="section-title">
