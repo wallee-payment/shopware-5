@@ -45,9 +45,9 @@ ShopwareWallee.Checkout = {
 	        	this.handler.validate();
 	    	}
     	} else {
-    		this.createOrder(function(response){
+    		this.createOrder($.proxy(function(){
     			window.location.replace(this.paymentPageUrl);
-    		});
+    		}, this), function(){});
     	}
     },
 
@@ -72,13 +72,12 @@ ShopwareWallee.Checkout = {
             this.handler.create(container, $.proxy(function(validationResult) {
             		this.hideErrors();
                 if (validationResult.success) {
-                	this.createOrder(function(response){
-                		if (response.result == 'success') {
-                			this.handler.submit();
-                		} else {
-                			window.location.reload();
-                		}
-                    });
+                	this.createOrder($.proxy(function(){
+                		this.handler.submit();
+                    }, this), $.proxy(function(){
+                    	this.unblockCheckoutButton();
+                        this.blockSubmit = false;
+                    }, this));
                 } else {
                     $(window).scrollTop($('#' + container).offset().top);
             		if (validationResult.errors) {
@@ -93,13 +92,29 @@ ShopwareWallee.Checkout = {
         }
     },
     
-    createOrder: function(onSuccess){
+    createOrder: function(onSuccess, onError){
     	$.ajax({
             url: this.saveOrderUrl,
             data: $('#confirm--form').serializeArray(),
             dataType: 'json',
             method: 'POST',
-            success: $.proxy(onSuccess, this),
+            success: $.proxy(function(response){
+            	if (response.result == 'success') {
+            		onSuccess();
+            	} else if (response.result == 'error') {
+        			if (response.error == 'agbError') {
+        				$('label[for="sAGB"]').addClass('has--error');
+        				$(window).scrollTop($('label[for="sAGB"]').offset().top);
+        				onError();
+        			} else {
+            			$(window).scrollTop($('#' + container).offset().top);
+            			this.showErrors([response.error]);
+            			onError();
+        			}
+        		} else {
+        			window.location.reload();
+        		}
+            }, this),
             error: function(){
         		window.location.reload();
             }
