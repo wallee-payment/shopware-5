@@ -275,6 +275,14 @@ class Transaction extends AbstractOrderRelatedSubscriber
 
     private function sendOrderEmail(Order $order)
     {
+        /**
+         * @var \Shopware\Models\Shop\Shop $shopBackup
+         */
+        $shopBackup = $this->container->get('shop');
+        
+        $shop = $order->getLanguageSubShop();
+        $shop->registerResources();
+        
         $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
         $sendOrderEmail = $pluginConfig['orderEmail'];
         $orderEmailData = $this->modelManager->getRepository(OrderTransactionMapping::class)->createNamedQuery('getOrderEmailData')->setParameter('orderId', $order->getId())->getResult();
@@ -292,5 +300,7 @@ class Transaction extends AbstractOrderRelatedSubscriber
             }
             $orderModule->sUserData = $sUserDataBackup;
         }
+        
+        $shopBackup->registerResources();
     }
 }
