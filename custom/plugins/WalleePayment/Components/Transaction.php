@@ -265,6 +265,7 @@ class Transaction extends AbstractService
                     });
                 } catch (ApiException $e) {
                     self::$possiblePaymentMethodByBasketCache = [];
+                    throw $e;
                 }
                 
                 foreach ($paymentMethods as $paymentMethod) {
