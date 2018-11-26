@@ -384,11 +384,13 @@ class Transaction extends AbstractService
         $query = new EntityQuery();
         $filter = new EntityQueryFilter();
         $filter->setType(EntityQueryFilterType::_AND);
-        $filter->setChildren(array(
-            $this->createEntityFilter('state', TransactionState::PENDING),
-            $this->createEntityFilter('customerId', $customer->getId()),
-            $this->createEntityFilter('customerEmailAddress', $customer->getEmail())
-        ));
+        $children = [];
+        $children[] = $this->createEntityFilter('state', TransactionState::PENDING);
+        $children[] = $this->createEntityFilter('customerEmailAddress', $customer->getEmail());
+        if ($customer->getAccountMode() == Customer::ACCOUNT_MODE_CUSTOMER) {
+            $children[] = $this->createEntityFilter('customerId', $customer->getId());
+        }
+        $filter->setChildren($children);
         $query->setFilter($filter);
         $query->setOrderBys([$this->createEntityOrderBy('createdOn', EntityQueryOrderByType::DESC)]);
         $query->setNumberOfEntities(1);
@@ -534,8 +536,10 @@ class Transaction extends AbstractService
         $transaction->setShippingAddress($this->getShippingAddress($order->getCustomer()));
         $transaction->setCustomerEmailAddress($order->getCustomer()
             ->getEmail());
-        $transaction->setCustomerId($order->getCustomer()
-            ->getId());
+        if ($order->getCustomer()->getAccountMode() == Customer::ACCOUNT_MODE_CUSTOMER) {
+            $transaction->setCustomerId($order->getCustomer()
+                ->getId());
+        }
         $transaction->setLanguage($order->getLanguageSubShop()
             ->getLocale()
             ->getLocale());
@@ -579,8 +583,9 @@ class Transaction extends AbstractService
         $transaction->setShippingAddress($this->getShippingAddress($customer));
         $transaction->setCustomerEmailAddress($customer
             ->getEmail());
-        $transaction->setCustomerId($customer
-            ->getId());
+        if ($customer->getAccountMode() == Customer::ACCOUNT_MODE_CUSTOMER) {
+            $transaction->setCustomerId($customer->getId());
+        }
         $transaction->setLanguage($shop->getLocale()->getLocale());
         
         $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $shop);
