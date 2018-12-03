@@ -16,6 +16,7 @@ use WalleePayment\Components\Webhook\Request as WebhookRequest;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Order;
 use WalleePayment\Models\OrderTransactionMapping;
+use Doctrine\DBAL\LockMode;
 
 abstract class AbstractOrderRelatedSubscriber extends AbstractSubscriber
 {
@@ -56,10 +57,7 @@ abstract class AbstractOrderRelatedSubscriber extends AbstractSubscriber
                 if (! ($orderTransactionMapping instanceof OrderTransactionMapping) || $orderTransactionMapping->getTransactionId() != $this->getTransactionId($entity)) {
                     return;
                 }
-                $this->modelManager->getRepository(OrderTransactionMapping::class)->createNamedQuery('lock')->setParameter('orderId', $order->getId())->execute();
-
-                $order = $this->modelManager->getRepository(Order::class)->find($order->getId());
-
+                $order = $this->modelManager->getRepository(Order::class)->find($order->getId(), LockMode::PESSIMISTIC_WRITE);
                 $this->handleOrderRelatedInner($order, $entity);
             }
 
