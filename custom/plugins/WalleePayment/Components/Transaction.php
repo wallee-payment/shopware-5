@@ -696,77 +696,91 @@ class Transaction extends AbstractService
     
     private function updateOrCreateTransactionMapping(\Wallee\Sdk\Model\Transaction $transaction, Order $order)
     {
-        if ($order->getTemporaryId() != null) {
+        $this->modelManager->beginTransaction();
+        try {
+            if ($order->getTemporaryId() != null) {
+                /* @var OrderTransactionMapping $orderTransactionMapping */
+                $orderTransactionMappings = $this->modelManager->getRepository(OrderTransactionMapping::class)->findBy([
+                    'temporaryId' => $order->getTemporaryId()
+                ]);
+                foreach ($orderTransactionMappings as $mapping) {
+                    $this->modelManager->remove($mapping);
+                }
+                $this->modelManager->flush();
+            }
+            
             /* @var OrderTransactionMapping $orderTransactionMapping */
             $orderTransactionMappings = $this->modelManager->getRepository(OrderTransactionMapping::class)->findBy([
-                'temporaryId' => $order->getTemporaryId()
+                'transactionId' => $transaction->getId(),
+                'spaceId' => $transaction->getLinkedSpaceId()
+            ]);
+            if (count($orderTransactionMappings) > 1) {
+                foreach ($orderTransactionMappings as $mapping) {
+                    $this->modelManager->remove($mapping);
+                }
+                $this->modelManager->flush();
+                $orderTransactionMapping = null;
+            } else {
+                $orderTransactionMapping = current($orderTransactionMappings);
+            }
+            
+            if (!($orderTransactionMapping instanceof OrderTransactionMapping)) {
+                $orderTransactionMapping = new OrderTransactionMapping();
+                $orderTransactionMapping->setSpaceId($transaction->getLinkedSpaceId());
+                $orderTransactionMapping->setTransactionId($transaction->getId());
+            }
+            $orderTransactionMapping->setOrder($order);
+            $this->modelManager->persist($orderTransactionMapping);
+            $this->modelManager->flush($orderTransactionMapping);
+            $this->modelManager->commit();
+        } catch (\Exception $e) {
+            $this->modelManager->rollback();
+            throw $e;
+        }
+    }
+    
+    private function updateOrCreateBasketTransactionMapping(\Wallee\Sdk\Model\Transaction $transaction)
+    {
+        $this->modelManager->beginTransaction();
+        try {
+            $sessionId = $this->sessionService->getSessionId();
+            /* @var OrderTransactionMapping $orderTransactionMapping */
+            $orderTransactionMappings = $this->modelManager->getRepository(OrderTransactionMapping::class)->findBy([
+                'temporaryId' => $sessionId
             ]);
             foreach ($orderTransactionMappings as $mapping) {
                 $this->modelManager->remove($mapping);
             }
             $this->modelManager->flush();
-        }
-        
-        /* @var OrderTransactionMapping $orderTransactionMapping */
-        $orderTransactionMappings = $this->modelManager->getRepository(OrderTransactionMapping::class)->findBy([
-            'transactionId' => $transaction->getId(),
-            'spaceId' => $transaction->getLinkedSpaceId()
-        ]);
-        if (count($orderTransactionMappings) > 1) {
-            foreach ($orderTransactionMappings as $mapping) {
-                $this->modelManager->remove($mapping);
+            
+            /* @var OrderTransactionMapping $orderTransactionMapping */
+            $orderTransactionMappings = $this->modelManager->getRepository(OrderTransactionMapping::class)->findBy([
+                'transactionId' => $transaction->getId(),
+                'spaceId' => $transaction->getLinkedSpaceId()
+            ]);
+            if (count($orderTransactionMappings) > 1) {
+                foreach ($orderTransactionMappings as $mapping) {
+                    $this->modelManager->remove($mapping);
+                }
+                $this->modelManager->flush();
+                $orderTransactionMapping = null;
+            } else {
+                $orderTransactionMapping = current($orderTransactionMappings);
             }
-            $this->modelManager->flush();
-            $orderTransactionMapping = null;
-        } else {
-            $orderTransactionMapping = current($orderTransactionMappings);
-        }
-        
-        if (!($orderTransactionMapping instanceof OrderTransactionMapping)) {
-            $orderTransactionMapping = new OrderTransactionMapping();
-            $orderTransactionMapping->setSpaceId($transaction->getLinkedSpaceId());
-            $orderTransactionMapping->setTransactionId($transaction->getId());
-        }
-        $orderTransactionMapping->setOrder($order);
-        $this->modelManager->persist($orderTransactionMapping);
-        $this->modelManager->flush($orderTransactionMapping);
-    }
-    
-    private function updateOrCreateBasketTransactionMapping(\Wallee\Sdk\Model\Transaction $transaction)
-    {
-        $sessionId = $this->sessionService->getSessionId();
-        /* @var OrderTransactionMapping $orderTransactionMapping */
-        $orderTransactionMappings = $this->modelManager->getRepository(OrderTransactionMapping::class)->findBy([
-            'temporaryId' => $sessionId
-        ]);
-        foreach ($orderTransactionMappings as $mapping) {
-            $this->modelManager->remove($mapping);
-        }
-        $this->modelManager->flush();
-        
-        /* @var OrderTransactionMapping $orderTransactionMapping */
-        $orderTransactionMappings = $this->modelManager->getRepository(OrderTransactionMapping::class)->findBy([
-            'transactionId' => $transaction->getId(),
-            'spaceId' => $transaction->getLinkedSpaceId()
-        ]);
-        if (count($orderTransactionMappings) > 1) {
-            foreach ($orderTransactionMappings as $mapping) {
-                $this->modelManager->remove($mapping);
+            
+            if (!($orderTransactionMapping instanceof OrderTransactionMapping)) {
+                $orderTransactionMapping = new OrderTransactionMapping();
+                $orderTransactionMapping->setSpaceId($transaction->getLinkedSpaceId());
+                $orderTransactionMapping->setTransactionId($transaction->getId());
             }
-            $this->modelManager->flush();
-            $orderTransactionMapping = null;
-        } else {
-            $orderTransactionMapping = current($orderTransactionMappings);
+            $orderTransactionMapping->setTemporaryId($sessionId);
+            $orderTransactionMapping->setShop($this->container->get('shop'));
+            $this->modelManager->persist($orderTransactionMapping);
+            $this->modelManager->flush($orderTransactionMapping);
+            $this->modelManager->commit();
+        } catch (\Exception $e) {
+            $this->modelManager->rollback();
+            throw $e;
         }
-        
-        if (!($orderTransactionMapping instanceof OrderTransactionMapping)) {
-            $orderTransactionMapping = new OrderTransactionMapping();
-            $orderTransactionMapping->setSpaceId($transaction->getLinkedSpaceId());
-            $orderTransactionMapping->setTransactionId($transaction->getId());
-        }
-        $orderTransactionMapping->setTemporaryId($sessionId);
-        $orderTransactionMapping->setShop($this->container->get('shop'));
-        $this->modelManager->persist($orderTransactionMapping);
-        $this->modelManager->flush($orderTransactionMapping);
     }
 }
