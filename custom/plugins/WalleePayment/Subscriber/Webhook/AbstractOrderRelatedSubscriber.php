@@ -17,6 +17,7 @@ use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Order;
 use WalleePayment\Models\OrderTransactionMapping;
 use Doctrine\DBAL\LockMode;
+use Doctrine\DBAL\Connection;
 
 abstract class AbstractOrderRelatedSubscriber extends AbstractSubscriber
 {
@@ -43,7 +44,7 @@ abstract class AbstractOrderRelatedSubscriber extends AbstractSubscriber
 
     public function process($entity)
     {
-        $this->modelManager->beginTransaction();
+        $this->beginTransaction();
         try {
             /* @var Order $order */
             $order = $this->modelManager->getRepository(Order::class)->findOneBy([
@@ -66,6 +67,12 @@ abstract class AbstractOrderRelatedSubscriber extends AbstractSubscriber
             $this->modelManager->rollback();
             throw $e;
         }
+    }
+    
+    protected function beginTransaction()
+    {
+        $this->modelManager->getConnection()->setTransactionIsolation(Connection::TRANSACTION_READ_COMMITTED);
+        $this->modelManager->beginTransaction();
     }
 
     /**

@@ -124,4 +124,22 @@ abstract class AbstractService
         }
         throw $lastException;
     }
+    
+    /**
+     * Traverses the stack of the given {@code $exception} to find an exception which matches the given
+	 * {@code $exceptionType}.
+	 * 
+     * @param \Throwable $e
+     * @param object $exceptionType
+     * @return \Throwable|null
+     */
+    protected function findCause(\Throwable $exception, $exceptionType) {
+        if ($exception instanceof $exceptionType) {
+            return $exception;
+        } elseif ($exception->getPrevious() != null) {
+            return $this->findCause($exception->getPrevious(), $exceptionType);
+        } else {
+            return null;
+        }
+    }
 }
