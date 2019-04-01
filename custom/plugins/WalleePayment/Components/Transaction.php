@@ -571,11 +571,11 @@ class Transaction extends AbstractService
             $transaction->setSuccessUrl($this->getUrl('WalleePaymentTransaction', 'success', null, null, [
                 'spaceId' => $pluginConfig['spaceId'],
                 'transactionId' => $transaction->getId()
-            ]));
+            ]) . '?utm_nooverride=1');
             $transaction->setFailedUrl($this->getUrl('WalleePaymentTransaction', 'failure', null, null, [
                 'spaceId' => $pluginConfig['spaceId'],
                 'transactionId' => $transaction->getId()
-            ]));
+            ]) . '?utm_nooverride=1');
         }
     }
 

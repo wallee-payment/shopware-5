@@ -60,7 +60,7 @@ class WalleePayment extends Plugin
 
     public function build(ContainerBuilder $container)
     {
-        $container->setParameter($this->getContainerPrefix() . '.base_gateway_url', 'https://app-wallee.com/');
+        $container->setParameter('wallee_payment.base_gateway_url', 'https://app-wallee.com/');
 
         parent::build($container);
     }
