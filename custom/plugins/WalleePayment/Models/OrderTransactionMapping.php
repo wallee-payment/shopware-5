@@ -22,6 +22,10 @@ use Shopware\Models\Shop\Shop;
  *      uniqueConstraints={
  *          @ORM\UniqueConstraint(name="UNQ_ORDER_ID", columns={"order_id"}),
  *          @ORM\UniqueConstraint(name="UNQ_TEMPORARY_ID", columns={"temporary_id"})
+ *      },
+ *      indexes={
+ *          @ORM\Index(name="IDX_SPACE_ID", columns={"space_id"}),
+ *          @ORM\Index(name="IDX_TRANSACTION_ID", columns={"transaction_id"})
  *      }
  * )
  * @ORM\Entity
