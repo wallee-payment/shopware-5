@@ -118,7 +118,7 @@ class TransactionInvoice extends AbstractOrderRelatedSubscriber
 
     private function derecognized(Order $order, \Wallee\Sdk\Model\TransactionInvoice $transactionInvoice)
     {
-        $order->setPaymentStatus($this->getStatus(Status::PAYMENT_STATE_REVIEW_NECESSARY));
+        $order->setPaymentStatus($this->getStatus(Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED));
         $this->modelManager->flush($order);
     }
 

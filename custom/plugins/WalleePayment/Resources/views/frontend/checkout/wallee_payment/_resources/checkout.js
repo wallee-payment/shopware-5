@@ -63,10 +63,10 @@ ShopwareWallee.Checkout = {
             			});
                 }
             });
-            this.handler.setEnableSubmitCallback($.proxy(function(){
+            this.handler.setResetPrimaryActionCallback($.proxy(function(){
             	this.enableCheckoutButton();
             }, this));
-            this.handler.setDisableSubmitCallback($.proxy(function(){
+            this.handler.setReplacePrimaryActionCallback($.proxy(function(){
             	this.disableCheckoutButton();
             }, this));
             this.handler.create(container, $.proxy(function(validationResult) {

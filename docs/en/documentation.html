@@ -21,7 +21,7 @@
 		</a>
 	</li>
 	<li>
-		<a href="https://github.com/wallee-payment/shopware/releases/tag/1.0.43/">
+		<a href="https://github.com/wallee-payment/shopware/releases/tag/1.0.44/">
 			Source
 		</a>
 	</li>
@@ -48,24 +48,18 @@
 					<div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>There are multiple ways to install the plugin in your Shopware store:</p>
-<div class="ulist">
-<ul>
-<li>
-<p>Upload the plugin files to the root directory of your store using FTP/SSH.</p>
-</li>
-<li>
 <p>Install the plugin directly from the Shopware plugin store.</p>
-</li>
-<li>
-<p>Install the plugin using composer by updating the <code>composer.json</code> file in the root directory of your Shopware store and wait for Composer to finish updating the dependencies.</p>
-<div class="listingblock">
-<div class="content">
-<pre>composer require wallee/shopware</pre>
-</div>
-</div>
-</li>
-</ul>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+You also have the possibility to install the plugin using composer.  See <a href="#_faq">FAQ</a>.
+</td>
+</tr>
+</table>
 </div>
 </li>
 <li>
@@ -192,20 +186,78 @@ can be found in the <a href="https://app-wallee.com/en-us/doc/payment/transactio
 <div class="content">
 <img src="resource/state_graph_order.svg" alt="state graph order"/>
 </div>
-</div>					</div>
-</div>					<div class="section" id="_state_mapping_of_shopware_payment_states">
+</div><div class="olist glossary">
+<ol class="glossary">
+<li>
+<p>If the transaction is <code>authorized</code> in wallee, the Shopware order is marked as <code>Clarification required</code>. This can be changed
+in the plugin configuration. It&#8217;s also possible to define different statuses for <code>authorized</code> and <code>completed</code> transactions.</p>
+</li>
+<li>
+<p>If the transaction fails during the authorization process, the Shopware order is either marked as <code>Cancelled/rejected</code> or removed from the database, depending on the configuration.</p>
+</li>
+<li>
+<p>Whether an order should be removed from the database or marked as <code>Cancelled/rejected</code> if the corresponding transaction fails can be configured in the plugin configuration. The latter is the default behaviour.</p>
+</li>
+<li>
+<p>If the transaction in wallee is marked as <code>fulfill</code>, the Shopware order is marked as <code>Ready for delivery</code>, indicating that it can now be fulfilled. Once the shipment has been created, we recommend to change the order&#8217;s status.</p>
+</li>
+<li>
+<p>If the transaction&#8217;s authorization is voided or the risk assessments indicate that the order should not be fulfilled, the order is marked as <code>Cancelled/rejected</code>.</p>
+</li>
+</ol>
+</div>							<div class="section" id="_general_remarks_regarding_order_statuses">
 	<div class="section-title">
-		<h2>
-			<span class="title-number">5.2</span>State mapping of Shopware payment states					</h2>
+		<h3>
+			<span class="title-number">5.1.1</span>General remarks regarding order statuses					</h3>
 	</div>
 	<div class="section-body">
 					<div class="paragraph">
-<p>Below you find a diagram that shows the state machine of Shopware for payment states including additional information for the state transitions.</p>
+<p>We recommend that you only change the order status to indicate that shipping has taken place. If you change it before the transaction has reached a final state in wallee, the plugin may changed the order status again. If you want different order statuses to be set, you can change the behaviour in the plugin configuration.</p>
+</div>					</div>
+</div>			</div>
+</div>					<div class="section" id="_state_mapping_of_shopware_payment_status">
+	<div class="section-title">
+		<h2>
+			<span class="title-number">5.2</span>State mapping of Shopware payment status					</h2>
+	</div>
+	<div class="section-body">
+					<div class="paragraph">
+<p>Below you find a diagram that shows the state machine of Shopware for payment status including additional information for the state transitions.</p>
 </div><div class="imageblock">
 <div class="content">
 <img src="resource/state_graph_payment_state.svg" alt="state graph payment state"/>
 </div>
+</div><div class="olist glossary">
+<ol class="glossary">
+<li>
+<p>If the transaction in wallee is <code>authorized</code>, the payment status of the Shopware order is set to <code>Reserved</code>.</p>
+</li>
+<li>
+<p>If the transaction fails during the authorization process, the payment status of the Shopware order is set to <code>The process has been canceled</code>.</p>
+</li>
+<li>
+<p>If the transaction in wallee is <code>completed</code>, the payment status of the Shopware order is set to <code>Completely invoiced</code>. At this point, the transfer of the amount has been initiated and the transaction amount can no longer be changed. However, the order has not yet been fulfilled and the delivery should not be started.</p>
+</li>
+<li>
+<p>If the transaction&#8217;s authorization is voided, the payment status of the Shopware order is set to <code>The process has been canceled</code>.</p>
+</li>
+<li>
+<p>Once the invoice is paid, the payment status of the Shopware order is set to <code>Completely paid</code>. This also applies if the invoice is not traceable due to external administration.</p>
+</li>
+<li>
+<p>If the invoice is derecognized and the payment can no longer be expected, the payment status of the Shopware order is set to <code>The process has been canceled</code>.</p>
+</li>
+</ol>
+</div>							<div class="section" id="_general_remarks_regarding_order_statuses_2">
+	<div class="section-title">
+		<h3>
+			<span class="title-number">5.2.1</span>General remarks regarding order statuses					</h3>
+	</div>
+	<div class="section-body">
+					<div class="paragraph">
+<p>We recommend that you do not change the payment status manually. If you do so, it may be changed again by the plugin.</p>
 </div>					</div>
+</div>			</div>
 </div>			</div>
 </div>	<div class="chapter" id="_transaction_management">
 	<div class="chapter-title">
@@ -388,10 +440,25 @@ The extension will log various unexpected errors or information which can help i
 			<span class="title-number">8</span>FAQ					</h1>
 	</div>
 	<div class="chapter-body">
-							<div class="section" id="_how_can_i_make_the_payment_methods_appear_in_the_checkout">
+							<div class="section" id="_how_to_install_the_plugin_using_composer">
 	<div class="section-title">
 		<h2>
-			<span class="title-number">8.1</span>How can I make the payment methods appear in the checkout?					</h2>
+			<span class="title-number">8.1</span>How to install the plugin using composer?					</h2>
+	</div>
+	<div class="section-body">
+					<div class="paragraph">
+<p>You can install the plugin using composer by updating the <code>composer.json</code> file in the root directory of your Shopware store and wait for Composer to finish updating the dependencies.</p>
+</div><div class="listingblock">
+<div class="content">
+<pre>composer require wallee/shopware</pre>
+</div>
+</div><div class="paragraph">
+<p>Once this done, continue with step 2 of the installation process. See <a href="#_installation">Installation</a>.</p>
+</div>					</div>
+</div>					<div class="section" id="_how_can_i_make_the_payment_methods_appear_in_the_checkout">
+	<div class="section-title">
+		<h2>
+			<span class="title-number">8.2</span>How can I make the payment methods appear in the checkout?					</h2>
 	</div>
 	<div class="section-body">
 					<div class="paragraph">
@@ -464,11 +531,25 @@ The payment methods are only displayed if the plugin&#8217;s total calculation m
 		<span class="item-number">5.1</span>
 		<span class="item-title">State mapping of Shopware orders</span>
 			</a>
-    </li>    		    			<li class="nav-level-2">
-	<a href="#_state_mapping_of_shopware_payment_states">
-		<span class="item-number">5.2</span>
-		<span class="item-title">State mapping of Shopware payment states</span>
+        	<ul  class="nav">
+    		    			<li class="nav-level-3">
+	<a href="#_general_remarks_regarding_order_statuses">
+		<span class="item-number">5.1.1</span>
+		<span class="item-title">General remarks regarding order statuses</span>
 			</a>
+    </li>    		    	</ul>
+    </li>    		    			<li class="nav-level-2">
+	<a href="#_state_mapping_of_shopware_payment_status">
+		<span class="item-number">5.2</span>
+		<span class="item-title">State mapping of Shopware payment status</span>
+			</a>
+        	<ul  class="nav">
+    		    			<li class="nav-level-3">
+	<a href="#_general_remarks_regarding_order_statuses_2">
+		<span class="item-number">5.2.1</span>
+		<span class="item-title">General remarks regarding order statuses</span>
+			</a>
+    </li>    		    	</ul>
     </li>    		    	</ul>
     </li>					<li class="nav-level-1">
 	<a href="#_transaction_management">
@@ -519,8 +600,13 @@ The payment methods are only displayed if the plugin&#8217;s total calculation m
 			</a>
         	<ul  class="nav">
     		    			<li class="nav-level-2">
-	<a href="#_how_can_i_make_the_payment_methods_appear_in_the_checkout">
+	<a href="#_how_to_install_the_plugin_using_composer">
 		<span class="item-number">8.1</span>
+		<span class="item-title">How to install the plugin using composer?</span>
+			</a>
+    </li>    		    			<li class="nav-level-2">
+	<a href="#_how_can_i_make_the_payment_methods_appear_in_the_checkout">
+		<span class="item-number">8.2</span>
 		<span class="item-title">How can I make the payment methods appear in the checkout?</span>
 			</a>
     </li>    		    	</ul>

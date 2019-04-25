@@ -92,6 +92,13 @@
         	<store>Shopware.apps.Base.store.OrderStatus</store>
         </element>
         <element type="select" scope="shop">
+        	<name>orderStatusVoid</name>
+        	<label lang="de">Bestell-Status: Annulliert</label>
+        	<label lang="en">Order Status: Void</label>
+        	<value>4</value>
+        	<store>Shopware.apps.Base.store.OrderStatus</store>
+        </element>
+        <element type="select" scope="shop">
         	<name>orderStatusCompleted</name>
         	<label lang="de">Bestell-Status: Verbucht</label>
         	<label lang="en">Order Status: Completed</label>

@@ -219,6 +219,7 @@ class Transaction extends AbstractOrderRelatedSubscriber
 
     private function voided(Order $order, \Wallee\Sdk\Model\Transaction $transaction)
     {
+        $order->setOrderStatus($this->getStatus($this->getVoidOrderStatusId($order)));
         $order->setPaymentStatus($this->getStatus(Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED));
         $this->modelManager->flush($order);
         $this->transactionInfoService->updateTransactionInfoByOrder($transaction, $order);
@@ -241,6 +242,17 @@ class Transaction extends AbstractOrderRelatedSubscriber
         $status = $pluginConfig['orderStatusAuthorized'];
         if ($status === null || $status === '' || !is_numeric($status)) {
             return Status::ORDER_STATE_CLARIFICATION_REQUIRED;
+        } else {
+            return (int)$status;
+        }
+    }
+    
+    private function getVoidOrderStatusId(Order $order)
+    {
+        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
+        $status = $pluginConfig['orderStatusVoid'];
+        if ($status === null || $status === '' || !is_numeric($status)) {
+            return Status::ORDER_STATE_CANCELLED_REJECTED;
         } else {
             return (int)$status;
         }
