@@ -53,6 +53,7 @@ class Checkout implements SubscriberInterface
     {
         return [
             'Shopware_Controllers_Frontend_Checkout::preDispatch::after' => 'onPreDispatch',
+            'Shopware_Controllers_Frontend_Checkout::cartAction::after' => 'onCartAction',
             'Shopware_Controllers_Frontend_Checkout::confirmAction::after' => 'onConfirmAction',
             'Shopware_Controllers_Frontend_Checkout::getMinimumCharge::after' => 'onGetMinimumCharge'
         ];
@@ -85,6 +86,16 @@ class Checkout implements SubscriberInterface
             $session['wallee_payment.success'] = false;
         }
     }
+    
+    public function onCartAction(\Enlight_Hook_HookArgs $args)
+    {
+        /* @var \Shopware_Controllers_Frontend_Checkout $checkoutController */
+        $checkoutController = $args->getSubject();
+        $view = $checkoutController->View();
+        $view->addTemplateDir($this->container->getParameter('wallee_payment.plugin_dir') . '/Resources/views/');
+        $view->extendsTemplate('frontend/checkout/wallee_payment/device-javascript.tpl');
+        $view->assign('walleePaymentDeviceJavascriptUrl', $this->transactionService->getDeviceJavascriptUrl());
+    }
 
     public function onConfirmAction(\Enlight_Hook_HookArgs $args)
     {
@@ -92,6 +103,10 @@ class Checkout implements SubscriberInterface
         $checkoutController = $args->getSubject();
 
         $view = $checkoutController->View();
+        $view->addTemplateDir($this->container->getParameter('wallee_payment.plugin_dir') . '/Resources/views/');
+        $view->extendsTemplate('frontend/checkout/wallee_payment/device-javascript.tpl');
+        $view->assign('walleePaymentDeviceJavascriptUrl', $this->transactionService->getDeviceJavascriptUrl());
+        
         if (empty($view->sUserLoggedIn)) {
             // When the customer is not logged in, we don't do anything.
             return;

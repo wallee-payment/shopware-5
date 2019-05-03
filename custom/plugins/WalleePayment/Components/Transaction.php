@@ -200,6 +200,29 @@ class Transaction extends AbstractService
             return $this->transactionService->buildJavaScriptUrl($orderTransactionMapping->getSpaceId(), $orderTransactionMapping->getTransactionId());
         });
     }
+    
+    public function getDeviceJavascriptUrl() {
+        $baseUrl = $this->container->getParameter('wallee_payment.base_gateway_url');
+        
+        /* @var Shop $shop */
+        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $shop);
+        $spaceId = $pluginConfig['spaceId'];
+        
+        $deviceId = Shopware()->Front()->Request()->getCookie('wallee_device_id');
+        if (empty($deviceId)) {
+            $deviceId = $this->generateDeviceId();
+            Shopware()->Front()->Response()->setCookie('wallee_device_id', $deviceId);
+        }
+        
+        return $baseUrl . '/s/' . $spaceId . '/payment/device.js?sessionIdentifier=' . $deviceId;
+    }
+    
+    private function generateDeviceId() {
+        $data = \openssl_random_pseudo_bytes(16);
+        $data[6] = \chr(\ord($data[6]) & 0x0f | 0x40); // set version to 0100
+        $data[8] = \chr(\ord($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
+        return \vsprintf('%s%s-%s-%s-%s-%s%s%s', \str_split(\bin2hex($data), 4));
+    }
 
     /**
      * Returns the URL to wallee's payment page.
@@ -337,6 +360,7 @@ class Transaction extends AbstractService
             $transaction = new \Wallee\Sdk\Model\TransactionCreate();
             $transaction->setCustomersPresence(\Wallee\Sdk\Model\CustomersPresence::VIRTUAL_PRESENT);
             $this->assembleTransactionData($transaction, $order);
+            $this->addDeviceSessionIdentifier($transaction);
 
             $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
             $spaceId = $pluginConfig['spaceId'];
@@ -365,6 +389,7 @@ class Transaction extends AbstractService
             $transaction = new \Wallee\Sdk\Model\TransactionCreate();
             $transaction->setCustomersPresence(\Wallee\Sdk\Model\CustomersPresence::VIRTUAL_PRESENT);
             $this->assembleBasketTransactionData($transaction);
+            $this->addDeviceSessionIdentifier($transaction);
 
             $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $this->container->get('shop'));
             $spaceId = $pluginConfig['spaceId'];
@@ -526,6 +551,14 @@ class Transaction extends AbstractService
         $sanitized = $serializer->sanitizeForSerialization($transaction);
         unset($sanitized->version);
         return $spaceId . '_' . $transactionId . '_' . \hash("sha256", \json_encode($sanitized));
+    }
+    
+    private function addDeviceSessionIdentifier(\Wallee\Sdk\Model\AbstractTransactionPending $transaction)
+    {
+        if ($transaction instanceof \Wallee\Sdk\Model\TransactionCreate) {
+            $deviceId = Shopware()->Front()->Request()->getCookie('wallee_device_id');
+            $transaction->setDeviceSessionIdentifier($deviceId);
+        }
     }
 
     /**
