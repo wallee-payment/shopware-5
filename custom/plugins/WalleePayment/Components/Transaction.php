@@ -191,33 +191,39 @@ class Transaction extends AbstractService
      */
     public function getJavaScriptUrl()
     {
-        $orderTransactionMapping = $this->getBasketTransactionMapping();
-        if (! ($orderTransactionMapping instanceof OrderTransactionMapping)) {
+        $transaction = $this->getTransactionByBasket();
+        if (! ($transaction instanceof \Wallee\Sdk\Model\Transaction)) {
             throw new \Exception('No order transaction mapping found to build javascript URL.');
         }
 
-        return $this->callApi($this->apiClient, function () use ($orderTransactionMapping) {
-            return $this->transactionService->buildJavaScriptUrl($orderTransactionMapping->getSpaceId(), $orderTransactionMapping->getTransactionId());
+        return $this->callApi($this->apiClient, function () use ($transaction) {
+            return $this->transactionService->buildJavaScriptUrl($transaction->getLinkedSpaceId(), $transaction->getId());
         });
     }
-    
-    public function getDeviceJavascriptUrl() {
+
+    public function getDeviceJavascriptUrl()
+    {
         $baseUrl = $this->container->getParameter('wallee_payment.base_gateway_url');
-        
+
         /* @var Shop $shop */
         $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $shop);
         $spaceId = $pluginConfig['spaceId'];
-        
-        $deviceId = Shopware()->Front()->Request()->getCookie('wallee_device_id');
+
+        $deviceId = Shopware()->Front()
+            ->Request()
+            ->getCookie('wallee_device_id');
         if (empty($deviceId)) {
             $deviceId = $this->generateDeviceId();
-            Shopware()->Front()->Response()->setCookie('wallee_device_id', $deviceId);
+            Shopware()->Front()
+                ->Response()
+                ->setCookie('wallee_device_id', $deviceId);
         }
-        
+
         return $baseUrl . '/s/' . $spaceId . '/payment/device.js?sessionIdentifier=' . $deviceId;
     }
-    
-    private function generateDeviceId() {
+
+    private function generateDeviceId()
+    {
         $data = \openssl_random_pseudo_bytes(16);
         $data[6] = \chr(\ord($data[6]) & 0x0f | 0x40); // set version to 0100
         $data[8] = \chr(\ord($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
@@ -232,13 +238,13 @@ class Transaction extends AbstractService
      */
     public function getPaymentPageUrl()
     {
-        $orderTransactionMapping = $this->getBasketTransactionMapping();
-        if (! ($orderTransactionMapping instanceof OrderTransactionMapping)) {
+        $transaction = $this->getTransactionByBasket();
+        if (! ($transaction instanceof \Wallee\Sdk\Model\Transaction)) {
             throw new \Exception('No order transaction mapping found to build javascript URL.');
         }
 
-        return $this->callApi($this->apiClient, function () use ($orderTransactionMapping) {
-            return $this->transactionService->buildPaymentPageUrl($orderTransactionMapping->getSpaceId(), $orderTransactionMapping->getTransactionId());
+        return $this->callApi($this->apiClient, function () use ($transaction) {
+            return $this->transactionService->buildPaymentPageUrl($transaction->getLinkedSpaceId(), $transaction->getId());
         });
     }
 
@@ -342,6 +348,22 @@ class Transaction extends AbstractService
             }
         }
         return self::$transactionByBasketCache;
+    }
+
+    /**
+     * Returns whether the transaction linked to the basket is in pending state.
+     *
+     * @return boolean
+     */
+    public function isBasketTransactionPending()
+    {
+        $orderTransactionMapping = $this->getBasketTransactionMapping();
+        if ($orderTransactionMapping instanceof OrderTransactionMapping) {
+            $transaction = $this->transactionService->read($orderTransactionMapping->getSpaceId(), $orderTransactionMapping->getTransactionId());
+            return $transaction->getState() == TransactionState::PENDING;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -483,7 +505,7 @@ class Transaction extends AbstractService
     {
         return $this->callApi($this->apiClient, function () use ($transactionId, $spaceId) {
             $transaction = $this->transactionService->read($spaceId, $transactionId);
-            if ($transaction->getState() != \Wallee\Sdk\Model\TransactionState::PENDING) {
+            if ($transaction->getState() != TransactionState::PENDING) {
                 return $this->createBasketTransaction();
             }
 
@@ -552,11 +574,13 @@ class Transaction extends AbstractService
         unset($sanitized->version);
         return $spaceId . '_' . $transactionId . '_' . \hash("sha256", \json_encode($sanitized));
     }
-    
+
     private function addDeviceSessionIdentifier(\Wallee\Sdk\Model\AbstractTransactionPending $transaction)
     {
         if ($transaction instanceof \Wallee\Sdk\Model\TransactionCreate) {
-            $deviceId = Shopware()->Front()->Request()->getCookie('wallee_device_id');
+            $deviceId = Shopware()->Front()
+                ->Request()
+                ->getCookie('wallee_device_id');
             $transaction->setDeviceSessionIdentifier($deviceId);
         }
     }
@@ -745,22 +769,22 @@ class Transaction extends AbstractService
         if ($this->modelManager->getConnection()->isTransactionActive()) {
             throw new \Exception('This method cannot be called from within a database transaction.');
         }
-        
+
         $lastException = null;
         for ($i = 0; $i < 5; $i ++) {
             $this->modelManager = $this->getEntityManager();
-            
+
             $existingMapping = $this->modelManager->getRepository(OrderTransactionMapping::class)->findBy([
                 'orderId' => $order->getId(),
                 'transactionId' => $transaction->getId(),
                 'spaceId' => $transaction->getLinkedSpaceId(),
                 'shopId' => $this->container->get('shop')
-                ->getId()
+                    ->getId()
             ]);
             if (! empty($existingMapping)) {
                 return;
             }
-        
+
             $this->modelManager->beginTransaction();
             try {
                 if ($order->getTemporaryId() != null) {
@@ -773,7 +797,7 @@ class Transaction extends AbstractService
                     }
                     $this->modelManager->flush();
                 }
-    
+
                 /* @var OrderTransactionMapping $orderTransactionMapping */
                 $orderTransactionMappings = $this->modelManager->getRepository(OrderTransactionMapping::class)->findBy([
                     'transactionId' => $transaction->getId(),
@@ -788,7 +812,7 @@ class Transaction extends AbstractService
                 } else {
                     $orderTransactionMapping = \current($orderTransactionMappings);
                 }
-    
+
                 if (! ($orderTransactionMapping instanceof OrderTransactionMapping)) {
                     $orderTransactionMapping = new OrderTransactionMapping();
                     $orderTransactionMapping->setSpaceId($transaction->getLinkedSpaceId());

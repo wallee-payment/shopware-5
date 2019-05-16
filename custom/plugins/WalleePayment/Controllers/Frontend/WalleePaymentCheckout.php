@@ -35,32 +35,43 @@ class Shopware_Controllers_Frontend_WalleePaymentCheckout extends Shopware_Contr
     public function saveOrderAction()
     {
         ob_start();
-        $this->_orderNumber = null;
-        $backup = $this->get('wallee_payment.basket')->backupBasket();
-        $this->finishAction();
-        if ($this->_forward !== 'confirm') {
-            $this->get('wallee_payment.basket')->restoreBasket($backup);
-        }
-        if ($this->_orderNumber != null) {
-            $this->get('wallee_payment.registry')->set('disable_risk_management', true);
-            $this->get('modules')->Order()->sCreateTemporaryOrder();
+        if (!$this->get('wallee_payment.transaction')->isBasketTransactionPending()) {
             ob_clean();
+            
+            /* @var \Enlight_Components_Session_Namespace $session */
+            $session = $this->get('session');
+            $session['wallee_payment.transaction_timeout'] = true;
             echo json_encode([
-                'result' => 'success'
+                'result' => 'timeout'
             ]);
         } else {
-            if (isset($this->_requestParams['voucherErrors'])) {
+            $this->_orderNumber = null;
+            $backup = $this->get('wallee_payment.basket')->backupBasket();
+            $this->finishAction();
+            if ($this->_forward !== 'confirm') {
+                $this->get('wallee_payment.basket')->restoreBasket($backup);
+            }
+            if ($this->_orderNumber != null) {
+                $this->get('wallee_payment.registry')->set('disable_risk_management', true);
+                $this->get('modules')->Order()->sCreateTemporaryOrder();
                 ob_clean();
                 echo json_encode([
-                    'result' => 'error',
-                    'error' => current($this->_requestParams['voucherErrors'])
+                    'result' => 'success'
                 ]);
-            } elseif (isset($this->_requestParams['agreementErrors']['agbError'])) {
-                ob_clean();
-                echo json_encode([
-                    'result' => 'error',
-                    'error' => 'agbError'
-                ]);
+            } else {
+                if (isset($this->_requestParams['voucherErrors'])) {
+                    ob_clean();
+                    echo json_encode([
+                        'result' => 'error',
+                        'error' => current($this->_requestParams['voucherErrors'])
+                    ]);
+                } elseif (isset($this->_requestParams['agreementErrors']['agbError'])) {
+                    ob_clean();
+                    echo json_encode([
+                        'result' => 'error',
+                        'error' => 'agbError'
+                    ]);
+                }
             }
         }
         ob_end_flush();
