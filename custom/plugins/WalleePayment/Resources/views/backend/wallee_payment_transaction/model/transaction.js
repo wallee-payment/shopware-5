@@ -31,6 +31,7 @@ Ext.define('Shopware.apps.WalleePaymentTransaction.model.Transaction', {
         { name: 'failureReason', type: 'string' },
         { name: 'paymentMethod', type: 'object' },
         { name: 'transactionUrl', type: 'string' },
+        { name: 'customerUrl', type: 'string' },
         { name: 'currencyDecimals', type: 'int' },
         { name: 'lineItemTotalAmount', type: 'float' },
         { name: 'canDownloadInvoice', type: 'boolean' },

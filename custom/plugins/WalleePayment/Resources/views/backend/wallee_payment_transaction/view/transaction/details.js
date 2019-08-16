@@ -30,6 +30,7 @@ Ext.define('Shopware.apps.WalleePaymentTransaction.view.transaction.Details', {
             currency: '{s name=transaction/field/currency}Currency{/s}',
             amount: '{s name=transaction/field/authorization_amount}Authorization Amount{/s}',
             transaction: '{s name=transaction/field/transaction}Transaction{/s}',
+            customer: '{s name=transaction/field/customer}Customer{/s}',
             invoice: '{s name=transaction/field/invoice}Invoice{/s}',
             packingSlip: '{s name=transaction/field/packing_slip}Packing Slip{/s}'
         },
@@ -53,6 +54,7 @@ Ext.define('Shopware.apps.WalleePaymentTransaction.view.transaction.Details', {
             deny: '{s name=transaction/button/delivery_indication_deny}Deny{/s}',
             accept: '{s name=transaction/button/delivery_indication_accept}Accept{/s}',
             transaction: '{s name=transaction/button/transaction_link}View in wallee{/s}',
+            customer: '{s name=transaction/button/customer_link}View in wallee{/s}',
             update: '{s name=transaction/button/update}Update{/s}',
         }
     },
@@ -139,6 +141,14 @@ Ext.define('Shopware.apps.WalleePaymentTransaction.view.transaction.Details', {
             items: {
                 xtype: 'container',
                 html: '<a href="' + me.record.get('transactionUrl') + '" target="_blank">' + me.snippets.button.transaction + '</a>'
+            }
+        });
+        fields.push({
+            xtype: 'fieldcontainer',
+            fieldLabel: me.snippets.field.customer,
+            items: {
+                xtype: 'container',
+                html: '<a href="' + me.record.get('customerUrl') + '" target="_blank">' + me.snippets.button.customer + '</a>'
             }
         });
         

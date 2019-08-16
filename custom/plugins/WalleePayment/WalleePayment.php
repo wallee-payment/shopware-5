@@ -24,14 +24,10 @@ use WalleePayment\Models\TransactionInfo;
 use Shopware\Models\Widget\Widget;
 use Shopware\Components\Plugin\Context\ActivateContext;
 
+require_once dirname(__FILE__) . '/vendor/autoload.php';
+
 class WalleePayment extends Plugin
 {
-    public static function getSubscribedEvents()
-    {
-        return [
-            'Enlight_Controller_Front_StartDispatch' => 'onStartDispatch'
-        ];
-    }
 
     public function install(InstallContext $context)
     {
@@ -65,13 +61,6 @@ class WalleePayment extends Plugin
         parent::build($container);
     }
 
-    public function onStartDispatch()
-    {
-        if (file_exists($this->getPath() . '/vendor/autoload.php')) {
-            require_once $this->getPath() . '/vendor/autoload.php';
-        }
-    }
-    
     private function getModelClasses()
     {
         return [
