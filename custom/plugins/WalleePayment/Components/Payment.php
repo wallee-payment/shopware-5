@@ -12,7 +12,6 @@
 
 namespace WalleePayment\Components;
 
-use Shopware\Components\Model\ModelManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Wallee\Sdk\Model\Transaction as TransactionModel;
 use Wallee\Sdk\Model\TransactionInvoice;
@@ -48,15 +47,16 @@ class Payment extends AbstractService
     
     /**
      * Constructor.
-     *
+     * 
      * @param ContainerInterface $container
-     * @param ModelManager $modelManager
-     * @param ApiClient $apiClient
+     * @param Transaction $transactionService
+     * @param Invoice $invoiceService
+     * @param TransactionWebhookService $transactionWebhookService
+     * @param InvoiceWebhookService $invoiceWebhookService
      */
     public function __construct(ContainerInterface $container, Transaction $transactionService, Invoice $invoiceService, TransactionWebhookService $transactionWebhookService, InvoiceWebhookService $invoiceWebhookService)
     {
         parent::__construct($container);
-        $this->modelManager = $modelManager;
         $this->transactionService = $transactionService;
         $this->invoiceService = $invoiceService;
         $this->transactionWebhookService = $transactionWebhookService;

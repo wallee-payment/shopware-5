@@ -158,15 +158,7 @@ class LineItem extends AbstractService
             }
         }
         
-        $basketTotalAmount = 0;
-        if (isset($basketData['AmountWithTaxNumeric']) && !empty($basketData['AmountWithTaxNumeric']) && !$this->isTaxFree()) {
-            $basketTotalAmount = $basketData['AmountWithTaxNumeric'];
-        } elseif (isset($basketData['AmountNumeric']) && !empty($basketData['AmountNumeric'])) {
-            $basketTotalAmount = $basketData['AmountNumeric'];
-        }
-        if ($basketTotalAmount > 0 && isset($shippingcosts['brutto'])) {
-            $basketTotalAmount += $shippingcosts['brutto'];
-        }
+        $easyCouponShippingAmount = 0;
         
         $index = 1;
         foreach ($basketData['content'] as $basketRow) {
@@ -194,8 +186,14 @@ class LineItem extends AbstractService
             
             $type = $this->getType($basketRow['modus'], $basketRow['priceNumeric']);
             
+            $amountIncludingTax = $this->getAmountIncludingTax($basketRow['priceNumeric'], $currency, $basketRow['quantity'], $basketRow['tax_rate'], $net && ! $taxfree);
+            if (isset($basketRow['neti_easycoupon_vouchercode']) && !empty($basketRow['neti_easycoupon_vouchercode'])) {
+                $easyCouponVoucherAmount = $this->getEasyCouponVoucherAmount();
+                $easyCouponShippingAmount = $easyCouponVoucherAmount - abs($amountIncludingTax);
+            }
+            
             $lineItem = new \Wallee\Sdk\Model\LineItemCreate();
-            $lineItem->setAmountIncludingTax($this->roundAmount($this->getAmountIncludingTax($basketRow['priceNumeric'], $currency, $basketRow['quantity'], $basketRow['tax_rate'], $net && ! $taxfree), $currency));
+            $lineItem->setAmountIncludingTax($this->roundAmount($amountIncludingTax, $currency));
             $lineItem->setName($articleName);
             $lineItem->setQuantity($basketRow['quantity']);
             $lineItem->setShippingRequired($type == \Wallee\Sdk\Model\LineItemType::PRODUCT && ! $basketRow['esdarticle']);
@@ -227,7 +225,7 @@ class LineItem extends AbstractService
             }
             
             $lineItem = new \Wallee\Sdk\Model\LineItemCreate();
-            $lineItem->setAmountIncludingTax($this->roundAmount($shippingcosts['brutto'], $currency));
+            $lineItem->setAmountIncludingTax($this->roundAmount($shippingcosts['brutto'] - $easyCouponShippingAmount, $currency));
             $lineItem->setName($shippingMethodName);
             $lineItem->setQuantity(1);
             $lineItem->setShippingRequired(false);
@@ -238,6 +236,16 @@ class LineItem extends AbstractService
             $lineItem->setType(\Wallee\Sdk\Model\LineItemType::SHIPPING);
             $lineItem->setUniqueId('shipping');
             $lineItems[] = $this->cleanLineItem($lineItem);
+        }
+                
+        $basketTotalAmount = 0;
+        if (isset($basketData['AmountWithTaxNumeric']) && !empty($basketData['AmountWithTaxNumeric']) && !$this->isTaxFree()) {
+            $basketTotalAmount = $basketData['AmountWithTaxNumeric'];
+        } elseif (isset($basketData['AmountNumeric']) && !empty($basketData['AmountNumeric'])) {
+            $basketTotalAmount = $basketData['AmountNumeric'];
+        }
+        if (($basketTotalAmount > 0 || $easyCouponShippingAmount != 0) && isset($shippingcosts['brutto'])) {
+            $basketTotalAmount += $shippingcosts['brutto'] - $easyCouponShippingAmount;
         }
         
         $lineItemTotalAmount = $this->getTotalAmountIncludingTax($lineItems);
@@ -317,6 +325,31 @@ class LineItem extends AbstractService
             case self::ORDER_DETAIL_MODE_TRUSTED_SHOP_ARTICLE:
             default:
                 return \Wallee\Sdk\Model\LineItemType::PRODUCT;
+        }
+    }
+    
+    /**
+     * 
+     * @return float
+     */
+    private function getEasyCouponVoucherAmount()
+    {
+        if ($this->container->has('neti_easy_coupon.service.basket_coupons')) {
+            $basketVoucher = $this->container->get('neti_easy_coupon.service.basket_coupons')->getBasketRemainingValues();
+            if (isset($basketVoucher['voucher'], $basketVoucher['voucherBasketValue'])) {
+                $factor = $this->container->get('shopware_storefront.context_service')->getShopContext()->getCurrency()->getFactor();
+                $voucher = $basketVoucher['voucher'];
+                $basketVoucher = Shopware()->Session()->get('netiEasyCouponBasketVoucher');
+                if (isset($basketVoucher[$voucher->getCode()])) {
+	                return ($voucher->getRemainingValue() * $factor) - Shopware()->Session()->get('netiEasyCouponBasketVoucher')[$voucher->getCode()];
+                } else {
+                    return ($voucher->getRemainingValue() * $factor);
+                }
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
         }
     }
     

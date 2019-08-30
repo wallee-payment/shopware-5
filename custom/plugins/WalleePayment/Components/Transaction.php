@@ -205,8 +205,7 @@ class Transaction extends AbstractService
     {
         $baseUrl = $this->container->getParameter('wallee_payment.base_gateway_url');
 
-        /* @var Shop $shop */
-        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $shop);
+        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $this->container->get('shop'));
         $spaceId = $pluginConfig['spaceId'];
 
         $deviceId = Shopware()->Front()
