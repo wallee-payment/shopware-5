@@ -189,7 +189,9 @@ class LineItem extends AbstractService
             $amountIncludingTax = $this->getAmountIncludingTax($basketRow['priceNumeric'], $currency, $basketRow['quantity'], $basketRow['tax_rate'], $net && ! $taxfree);
             if (isset($basketRow['neti_easycoupon_vouchercode']) && !empty($basketRow['neti_easycoupon_vouchercode'])) {
                 $easyCouponVoucherAmount = $this->getEasyCouponVoucherAmount();
-                $easyCouponShippingAmount = $easyCouponVoucherAmount - abs($amountIncludingTax);
+                if ($easyCouponVoucherAmount > 0) {
+                    $easyCouponShippingAmount = $easyCouponVoucherAmount - abs($amountIncludingTax);
+                }
             }
             
             $lineItem = new \Wallee\Sdk\Model\LineItemCreate();
@@ -246,6 +248,9 @@ class LineItem extends AbstractService
         }
         if (($basketTotalAmount > 0 || $easyCouponShippingAmount != 0) && isset($shippingcosts['brutto'])) {
             $basketTotalAmount += $shippingcosts['brutto'] - $easyCouponShippingAmount;
+        }
+        if ($basketTotalAmount < 0) {
+            $basketTotalAmount = 0;
         }
         
         $lineItemTotalAmount = $this->getTotalAmountIncludingTax($lineItems);
