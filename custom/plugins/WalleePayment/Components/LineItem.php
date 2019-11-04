@@ -98,7 +98,7 @@ class LineItem extends AbstractService
             $lineItems[] = $this->cleanLineItem($lineItem);
         }
 
-        if ($order->getInvoiceShipping() > 0) {
+        if ($order->getInvoiceShipping() != 0) {
             if ($order->getDispatch() instanceof \Shopware\Models\Dispatch\Dispatch) {
                 $shippingMethodName = $order->getDispatch()->getName();
             } else {
@@ -141,7 +141,7 @@ class LineItem extends AbstractService
         
         $basketData = Shopware()->Modules()->Basket()->sGetBasketData();
         
-        $currency = Shopware()->Modules()->System()->sCurrency['currency'];
+        $currency = Shopware()->Shop()->getCurrency()->getCurrency();
         if (empty($currency)) {
             $currency = 'EUR';
         }
@@ -217,7 +217,7 @@ class LineItem extends AbstractService
         if ($dispatchId > 0) {
             $dispatch = $this->modelManager->getRepository(Dispatch::class)->find($dispatchId);
         }
-        if (isset($shippingcosts['brutto']) && $shippingcosts['brutto'] > 0) {
+        if (isset($shippingcosts['brutto']) && $shippingcosts['brutto'] != 0) {
             if ($dispatch instanceof \Shopware\Models\Dispatch\Dispatch) {
                 $shippingMethodName = $dispatch->getName();
             } else {

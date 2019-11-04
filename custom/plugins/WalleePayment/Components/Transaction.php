@@ -648,9 +648,13 @@ class Transaction extends AbstractService
         /* @var Customer $customer */
         $customer = $this->modelManager->getRepository(Customer::class)->find($this->container->get('session')
             ->get('sUserId'));
+        
+        $currency = Shopware()->Shop()->getCurrency()->getCurrency();
+        if (empty($currency)) {
+            $currency = 'EUR';
+        }
 
-        $transaction->setCurrency(Shopware()->Modules()
-            ->System()->sCurrency['currency']);
+        $transaction->setCurrency($currency);
         $transaction->setBillingAddress($this->getBillingAddress($customer));
         $transaction->setShippingAddress($this->getShippingAddress($customer));
         $transaction->setCustomerEmailAddress($customer->getEmail());
