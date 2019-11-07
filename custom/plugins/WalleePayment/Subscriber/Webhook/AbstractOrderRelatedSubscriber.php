@@ -18,6 +18,7 @@ use Shopware\Models\Order\Order;
 use WalleePayment\Models\OrderTransactionMapping;
 use Doctrine\DBAL\LockMode;
 use Doctrine\DBAL\Connection;
+use WalleePayment\Models\TransactionInfo;
 
 abstract class AbstractOrderRelatedSubscriber extends AbstractSubscriber
 {
@@ -47,9 +48,7 @@ abstract class AbstractOrderRelatedSubscriber extends AbstractSubscriber
         $this->beginTransaction();
         try {
             /* @var Order $order */
-            $order = $this->modelManager->getRepository(Order::class)->findOneBy([
-                'number' => $this->getOrderNumber($entity)
-            ]);
+            $order = $this->modelManager->getRepository(Order::class)->find($this->getOrderId($entity));
             if ($order instanceof Order) {
                 /* @var OrderTransactionMapping $orderTransactionMapping */
                 $orderTransactionMapping = $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy([
@@ -84,12 +83,19 @@ abstract class AbstractOrderRelatedSubscriber extends AbstractSubscriber
     abstract protected function loadEntity(WebhookRequest $request);
 
     /**
-     * Returns the order number linked to the entity.
+     * Returns the ID of the order linked to the entity.
      *
      * @param object $entity
-     * @return string
+     * @return int
      */
-    abstract protected function getOrderNumber($entity);
+    protected function getOrderId($entity) {
+        /* @var TransactionInfo $transactionInfo */
+        $transactionInfo = $this->modelManager->getRepository(TransactionInfo::class)->findOneBy([
+            'spaceId' => $entity->getLinkedSpaceId(),
+            'transactionId' => $this->getTransactionId($entity)
+        ]);
+        return $transactionInfo->getOrderId();
+    }
 
     /**
      * Returns the transaction's id linked to the entity.

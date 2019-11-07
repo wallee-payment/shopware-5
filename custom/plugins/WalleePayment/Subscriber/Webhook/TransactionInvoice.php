@@ -59,19 +59,6 @@ class TransactionInvoice extends AbstractOrderRelatedSubscriber
     /**
      *
      * @param \Wallee\Sdk\Model\TransactionInvoice $transactionInvoice
-     * @return string
-     */
-    protected function getOrderNumber($transactionInvoice)
-    {
-        return $transactionInvoice->getCompletion()
-            ->getLineItemVersion()
-            ->getTransaction()
-            ->getMerchantReference();
-    }
-
-    /**
-     *
-     * @param \Wallee\Sdk\Model\TransactionInvoice $transactionInvoice
      * @return int
      */
     protected function getTransactionId($transactionInvoice)

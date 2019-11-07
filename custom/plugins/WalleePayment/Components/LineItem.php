@@ -315,19 +315,19 @@ class LineItem extends AbstractService
     private function getType($mode, $price)
     {
         switch ($mode) {
-            case self::ORDER_DETAIL_MODE_VOUCHER:
-            case self::ORDER_DETAIL_MODE_CUSTOMERGROUP_DISCOUNT:
-            case self::ORDER_DETAIL_MODE_BUNDLE_DISCOUNT:
+            case static::ORDER_DETAIL_MODE_VOUCHER:
+            case static::ORDER_DETAIL_MODE_CUSTOMERGROUP_DISCOUNT:
+            case static::ORDER_DETAIL_MODE_BUNDLE_DISCOUNT:
                 return \Wallee\Sdk\Model\LineItemType::DISCOUNT;
-            case self::ORDER_DETAIL_MODE_PAYMENT_SURCHARGE_DISCOUNT:
+            case static::ORDER_DETAIL_MODE_PAYMENT_SURCHARGE_DISCOUNT:
                 if ($price > 0) {
                     return \Wallee\Sdk\Model\LineItemType::FEE;
                 } else {
                     return \Wallee\Sdk\Model\LineItemType::DISCOUNT;
                 }
-            case self::ORDER_DETAIL_MODE_DEFAULT_ARTICLE:
-            case self::ORDER_DETAIL_MODE_PREMIUM_ARTICLE:
-            case self::ORDER_DETAIL_MODE_TRUSTED_SHOP_ARTICLE:
+            case static::ORDER_DETAIL_MODE_DEFAULT_ARTICLE:
+            case static::ORDER_DETAIL_MODE_PREMIUM_ARTICLE:
+            case static::ORDER_DETAIL_MODE_TRUSTED_SHOP_ARTICLE:
             default:
                 return \Wallee\Sdk\Model\LineItemType::PRODUCT;
         }

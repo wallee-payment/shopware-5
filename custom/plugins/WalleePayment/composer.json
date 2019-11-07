@@ -16,7 +16,7 @@
 		}
 	],
 	"type": "shopware-plugin",
-	"version" : "1.0.50",
+	"version" : "1.0.51",
     "require": {
         "wallee/sdk": "1.1.16"
     },

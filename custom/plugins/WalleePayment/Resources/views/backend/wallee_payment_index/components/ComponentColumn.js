@@ -118,15 +118,16 @@ Ext.define('Skirtle.grid.column.Component', {
         return function(value, p, record) {
             var data = Ext.apply({}, record.data, record.getAssociatedData());
 
+            var scopedValue = value;
             if (renderer) {
                 // Scope must be this, not me
-                value = renderer.apply(this, arguments);
+            	scopedValue = renderer.apply(this, arguments);
             }
 
             // Process the value even with no renderer defined as the record may contain a component config
-            value = me.processValue(value);
+            var processedValue = me.processValue(scopedValue);
 
-            return me.applyTemplate(data, value);
+            return me.applyTemplate(data, processedValue);
         };
     },
 
@@ -264,25 +265,26 @@ Ext.define('Skirtle.grid.column.Component', {
     processValue: function(value) {
         var me = this,
             compIds = me.compIds,
-            id, initialWidth, dom, parent;
+            id, initialWidth, dom, parent,
+            processedValue = value;
 
         if (Ext.isObject(value) && !value.isComponent && value.xtype) {
             // Do not default to a panel, not only would it be an odd default but it makes future enhancements trickier
-            value = Ext.widget(value.xtype, value);
+        	processedValue = Ext.widget(value.xtype, value);
         }
 
-        if (value && value.isComponent) {
-            id = value.getId();
+        if (processedValue && processedValue.isComponent) {
+            id = processedValue.getId();
 
             // When the view is refreshed the renderer could return a component that's already in the list
             if (!Ext.Array.contains(compIds, id)) {
                 compIds.push(id);
             }
 
-            me.addRefOwner(value);
-            me.registerListeners(value);
+            me.addRefOwner(processedValue);
+            me.registerListeners(processedValue);
 
-            if (value.rendered) {
+            if (processedValue.rendered) {
                 /* This is only necessary in IE because it is just another manifestation of the innerHTML problems.
                  * The problem occurs when a record value is changed and the components in that same row are being
                  * reused. The view doesn't go through a full refresh, instead it performs a quick update on just the
@@ -290,7 +292,7 @@ Ext.define('Skirtle.grid.column.Component', {
                  */
                 if (Ext.isIE) {
                     // TODO: Should this be promoted to CTemplate?
-                    dom = value.el.dom;
+                    dom = processedValue.el.dom;
                     parent = dom.parentNode;
 
                     if (parent) {
@@ -318,16 +320,16 @@ Ext.define('Skirtle.grid.column.Component', {
                 // Impose a minimum width of 4, we really don't want negatives values or NaN slipping through
                 initialWidth = initialWidth > 4 ? initialWidth : 4;
 
-                value.setWidth(initialWidth);
+                processedValue.setWidth(initialWidth);
             }
 
             // Part of the same IE 6/7 hack as onColumnVisibilityChange
             if ((Ext.isIE6 || Ext.isIE7) && me.isHidden()) {
-                value.hide();
+            	processedValue.hide();
             }
         }
 
-        return value;
+        return processedValue;
     },
 
     redoScrollbars: function() {

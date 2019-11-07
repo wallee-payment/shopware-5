@@ -255,7 +255,7 @@ class Transaction extends AbstractService
      */
     public function getPossiblePaymentMethods(Order $order)
     {
-        if (! isset(self::$possiblePaymentMethodByOrderCache[$order->getId()]) || self::$possiblePaymentMethodByOrderCache[$order->getId()] == null) {
+        if (! isset(static::$possiblePaymentMethodByOrderCache[$order->getId()]) || static::$possiblePaymentMethodByOrderCache[$order->getId()] == null) {
             $transaction = $this->getTransactionByOrder($order);
             $paymentMethods = $this->callApi($this->apiClient, function () use ($transaction) {
                 return $this->transactionService->fetchPossiblePaymentMethods($transaction->getLinkedSpaceId(), $transaction->getId());
@@ -265,10 +265,10 @@ class Transaction extends AbstractService
                 $this->paymentMethodConfigurationService->updateData($paymentMethod);
             }
 
-            self::$possiblePaymentMethodByOrderCache[$order->getId()] = $paymentMethods;
+            static::$possiblePaymentMethodByOrderCache[$order->getId()] = $paymentMethods;
         }
 
-        return self::$possiblePaymentMethodByOrderCache[$order->getId()];
+        return static::$possiblePaymentMethodByOrderCache[$order->getId()];
     }
 
     /**
@@ -281,7 +281,7 @@ class Transaction extends AbstractService
         /* @var \Enlight_Components_Session_Namespace $session */
         $session = $this->container->get('session');
 
-        if (self::$possiblePaymentMethodByBasketCache == null) {
+        if (static::$possiblePaymentMethodByBasketCache == null) {
             if (! $this->isBasketTransactionChanged() && isset($session['wallee_payment.possible_payment_methods']) && ! empty($session['wallee_payment.possible_payment_methods'])) {
                 $paymentMethods = $session['wallee_payment.possible_payment_methods'];
             } else {
@@ -291,7 +291,7 @@ class Transaction extends AbstractService
                         return $this->transactionService->fetchPossiblePaymentMethods($transaction->getLinkedSpaceId(), $transaction->getId());
                     });
                 } catch (ApiException $e) {
-                    self::$possiblePaymentMethodByBasketCache = [];
+                    static::$possiblePaymentMethodByBasketCache = [];
                     throw $e;
                 }
 
@@ -302,10 +302,10 @@ class Transaction extends AbstractService
                 $session['wallee_payment.possible_payment_methods'] = $paymentMethods;
             }
 
-            self::$possiblePaymentMethodByBasketCache = $paymentMethods;
+            static::$possiblePaymentMethodByBasketCache = $paymentMethods;
         }
 
-        return self::$possiblePaymentMethodByBasketCache;
+        return static::$possiblePaymentMethodByBasketCache;
     }
 
     /**
@@ -318,7 +318,7 @@ class Transaction extends AbstractService
      */
     public function getTransactionByOrder(Order $order)
     {
-        if (! isset(self::$transactionByOrderCache[$order->getId()]) || self::$transactionByOrderCache[$order->getId()] == null) {
+        if (! isset(static::$transactionByOrderCache[$order->getId()]) || static::$transactionByOrderCache[$order->getId()] == null) {
             $orderTransactionMapping = $this->getOrderTransactionMapping($order);
             if ($orderTransactionMapping instanceof OrderTransactionMapping) {
                 $this->updateTransaction($order, $orderTransactionMapping->getTransactionId(), $orderTransactionMapping->getSpaceId());
@@ -326,7 +326,7 @@ class Transaction extends AbstractService
                 $this->createTransaction($order);
             }
         }
-        return self::$transactionByOrderCache[$order->getId()];
+        return static::$transactionByOrderCache[$order->getId()];
     }
 
     /**
@@ -338,7 +338,7 @@ class Transaction extends AbstractService
      */
     public function getTransactionByBasket()
     {
-        if (self::$transactionByBasketCache == null) {
+        if (static::$transactionByBasketCache == null) {
             $orderTransactionMapping = $this->getBasketTransactionMapping();
             if ($orderTransactionMapping instanceof OrderTransactionMapping) {
                 $this->updateBasketTransaction($orderTransactionMapping->getTransactionId(), $orderTransactionMapping->getSpaceId());
@@ -346,7 +346,7 @@ class Transaction extends AbstractService
                 $this->createBasketTransaction();
             }
         }
-        return self::$transactionByBasketCache;
+        return static::$transactionByBasketCache;
     }
 
     /**
@@ -389,7 +389,7 @@ class Transaction extends AbstractService
             $transaction = $this->transactionService->create($spaceId, $transaction);
 
             $this->updateOrCreateTransactionMapping($transaction, $order);
-            self::$transactionByOrderCache[$order->getId()] = $transaction;
+            static::$transactionByOrderCache[$order->getId()] = $transaction;
             return $transaction;
         }
     }
@@ -418,7 +418,7 @@ class Transaction extends AbstractService
             $transaction = $this->transactionService->create($spaceId, $transaction);
 
             $this->updateOrCreateBasketTransactionMapping($transaction);
-            self::$transactionByBasketCache = $transaction;
+            static::$transactionByBasketCache = $transaction;
             return $transaction;
         }
     }
@@ -487,7 +487,7 @@ class Transaction extends AbstractService
             }
 
             $this->updateOrCreateTransactionMapping($transaction, $order);
-            self::$transactionByOrderCache[$order->getId()] = $transaction;
+            static::$transactionByOrderCache[$order->getId()] = $transaction;
         });
     }
 
@@ -517,9 +517,9 @@ class Transaction extends AbstractService
                 $updatedTransaction = $this->transactionService->update($spaceId, $pendingTransaction);
                 $this->updateOrCreateBasketTransactionMapping($updatedTransaction);
                 $this->updateTransactionHash($spaceId, $transactionId, $pendingTransaction);
-                self::$transactionByBasketCache = $updatedTransaction;
+                static::$transactionByBasketCache = $updatedTransaction;
             } else {
-                self::$transactionByBasketCache = $transaction;
+                static::$transactionByBasketCache = $transaction;
             }
             return $updatedTransaction;
         });

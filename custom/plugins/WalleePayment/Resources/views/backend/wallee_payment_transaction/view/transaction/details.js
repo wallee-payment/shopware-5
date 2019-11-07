@@ -88,7 +88,9 @@ Ext.define('Shopware.apps.WalleePaymentTransaction.view.transaction.Details', {
         
         var labels = me.record.get('labels');
         for (var index in labels) {
-            items.push(this.createLabelPanel(labels[index].group, labels[index].labels));
+        	if (labels.hasOwnProperty(index)) {
+        		items.push(this.createLabelPanel(labels[index].group, labels[index].labels));
+        	}
         }
         
         return items;
@@ -277,13 +279,15 @@ Ext.define('Shopware.apps.WalleePaymentTransaction.view.transaction.Details', {
             count = Math.ceil(Object.keys(labels).length / 2),
             i = 1;
         for (var key in labels) {
-            field = { value: labels[key].value, fieldLabel: labels[key].descriptor.name, helpText: labels[key].descriptor.description };
-            if (i <= count) {
-                fields.left.push(field);
-            } else {
-                fields.right.push(field);
-            }
-            i++;
+        	if (labels.hasOwnProperty(key)) {
+	            field = { value: labels[key].value, fieldLabel: labels[key].descriptor.name, helpText: labels[key].descriptor.description };
+	            if (i <= count) {
+	                fields.left.push(field);
+	            } else {
+	                fields.right.push(field);
+	            }
+	            i++;
+        	}
         }
         return fields;
     },

@@ -103,16 +103,6 @@ class Transaction extends AbstractOrderRelatedSubscriber
     /**
      *
      * @param \Wallee\Sdk\Model\Transaction $transaction
-     * @return string
-     */
-    protected function getOrderNumber($transaction)
-    {
-        return $transaction->getMerchantReference();
-    }
-
-    /**
-     *
-     * @param \Wallee\Sdk\Model\Transaction $transaction
      * @return int
      */
     protected function getTransactionId($transaction)
@@ -129,6 +119,7 @@ class Transaction extends AbstractOrderRelatedSubscriber
     {
         /* @var TransactionInfo $transactionInfo */
         $transactionInfo = $this->modelManager->getRepository(TransactionInfo::class)->findOneBy([
+            'spaceId' => $transaction->getLinkedSpaceId(),
             'transactionId' => $transaction->getId()
         ]);
         if (!($transactionInfo instanceof TransactionInfo)) {

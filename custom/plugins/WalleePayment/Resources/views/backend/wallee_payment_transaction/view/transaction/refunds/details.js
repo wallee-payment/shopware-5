@@ -84,7 +84,9 @@ Ext.define('Shopware.apps.WalleePaymentTransaction.view.transaction.Refunds.Deta
         
         var labels = me.record.get('labels');
         for (var index in labels) {
-            items.push(this.createLabelPanel(labels[index].group, labels[index].labels));
+        	if (labels.hasOwnProperty(index)) {
+        		items.push(this.createLabelPanel(labels[index].group, labels[index].labels));
+        	}
         }
         
         items.push(this.createLineItemPanel());
@@ -187,7 +189,9 @@ Ext.define('Shopware.apps.WalleePaymentTransaction.view.transaction.Refunds.Deta
         var me = this,
             fields = [];
         for (var key in labels) {
-            fields.push({ value: labels[key].value, fieldLabel: labels[key].descriptor.name, helpText: labels[key].descriptor.description });
+        	if (labels.hasOwnProperty(key)) {
+        		fields.push({ value: labels[key].value, fieldLabel: labels[key].descriptor.name, helpText: labels[key].descriptor.description });
+        	}
         }
         return fields;
     },
