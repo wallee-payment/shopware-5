@@ -24,7 +24,9 @@ use WalleePayment\Models\TransactionInfo;
 use Shopware\Models\Widget\Widget;
 use Shopware\Components\Plugin\Context\ActivateContext;
 
-require_once dirname(__FILE__) . '/vendor/autoload.php';
+if (\file_exists(dirname(__FILE__) . '/vendor/autoload.php')) {
+    require_once dirname(__FILE__) . '/vendor/autoload.php';
+}
 
 class WalleePayment extends Plugin
 {
