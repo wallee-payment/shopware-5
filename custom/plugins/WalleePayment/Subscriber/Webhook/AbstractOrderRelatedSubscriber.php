@@ -9,7 +9,6 @@
  * @author customweb GmbH (http://www.customweb.com/)
  * @license http://www.apache.org/licenses/LICENSE-2.0  Apache Software License (ASL 2.0)
  */
-
 namespace WalleePayment\Subscriber\Webhook;
 
 use WalleePayment\Components\Webhook\Request as WebhookRequest;
@@ -47,18 +46,21 @@ abstract class AbstractOrderRelatedSubscriber extends AbstractSubscriber
     {
         $this->beginTransaction();
         try {
-            /* @var Order $order */
-            $order = $this->modelManager->getRepository(Order::class)->find($this->getOrderId($entity));
-            if ($order instanceof Order) {
-                /* @var OrderTransactionMapping $orderTransactionMapping */
-                $orderTransactionMapping = $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy([
-                    'orderId' => $order->getId()
-                ]);
-                if (! ($orderTransactionMapping instanceof OrderTransactionMapping) || $orderTransactionMapping->getTransactionId() != $this->getTransactionId($entity)) {
-                    return;
+            $orderId = $this->getOrderId($entity);
+            if ($orderId != null) {
+                /* @var Order $order */
+                $order = $this->modelManager->getRepository(Order::class)->find($orderId);
+                if ($order instanceof Order) {
+                    /* @var OrderTransactionMapping $orderTransactionMapping */
+                    $orderTransactionMapping = $this->modelManager->getRepository(OrderTransactionMapping::class)->findOneBy([
+                        'orderId' => $order->getId()
+                    ]);
+                    if (! ($orderTransactionMapping instanceof OrderTransactionMapping) || $orderTransactionMapping->getTransactionId() != $this->getTransactionId($entity)) {
+                        return;
+                    }
+                    $order = $this->modelManager->getRepository(Order::class)->find($order->getId(), LockMode::PESSIMISTIC_WRITE);
+                    $this->handleOrderRelatedInner($order, $entity);
                 }
-                $order = $this->modelManager->getRepository(Order::class)->find($order->getId(), LockMode::PESSIMISTIC_WRITE);
-                $this->handleOrderRelatedInner($order, $entity);
             }
 
             $this->modelManager->commit();
@@ -67,7 +69,7 @@ abstract class AbstractOrderRelatedSubscriber extends AbstractSubscriber
             throw $e;
         }
     }
-    
+
     protected function beginTransaction()
     {
         $this->modelManager->getConnection()->setTransactionIsolation(Connection::TRANSACTION_READ_COMMITTED);
@@ -88,13 +90,18 @@ abstract class AbstractOrderRelatedSubscriber extends AbstractSubscriber
      * @param object $entity
      * @return int
      */
-    protected function getOrderId($entity) {
+    protected function getOrderId($entity)
+    {
         /* @var TransactionInfo $transactionInfo */
         $transactionInfo = $this->modelManager->getRepository(TransactionInfo::class)->findOneBy([
             'spaceId' => $entity->getLinkedSpaceId(),
             'transactionId' => $this->getTransactionId($entity)
         ]);
-        return $transactionInfo->getOrderId();
+        if ($transactionInfo instanceof TransactionInfo) {
+            return $transactionInfo->getOrderId();
+        } else {
+            return null;
+        }
     }
 
     /**
