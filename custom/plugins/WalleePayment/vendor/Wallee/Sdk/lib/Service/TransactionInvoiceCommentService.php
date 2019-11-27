@@ -1,10 +1,8 @@
 <?php
 /**
- * wallee SDK
+ *  SDK
  *
- * This library allows to interact with the wallee payment service.
- * wallee SDK: 1.0.0
- * 
+ * This library allows to interact with the  payment service.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,14 @@
  * limitations under the License.
  */
 
+
 namespace Wallee\Sdk\Service;
 
 use Wallee\Sdk\ApiClient;
 use Wallee\Sdk\ApiException;
 use Wallee\Sdk\ApiResponse;
 use Wallee\Sdk\Http\HttpRequest;
+use Wallee\Sdk\ObjectSerializer;
 
 /**
  * TransactionInvoiceCommentService service
@@ -49,7 +49,7 @@ class TransactionInvoiceCommentService {
 	 * @param ApiClient $apiClient the api client
 	 */
 	public function __construct(ApiClient $apiClient) {
-		if ($apiClient == null) {
+		if (is_null($apiClient)) {
 			throw new \InvalidArgumentException('The api client is required.');
 		}
 
@@ -71,15 +71,15 @@ class TransactionInvoiceCommentService {
 	 *
 	 * Find by invoice
 	 *
-	 * @param int $spaceId  (required)
-	 * @param int $invoiceId  (required)
+	 * @param int $space_id  (required)
+	 * @param int $invoice_id  (required)
 	 * @throws \Wallee\Sdk\ApiException
 	 * @throws \Wallee\Sdk\VersioningException
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @return \Wallee\Sdk\Model\TransactionInvoiceComment[]
 	 */
-	public function all($spaceId, $invoiceId) {
-		return $this->allWithHttpInfo($spaceId, $invoiceId)->getData();
+	public function all($space_id, $invoice_id) {
+		return $this->allWithHttpInfo($space_id, $invoice_id)->getData();
 	}
 
 	/**
@@ -87,46 +87,46 @@ class TransactionInvoiceCommentService {
 	 *
 	 * Find by invoice
 	 *
-	 * @param int $spaceId  (required)
-	 * @param int $invoiceId  (required)
+	 * @param int $space_id  (required)
+	 * @param int $invoice_id  (required)
 	 * @throws \Wallee\Sdk\ApiException
 	 * @throws \Wallee\Sdk\VersioningException
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @return ApiResponse
 	 */
-	public function allWithHttpInfo($spaceId, $invoiceId) {
-		// verify the required parameter 'spaceId' is set
-		if ($spaceId === null) {
-			throw new \InvalidArgumentException('Missing the required parameter $spaceId when calling all');
+	public function allWithHttpInfo($space_id, $invoice_id) {
+		// verify the required parameter 'space_id' is set
+		if (is_null($space_id)) {
+			throw new \InvalidArgumentException('Missing the required parameter $space_id when calling all');
 		}
-		// verify the required parameter 'invoiceId' is set
-		if ($invoiceId === null) {
-			throw new \InvalidArgumentException('Missing the required parameter $invoiceId when calling all');
+		// verify the required parameter 'invoice_id' is set
+		if (is_null($invoice_id)) {
+			throw new \InvalidArgumentException('Missing the required parameter $invoice_id when calling all');
 		}
 		// header params
-		$headerParams = array();
-		$headerAccept = $this->apiClient->selectHeaderAccept(array('application/json;charset=utf-8'));
-		if ($headerAccept !== null) {
+		$headerParams = [];
+		$headerAccept = $this->apiClient->selectHeaderAccept(['application/json;charset=utf-8']);
+		if (!is_null($headerAccept)) {
 			$headerParams[HttpRequest::HEADER_KEY_ACCEPT] = $headerAccept;
 		}
-		$headerParams[HttpRequest::HEADER_KEY_CONTENT_TYPE] = $this->apiClient->selectHeaderContentType(array('application/json;charset=utf-8'));
+		$headerParams[HttpRequest::HEADER_KEY_CONTENT_TYPE] = $this->apiClient->selectHeaderContentType(['application/json;charset=utf-8']);
 
 		// query params
-		$queryParams = array();
-		if ($spaceId !== null) {
-			$queryParams['spaceId'] = $this->apiClient->getSerializer()->toQueryValue($spaceId);
+		$queryParams = [];
+		if (!is_null($space_id)) {
+			$queryParams['spaceId'] = $this->apiClient->getSerializer()->toQueryValue($space_id);
 		}
-		if ($invoiceId !== null) {
-			$queryParams['invoiceId'] = $this->apiClient->getSerializer()->toQueryValue($invoiceId);
+		if (!is_null($invoice_id)) {
+			$queryParams['invoiceId'] = $this->apiClient->getSerializer()->toQueryValue($invoice_id);
 		}
 
 		// path params
-		$resourcePath = "/transaction-invoice-comment/all";
+		$resourcePath = '/transaction-invoice-comment/all';
 		// default format to json
-		$resourcePath = str_replace("{format}", "json", $resourcePath);
+		$resourcePath = str_replace('{format}', 'json', $resourcePath);
 
 		// form params
-		$formParams = array();
+		$formParams = [];
 		
 		// for model (json/xml)
 		$httpBody = '';
@@ -149,20 +149,31 @@ class TransactionInvoiceCommentService {
 			return new ApiResponse($response->getStatusCode(), $response->getHeaders(), $this->apiClient->getSerializer()->deserialize($response->getData(), '\Wallee\Sdk\Model\TransactionInvoiceComment[]', $response->getHeaders()));
 		} catch (ApiException $e) {
 			switch ($e->getCode()) {
-				case 200:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\TransactionInvoiceComment[]', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
-				case 442:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ClientError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
-				case 542:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ServerError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
+                case 200:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\TransactionInvoiceComment[]',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
+                case 442:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ClientError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
+                case 542:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ServerError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
 			}
-
 			throw $e;
 		}
 	}
@@ -172,15 +183,15 @@ class TransactionInvoiceCommentService {
 	 *
 	 * Create
 	 *
-	 * @param int $spaceId  (required)
+	 * @param int $space_id  (required)
 	 * @param \Wallee\Sdk\Model\TransactionInvoiceCommentCreate $entity  (required)
 	 * @throws \Wallee\Sdk\ApiException
 	 * @throws \Wallee\Sdk\VersioningException
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @return \Wallee\Sdk\Model\TransactionInvoiceComment
 	 */
-	public function create($spaceId, $entity) {
-		return $this->createWithHttpInfo($spaceId, $entity)->getData();
+	public function create($space_id, $entity) {
+		return $this->createWithHttpInfo($space_id, $entity)->getData();
 	}
 
 	/**
@@ -188,43 +199,43 @@ class TransactionInvoiceCommentService {
 	 *
 	 * Create
 	 *
-	 * @param int $spaceId  (required)
+	 * @param int $space_id  (required)
 	 * @param \Wallee\Sdk\Model\TransactionInvoiceCommentCreate $entity  (required)
 	 * @throws \Wallee\Sdk\ApiException
 	 * @throws \Wallee\Sdk\VersioningException
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @return ApiResponse
 	 */
-	public function createWithHttpInfo($spaceId, $entity) {
-		// verify the required parameter 'spaceId' is set
-		if ($spaceId === null) {
-			throw new \InvalidArgumentException('Missing the required parameter $spaceId when calling create');
+	public function createWithHttpInfo($space_id, $entity) {
+		// verify the required parameter 'space_id' is set
+		if (is_null($space_id)) {
+			throw new \InvalidArgumentException('Missing the required parameter $space_id when calling create');
 		}
 		// verify the required parameter 'entity' is set
-		if ($entity === null) {
+		if (is_null($entity)) {
 			throw new \InvalidArgumentException('Missing the required parameter $entity when calling create');
 		}
 		// header params
-		$headerParams = array();
-		$headerAccept = $this->apiClient->selectHeaderAccept(array('application/json;charset=utf-8'));
-		if ($headerAccept !== null) {
+		$headerParams = [];
+		$headerAccept = $this->apiClient->selectHeaderAccept(['application/json;charset=utf-8']);
+		if (!is_null($headerAccept)) {
 			$headerParams[HttpRequest::HEADER_KEY_ACCEPT] = $headerAccept;
 		}
-		$headerParams[HttpRequest::HEADER_KEY_CONTENT_TYPE] = $this->apiClient->selectHeaderContentType(array('application/json;charset=utf-8'));
+		$headerParams[HttpRequest::HEADER_KEY_CONTENT_TYPE] = $this->apiClient->selectHeaderContentType(['application/json;charset=utf-8']);
 
 		// query params
-		$queryParams = array();
-		if ($spaceId !== null) {
-			$queryParams['spaceId'] = $this->apiClient->getSerializer()->toQueryValue($spaceId);
+		$queryParams = [];
+		if (!is_null($space_id)) {
+			$queryParams['spaceId'] = $this->apiClient->getSerializer()->toQueryValue($space_id);
 		}
 
 		// path params
-		$resourcePath = "/transaction-invoice-comment/create";
+		$resourcePath = '/transaction-invoice-comment/create';
 		// default format to json
-		$resourcePath = str_replace("{format}", "json", $resourcePath);
+		$resourcePath = str_replace('{format}', 'json', $resourcePath);
 
 		// form params
-		$formParams = array();
+		$formParams = [];
 		// body params
 		$tempBody = null;
 		if (isset($entity)) {
@@ -252,20 +263,31 @@ class TransactionInvoiceCommentService {
 			return new ApiResponse($response->getStatusCode(), $response->getHeaders(), $this->apiClient->getSerializer()->deserialize($response->getData(), '\Wallee\Sdk\Model\TransactionInvoiceComment', $response->getHeaders()));
 		} catch (ApiException $e) {
 			switch ($e->getCode()) {
-				case 200:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\TransactionInvoiceComment', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
-				case 442:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ClientError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
-				case 542:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ServerError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
+                case 200:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\TransactionInvoiceComment',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
+                case 442:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ClientError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
+                case 542:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ServerError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
 			}
-
 			throw $e;
 		}
 	}
@@ -275,15 +297,15 @@ class TransactionInvoiceCommentService {
 	 *
 	 * Delete
 	 *
-	 * @param int $spaceId  (required)
+	 * @param int $space_id  (required)
 	 * @param int $id  (required)
 	 * @throws \Wallee\Sdk\ApiException
 	 * @throws \Wallee\Sdk\VersioningException
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @return void
 	 */
-	public function delete($spaceId, $id) {
-		return $this->deleteWithHttpInfo($spaceId, $id)->getData();
+	public function delete($space_id, $id) {
+		return $this->deleteWithHttpInfo($space_id, $id)->getData();
 	}
 
 	/**
@@ -291,46 +313,46 @@ class TransactionInvoiceCommentService {
 	 *
 	 * Delete
 	 *
-	 * @param int $spaceId  (required)
+	 * @param int $space_id  (required)
 	 * @param int $id  (required)
 	 * @throws \Wallee\Sdk\ApiException
 	 * @throws \Wallee\Sdk\VersioningException
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @return ApiResponse
 	 */
-	public function deleteWithHttpInfo($spaceId, $id) {
-		// verify the required parameter 'spaceId' is set
-		if ($spaceId === null) {
-			throw new \InvalidArgumentException('Missing the required parameter $spaceId when calling delete');
+	public function deleteWithHttpInfo($space_id, $id) {
+		// verify the required parameter 'space_id' is set
+		if (is_null($space_id)) {
+			throw new \InvalidArgumentException('Missing the required parameter $space_id when calling delete');
 		}
 		// verify the required parameter 'id' is set
-		if ($id === null) {
+		if (is_null($id)) {
 			throw new \InvalidArgumentException('Missing the required parameter $id when calling delete');
 		}
 		// header params
-		$headerParams = array();
-		$headerAccept = $this->apiClient->selectHeaderAccept(array('application/json;charset=utf-8'));
-		if ($headerAccept !== null) {
+		$headerParams = [];
+		$headerAccept = $this->apiClient->selectHeaderAccept(['application/json;charset=utf-8']);
+		if (!is_null($headerAccept)) {
 			$headerParams[HttpRequest::HEADER_KEY_ACCEPT] = $headerAccept;
 		}
-		$headerParams[HttpRequest::HEADER_KEY_CONTENT_TYPE] = $this->apiClient->selectHeaderContentType(array('application/json;charset=utf-8'));
+		$headerParams[HttpRequest::HEADER_KEY_CONTENT_TYPE] = $this->apiClient->selectHeaderContentType(['application/json;charset=utf-8']);
 
 		// query params
-		$queryParams = array();
-		if ($spaceId !== null) {
-			$queryParams['spaceId'] = $this->apiClient->getSerializer()->toQueryValue($spaceId);
+		$queryParams = [];
+		if (!is_null($space_id)) {
+			$queryParams['spaceId'] = $this->apiClient->getSerializer()->toQueryValue($space_id);
 		}
-		if ($id !== null) {
+		if (!is_null($id)) {
 			$queryParams['id'] = $this->apiClient->getSerializer()->toQueryValue($id);
 		}
 
 		// path params
-		$resourcePath = "/transaction-invoice-comment/delete";
+		$resourcePath = '/transaction-invoice-comment/delete';
 		// default format to json
-		$resourcePath = str_replace("{format}", "json", $resourcePath);
+		$resourcePath = str_replace('{format}', 'json', $resourcePath);
 
 		// form params
-		$formParams = array();
+		$formParams = [];
 		
 		// for model (json/xml)
 		$httpBody = '';
@@ -353,20 +375,31 @@ class TransactionInvoiceCommentService {
 			return new ApiResponse($response->getStatusCode(), $response->getHeaders());
 		} catch (ApiException $e) {
 			switch ($e->getCode()) {
-				case 409:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ClientError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
-				case 442:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ClientError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
-				case 542:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ServerError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
+                case 409:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ClientError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
+                case 442:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ClientError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
+                case 542:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ServerError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
 			}
-
 			throw $e;
 		}
 	}
@@ -376,15 +409,15 @@ class TransactionInvoiceCommentService {
 	 *
 	 * Pin
 	 *
-	 * @param int $spaceId  (required)
+	 * @param int $space_id  (required)
 	 * @param int $id  (required)
 	 * @throws \Wallee\Sdk\ApiException
 	 * @throws \Wallee\Sdk\VersioningException
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @return void
 	 */
-	public function pin($spaceId, $id) {
-		return $this->pinWithHttpInfo($spaceId, $id)->getData();
+	public function pin($space_id, $id) {
+		return $this->pinWithHttpInfo($space_id, $id)->getData();
 	}
 
 	/**
@@ -392,46 +425,46 @@ class TransactionInvoiceCommentService {
 	 *
 	 * Pin
 	 *
-	 * @param int $spaceId  (required)
+	 * @param int $space_id  (required)
 	 * @param int $id  (required)
 	 * @throws \Wallee\Sdk\ApiException
 	 * @throws \Wallee\Sdk\VersioningException
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @return ApiResponse
 	 */
-	public function pinWithHttpInfo($spaceId, $id) {
-		// verify the required parameter 'spaceId' is set
-		if ($spaceId === null) {
-			throw new \InvalidArgumentException('Missing the required parameter $spaceId when calling pin');
+	public function pinWithHttpInfo($space_id, $id) {
+		// verify the required parameter 'space_id' is set
+		if (is_null($space_id)) {
+			throw new \InvalidArgumentException('Missing the required parameter $space_id when calling pin');
 		}
 		// verify the required parameter 'id' is set
-		if ($id === null) {
+		if (is_null($id)) {
 			throw new \InvalidArgumentException('Missing the required parameter $id when calling pin');
 		}
 		// header params
-		$headerParams = array();
-		$headerAccept = $this->apiClient->selectHeaderAccept(array('application/json;charset=utf-8'));
-		if ($headerAccept !== null) {
+		$headerParams = [];
+		$headerAccept = $this->apiClient->selectHeaderAccept(['application/json;charset=utf-8']);
+		if (!is_null($headerAccept)) {
 			$headerParams[HttpRequest::HEADER_KEY_ACCEPT] = $headerAccept;
 		}
-		$headerParams[HttpRequest::HEADER_KEY_CONTENT_TYPE] = $this->apiClient->selectHeaderContentType(array('*/*'));
+		$headerParams[HttpRequest::HEADER_KEY_CONTENT_TYPE] = $this->apiClient->selectHeaderContentType(['*/*']);
 
 		// query params
-		$queryParams = array();
-		if ($spaceId !== null) {
-			$queryParams['spaceId'] = $this->apiClient->getSerializer()->toQueryValue($spaceId);
+		$queryParams = [];
+		if (!is_null($space_id)) {
+			$queryParams['spaceId'] = $this->apiClient->getSerializer()->toQueryValue($space_id);
 		}
-		if ($id !== null) {
+		if (!is_null($id)) {
 			$queryParams['id'] = $this->apiClient->getSerializer()->toQueryValue($id);
 		}
 
 		// path params
-		$resourcePath = "/transaction-invoice-comment/pin";
+		$resourcePath = '/transaction-invoice-comment/pin';
 		// default format to json
-		$resourcePath = str_replace("{format}", "json", $resourcePath);
+		$resourcePath = str_replace('{format}', 'json', $resourcePath);
 
 		// form params
-		$formParams = array();
+		$formParams = [];
 		
 		// for model (json/xml)
 		$httpBody = '';
@@ -454,20 +487,31 @@ class TransactionInvoiceCommentService {
 			return new ApiResponse($response->getStatusCode(), $response->getHeaders());
 		} catch (ApiException $e) {
 			switch ($e->getCode()) {
-				case 409:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ClientError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
-				case 442:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ClientError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
-				case 542:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ServerError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
+                case 409:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ClientError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
+                case 442:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ClientError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
+                case 542:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ServerError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
 			}
-
 			throw $e;
 		}
 	}
@@ -477,15 +521,15 @@ class TransactionInvoiceCommentService {
 	 *
 	 * Read
 	 *
-	 * @param int $spaceId  (required)
+	 * @param int $space_id  (required)
 	 * @param int $id  (required)
 	 * @throws \Wallee\Sdk\ApiException
 	 * @throws \Wallee\Sdk\VersioningException
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @return \Wallee\Sdk\Model\TransactionInvoiceComment
 	 */
-	public function read($spaceId, $id) {
-		return $this->readWithHttpInfo($spaceId, $id)->getData();
+	public function read($space_id, $id) {
+		return $this->readWithHttpInfo($space_id, $id)->getData();
 	}
 
 	/**
@@ -493,46 +537,46 @@ class TransactionInvoiceCommentService {
 	 *
 	 * Read
 	 *
-	 * @param int $spaceId  (required)
+	 * @param int $space_id  (required)
 	 * @param int $id  (required)
 	 * @throws \Wallee\Sdk\ApiException
 	 * @throws \Wallee\Sdk\VersioningException
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @return ApiResponse
 	 */
-	public function readWithHttpInfo($spaceId, $id) {
-		// verify the required parameter 'spaceId' is set
-		if ($spaceId === null) {
-			throw new \InvalidArgumentException('Missing the required parameter $spaceId when calling read');
+	public function readWithHttpInfo($space_id, $id) {
+		// verify the required parameter 'space_id' is set
+		if (is_null($space_id)) {
+			throw new \InvalidArgumentException('Missing the required parameter $space_id when calling read');
 		}
 		// verify the required parameter 'id' is set
-		if ($id === null) {
+		if (is_null($id)) {
 			throw new \InvalidArgumentException('Missing the required parameter $id when calling read');
 		}
 		// header params
-		$headerParams = array();
-		$headerAccept = $this->apiClient->selectHeaderAccept(array('application/json;charset=utf-8'));
-		if ($headerAccept !== null) {
+		$headerParams = [];
+		$headerAccept = $this->apiClient->selectHeaderAccept(['application/json;charset=utf-8']);
+		if (!is_null($headerAccept)) {
 			$headerParams[HttpRequest::HEADER_KEY_ACCEPT] = $headerAccept;
 		}
-		$headerParams[HttpRequest::HEADER_KEY_CONTENT_TYPE] = $this->apiClient->selectHeaderContentType(array('*/*'));
+		$headerParams[HttpRequest::HEADER_KEY_CONTENT_TYPE] = $this->apiClient->selectHeaderContentType(['*/*']);
 
 		// query params
-		$queryParams = array();
-		if ($spaceId !== null) {
-			$queryParams['spaceId'] = $this->apiClient->getSerializer()->toQueryValue($spaceId);
+		$queryParams = [];
+		if (!is_null($space_id)) {
+			$queryParams['spaceId'] = $this->apiClient->getSerializer()->toQueryValue($space_id);
 		}
-		if ($id !== null) {
+		if (!is_null($id)) {
 			$queryParams['id'] = $this->apiClient->getSerializer()->toQueryValue($id);
 		}
 
 		// path params
-		$resourcePath = "/transaction-invoice-comment/read";
+		$resourcePath = '/transaction-invoice-comment/read';
 		// default format to json
-		$resourcePath = str_replace("{format}", "json", $resourcePath);
+		$resourcePath = str_replace('{format}', 'json', $resourcePath);
 
 		// form params
-		$formParams = array();
+		$formParams = [];
 		
 		// for model (json/xml)
 		$httpBody = '';
@@ -555,20 +599,31 @@ class TransactionInvoiceCommentService {
 			return new ApiResponse($response->getStatusCode(), $response->getHeaders(), $this->apiClient->getSerializer()->deserialize($response->getData(), '\Wallee\Sdk\Model\TransactionInvoiceComment', $response->getHeaders()));
 		} catch (ApiException $e) {
 			switch ($e->getCode()) {
-				case 200:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\TransactionInvoiceComment', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
-				case 442:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ClientError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
-				case 542:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ServerError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
+                case 200:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\TransactionInvoiceComment',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
+                case 442:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ClientError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
+                case 542:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ServerError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
 			}
-
 			throw $e;
 		}
 	}
@@ -578,15 +633,15 @@ class TransactionInvoiceCommentService {
 	 *
 	 * Unpin
 	 *
-	 * @param int $spaceId  (required)
+	 * @param int $space_id  (required)
 	 * @param int $id  (required)
 	 * @throws \Wallee\Sdk\ApiException
 	 * @throws \Wallee\Sdk\VersioningException
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @return void
 	 */
-	public function unpin($spaceId, $id) {
-		return $this->unpinWithHttpInfo($spaceId, $id)->getData();
+	public function unpin($space_id, $id) {
+		return $this->unpinWithHttpInfo($space_id, $id)->getData();
 	}
 
 	/**
@@ -594,46 +649,46 @@ class TransactionInvoiceCommentService {
 	 *
 	 * Unpin
 	 *
-	 * @param int $spaceId  (required)
+	 * @param int $space_id  (required)
 	 * @param int $id  (required)
 	 * @throws \Wallee\Sdk\ApiException
 	 * @throws \Wallee\Sdk\VersioningException
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @return ApiResponse
 	 */
-	public function unpinWithHttpInfo($spaceId, $id) {
-		// verify the required parameter 'spaceId' is set
-		if ($spaceId === null) {
-			throw new \InvalidArgumentException('Missing the required parameter $spaceId when calling unpin');
+	public function unpinWithHttpInfo($space_id, $id) {
+		// verify the required parameter 'space_id' is set
+		if (is_null($space_id)) {
+			throw new \InvalidArgumentException('Missing the required parameter $space_id when calling unpin');
 		}
 		// verify the required parameter 'id' is set
-		if ($id === null) {
+		if (is_null($id)) {
 			throw new \InvalidArgumentException('Missing the required parameter $id when calling unpin');
 		}
 		// header params
-		$headerParams = array();
-		$headerAccept = $this->apiClient->selectHeaderAccept(array('application/json;charset=utf-8'));
-		if ($headerAccept !== null) {
+		$headerParams = [];
+		$headerAccept = $this->apiClient->selectHeaderAccept(['application/json;charset=utf-8']);
+		if (!is_null($headerAccept)) {
 			$headerParams[HttpRequest::HEADER_KEY_ACCEPT] = $headerAccept;
 		}
-		$headerParams[HttpRequest::HEADER_KEY_CONTENT_TYPE] = $this->apiClient->selectHeaderContentType(array('*/*'));
+		$headerParams[HttpRequest::HEADER_KEY_CONTENT_TYPE] = $this->apiClient->selectHeaderContentType(['*/*']);
 
 		// query params
-		$queryParams = array();
-		if ($spaceId !== null) {
-			$queryParams['spaceId'] = $this->apiClient->getSerializer()->toQueryValue($spaceId);
+		$queryParams = [];
+		if (!is_null($space_id)) {
+			$queryParams['spaceId'] = $this->apiClient->getSerializer()->toQueryValue($space_id);
 		}
-		if ($id !== null) {
+		if (!is_null($id)) {
 			$queryParams['id'] = $this->apiClient->getSerializer()->toQueryValue($id);
 		}
 
 		// path params
-		$resourcePath = "/transaction-invoice-comment/unpin";
+		$resourcePath = '/transaction-invoice-comment/unpin';
 		// default format to json
-		$resourcePath = str_replace("{format}", "json", $resourcePath);
+		$resourcePath = str_replace('{format}', 'json', $resourcePath);
 
 		// form params
-		$formParams = array();
+		$formParams = [];
 		
 		// for model (json/xml)
 		$httpBody = '';
@@ -656,20 +711,31 @@ class TransactionInvoiceCommentService {
 			return new ApiResponse($response->getStatusCode(), $response->getHeaders());
 		} catch (ApiException $e) {
 			switch ($e->getCode()) {
-				case 409:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ClientError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
-				case 442:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ClientError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
-				case 542:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ServerError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
+                case 409:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ClientError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
+                case 442:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ClientError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
+                case 542:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ServerError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
 			}
-
 			throw $e;
 		}
 	}
@@ -679,15 +745,15 @@ class TransactionInvoiceCommentService {
 	 *
 	 * Update
 	 *
-	 * @param int $spaceId  (required)
+	 * @param int $space_id  (required)
 	 * @param \Wallee\Sdk\Model\TransactionInvoiceCommentActive $entity  (required)
 	 * @throws \Wallee\Sdk\ApiException
 	 * @throws \Wallee\Sdk\VersioningException
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @return \Wallee\Sdk\Model\TransactionInvoiceComment
 	 */
-	public function update($spaceId, $entity) {
-		return $this->updateWithHttpInfo($spaceId, $entity)->getData();
+	public function update($space_id, $entity) {
+		return $this->updateWithHttpInfo($space_id, $entity)->getData();
 	}
 
 	/**
@@ -695,43 +761,43 @@ class TransactionInvoiceCommentService {
 	 *
 	 * Update
 	 *
-	 * @param int $spaceId  (required)
+	 * @param int $space_id  (required)
 	 * @param \Wallee\Sdk\Model\TransactionInvoiceCommentActive $entity  (required)
 	 * @throws \Wallee\Sdk\ApiException
 	 * @throws \Wallee\Sdk\VersioningException
 	 * @throws \Wallee\Sdk\Http\ConnectionException
 	 * @return ApiResponse
 	 */
-	public function updateWithHttpInfo($spaceId, $entity) {
-		// verify the required parameter 'spaceId' is set
-		if ($spaceId === null) {
-			throw new \InvalidArgumentException('Missing the required parameter $spaceId when calling update');
+	public function updateWithHttpInfo($space_id, $entity) {
+		// verify the required parameter 'space_id' is set
+		if (is_null($space_id)) {
+			throw new \InvalidArgumentException('Missing the required parameter $space_id when calling update');
 		}
 		// verify the required parameter 'entity' is set
-		if ($entity === null) {
+		if (is_null($entity)) {
 			throw new \InvalidArgumentException('Missing the required parameter $entity when calling update');
 		}
 		// header params
-		$headerParams = array();
-		$headerAccept = $this->apiClient->selectHeaderAccept(array('application/json;charset=utf-8'));
-		if ($headerAccept !== null) {
+		$headerParams = [];
+		$headerAccept = $this->apiClient->selectHeaderAccept(['application/json;charset=utf-8']);
+		if (!is_null($headerAccept)) {
 			$headerParams[HttpRequest::HEADER_KEY_ACCEPT] = $headerAccept;
 		}
-		$headerParams[HttpRequest::HEADER_KEY_CONTENT_TYPE] = $this->apiClient->selectHeaderContentType(array('application/json;charset=utf-8'));
+		$headerParams[HttpRequest::HEADER_KEY_CONTENT_TYPE] = $this->apiClient->selectHeaderContentType(['application/json;charset=utf-8']);
 
 		// query params
-		$queryParams = array();
-		if ($spaceId !== null) {
-			$queryParams['spaceId'] = $this->apiClient->getSerializer()->toQueryValue($spaceId);
+		$queryParams = [];
+		if (!is_null($space_id)) {
+			$queryParams['spaceId'] = $this->apiClient->getSerializer()->toQueryValue($space_id);
 		}
 
 		// path params
-		$resourcePath = "/transaction-invoice-comment/update";
+		$resourcePath = '/transaction-invoice-comment/update';
 		// default format to json
-		$resourcePath = str_replace("{format}", "json", $resourcePath);
+		$resourcePath = str_replace('{format}', 'json', $resourcePath);
 
 		// form params
-		$formParams = array();
+		$formParams = [];
 		// body params
 		$tempBody = null;
 		if (isset($entity)) {
@@ -759,24 +825,39 @@ class TransactionInvoiceCommentService {
 			return new ApiResponse($response->getStatusCode(), $response->getHeaders(), $this->apiClient->getSerializer()->deserialize($response->getData(), '\Wallee\Sdk\Model\TransactionInvoiceComment', $response->getHeaders()));
 		} catch (ApiException $e) {
 			switch ($e->getCode()) {
-				case 200:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\TransactionInvoiceComment', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
-				case 409:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ClientError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
-				case 442:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ClientError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
-				case 542:
-					$responseObject = $this->apiClient->getSerializer()->deserialize($e->getResponseBody(), '\Wallee\Sdk\Model\ServerError', $e->getResponseHeaders());
-					$e = new ApiException($e->getLogToken(), $responseObject->getMessage(), $e->getCode(), $e->getResponseHeaders(), $e->getResponseBody(), $responseObject);
-					break;
+                case 200:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\TransactionInvoiceComment',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
+                case 409:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ClientError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
+                case 442:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ClientError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
+                case 542:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\Wallee\Sdk\Model\ServerError',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                break;
 			}
-
 			throw $e;
 		}
 	}

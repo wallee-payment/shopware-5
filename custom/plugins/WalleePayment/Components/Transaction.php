@@ -95,13 +95,27 @@ class Transaction extends AbstractService
      * @var Session
      */
     private $sessionService;
-
+    
     /**
      * The transaction API service.
      *
      * @var \Wallee\Sdk\Service\TransactionService
      */
     private $transactionService;
+    
+    /**
+     * The transaction iframe API service.
+     *
+     * @var \Wallee\Sdk\Service\TransactionIframeService
+     */
+    private $transactionIframeService;
+    
+    /**
+     * The transaction payment page API service.
+     *
+     * @var \Wallee\Sdk\Service\TransactionPaymentPageService
+     */
+    private $transactionPaymentPageService;
 
     /**
      * Constructor.
@@ -126,6 +140,8 @@ class Transaction extends AbstractService
         $this->transactionInfoService = $transactionInfoService;
         $this->sessionService = $sessionService;
         $this->transactionService = new \Wallee\Sdk\Service\TransactionService($this->apiClient);
+        $this->transactionIframeService = new \Wallee\Sdk\Service\TransactionIframeService($this->apiClient);
+        $this->transactionPaymentPageService = new \Wallee\Sdk\Service\TransactionPaymentPageService($this->apiClient);
     }
 
     /**
@@ -197,7 +213,7 @@ class Transaction extends AbstractService
         }
 
         return $this->callApi($this->apiClient, function () use ($transaction) {
-            return $this->transactionService->buildJavaScriptUrl($transaction->getLinkedSpaceId(), $transaction->getId());
+        	return $this->transactionIframeService->javascriptUrl($transaction->getLinkedSpaceId(), $transaction->getId());
         });
     }
 
@@ -243,7 +259,7 @@ class Transaction extends AbstractService
         }
 
         return $this->callApi($this->apiClient, function () use ($transaction) {
-            return $this->transactionService->buildPaymentPageUrl($transaction->getLinkedSpaceId(), $transaction->getId());
+            return $this->transactionPaymentPageService->paymentPageUrl($transaction->getLinkedSpaceId(), $transaction->getId());
         });
     }
 
