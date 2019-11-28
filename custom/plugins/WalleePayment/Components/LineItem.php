@@ -240,18 +240,10 @@ class LineItem extends AbstractService
             $lineItems[] = $this->cleanLineItem($lineItem);
         }
                 
-        $basketTotalAmount = 0;
-        if (isset($basketData['AmountWithTaxNumeric']) && !empty($basketData['AmountWithTaxNumeric']) && !$this->isTaxFree()) {
-            $basketTotalAmount = $basketData['AmountWithTaxNumeric'];
-        } elseif (isset($basketData['AmountNumeric']) && !empty($basketData['AmountNumeric'])) {
-            $basketTotalAmount = $basketData['AmountNumeric'];
-        }
-        if (($basketTotalAmount > 0 || $easyCouponShippingAmount != 0) && isset($shippingcosts['brutto'])) {
-            $basketTotalAmount += $shippingcosts['brutto'] - $easyCouponShippingAmount;
-        }
-        if ($basketTotalAmount < 0) {
-            $basketTotalAmount = 0;
-        }
+        $basketTotalAmount = $this->getBasketTotalAmount(isset($basketData['AmountWithTaxNumeric']) ? $basketData['AmountWithTaxNumeric'] : null,
+            isset($basketData['AmountNumeric']) ? $basketData['AmountNumeric'] : null,
+            isset($shippingcosts['brutto']) ? $shippingcosts['brutto'] : null,
+            $easyCouponShippingAmount, $this->isTaxFree());
         
         $lineItemTotalAmount = $this->getTotalAmountIncludingTax($lineItems);
         if (abs($lineItemTotalAmount - $basketTotalAmount) > 0.0001) {
@@ -259,6 +251,35 @@ class LineItem extends AbstractService
         }
         
         return $lineItems;
+    }
+    
+    /**
+     * 
+     * @param float $amountWithTaxNumeric
+     * @param float $amountNumeric
+     * @param float $shippingAmount
+     * @param float $easyCouponShippingAmount
+     * @param boolean $taxFree
+     * @return float
+     */
+    private function getBasketTotalAmount($amountWithTaxNumeric, $amountNumeric, $shippingAmount, $easyCouponShippingAmount, $taxFree)
+    {
+        $totalAmount = 0;
+        if (! empty($amountWithTaxNumeric) && ! $taxFree) {
+            $totalAmount = $amountWithTaxNumeric;
+        } elseif (! empty($amountNumeric)) {
+            $totalAmount = $amountNumeric;
+        }
+        if ($shippingAmount !== null) {
+            $totalAmount += $shippingAmount;
+            if ($easyCouponShippingAmount !== null) {
+                $totalAmount -= $easyCouponShippingAmount;
+            }
+        }
+        if ($totalAmount < 0) {
+            $totalAmount = 0;
+        }
+        return $totalAmount;
     }
     
     /**
