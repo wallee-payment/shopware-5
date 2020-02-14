@@ -184,16 +184,20 @@ class Transaction extends AbstractOrderRelatedSubscriber
 
     private function failed(Order $order, \Wallee\Sdk\Model\Transaction $transaction)
     {
-        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
-        if ((boolean) $pluginConfig['orderRemoveFailed']) {
-            $this->transactionInfoService->updateTransactionInfoByOrder($transaction, $order);
-            $this->modelManager->remove($order);
-            $this->modelManager->flush();
-        } else {
-            $order->setOrderStatus($this->getStatus($this->getCancelledOrderStatusId($order)));
-            $order->setPaymentStatus($this->getStatus(Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED));
-            $this->modelManager->flush($order);
-            $this->transactionInfoService->updateTransactionInfoByOrder($transaction, $order);
+        try {
+            $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
+            if ((boolean) $pluginConfig['orderRemoveFailed']) {
+                $this->transactionInfoService->updateTransactionInfoByOrder($transaction, $order);
+                $this->modelManager->remove($order);
+                $this->modelManager->flush();
+            } else {
+                $order->setOrderStatus($this->getStatus($this->getCancelledOrderStatusId($order)));
+                $order->setPaymentStatus($this->getStatus(Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED));
+                $this->modelManager->flush($order);
+                $this->transactionInfoService->updateTransactionInfoByOrder($transaction, $order);
+            }
+        } catch (\Doctrine\ORM\EntityNotFoundException $e) {
+            // The order was already deleted, so nothing more needs to be done.
         }
     }
 
