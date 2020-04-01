@@ -1,26 +1,25 @@
 {
-    "name": "wallee/shopware",
-    "description": "wallee integration for Shopware",
-    "keywords": [
+	"name" : "wallee/shopware-5",
+	"description" : "wallee integration for Shopware 5",
+	"keywords" : [
 		"wallee",
 		"payment",
 		"php",
 		"shopware"
 	],
-	"homepage": "https://www.wallee.com/",
-    "license": "Apache-2.0",
-    "authors": [
-		{
-			"name": "customweb GmbH",
-			"homepage": "https://customweb.com"
+	"homepage" : "https://www.wallee.com/",
+	"license" : "Apache-2.0",
+	"authors" : [{
+			"name" : "customweb GmbH",
+			"homepage" : "https://customweb.com"
 		}
 	],
-	"type": "shopware-plugin",
-	"version" : "1.0.59",
-    "require": {
-        "wallee/sdk": "2.0.11"
-    },
-    "extra": {
-        "installer-name": "WalleePayment"
-    }
+	"type" : "shopware-plugin",
+	"version" : "1.0.60",
+	"require" : {
+		"wallee/sdk" : "2.0.11"
+	},
+	"extra" : {
+		"installer-name" : "WalleePayment"
+	}
 }
