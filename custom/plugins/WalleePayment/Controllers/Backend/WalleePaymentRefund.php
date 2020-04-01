@@ -1,9 +1,9 @@
 <?php
 
 /**
- * wallee Shopware
+ * wallee Shopware 5
  *
- * This Shopware extension enables to process payments with wallee (https://www.wallee.com/).
+ * This Shopware 5 extension enables to process payments with wallee (https://www.wallee.com/).
  *
  * @package Wallee_Payment
  * @author customweb GmbH (http://www.customweb.com/)

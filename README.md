@@ -1,5 +1,5 @@
-# wallee Shopware
-This repository contains the Shopware plugin that enables to process payments with [wallee](https://www.wallee.com/).
+# wallee Shopware 5
+This repository contains the Shopware 5 plugin that enables to process payments with [wallee](https://www.wallee.com/).
 
 ###### To use this extension, a [wallee](https://www.wallee.com/) account is required.
 
@@ -10,8 +10,8 @@ This repository contains the Shopware plugin that enables to process payments wi
 
 ## Documentation
 
-* [Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware/1.0.60/docs/en/documentation.html)
+* [Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware-5/1.0.61/docs/en/documentation.html)
 
 ## License
 
-Please see the [license file](https://github.com/wallee-payment/shopware/blob/1.0.60/LICENSE) for more information.
+Please see the [license file](https://github.com/wallee-payment/shopware-5/blob/1.0.61/LICENSE) for more information.

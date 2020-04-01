@@ -1,9 +1,9 @@
 <?php
 
 /**
- * wallee Shopware
+ * wallee Shopware 5
  *
- * This Shopware extension enables to process payments with wallee (https://www.wallee.com/).
+ * This Shopware 5 extension enables to process payments with wallee (https://www.wallee.com/).
  *
  * @package Wallee_Payment
  * @author customweb GmbH (http://www.customweb.com/)
@@ -188,7 +188,7 @@ class Webhook extends AbstractService
         $webhookUrl = new \Wallee\Sdk\Model\WebhookUrlCreate();
         $webhookUrl->setUrl($this->getHandleUrl());
         $webhookUrl->setState(\Wallee\Sdk\Model\CreationEntityState::ACTIVE);
-        $webhookUrl->setName('Shopware');
+        $webhookUrl->setName('Shopware 5');
         return $this->webhookUrlService->create($spaceId, $webhookUrl);
     }
 
