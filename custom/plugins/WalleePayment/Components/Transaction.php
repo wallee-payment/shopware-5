@@ -6,7 +6,7 @@
  * This Shopware 5 extension enables to process payments with wallee (https://www.wallee.com/).
  *
  * @package Wallee_Payment
- * @author customweb GmbH (http://www.customweb.com/)
+ * @author wallee AG (http://www.wallee.com/)
  * @license http://www.apache.org/licenses/LICENSE-2.0  Apache Software License (ASL 2.0)
  */
 namespace WalleePayment\Components;
@@ -274,7 +274,7 @@ class Transaction extends AbstractService
         if (! isset(static::$possiblePaymentMethodByOrderCache[$order->getId()]) || static::$possiblePaymentMethodByOrderCache[$order->getId()] == null) {
             $transaction = $this->getTransactionByOrder($order);
             $paymentMethods = $this->callApi($this->apiClient, function () use ($transaction) {
-                return $this->transactionService->fetchPossiblePaymentMethods($transaction->getLinkedSpaceId(), $transaction->getId());
+                return $this->transactionService->fetchPaymentMethods($transaction->getLinkedSpaceId(), $transaction->getId(), 'iframe');
             });
 
             foreach ($paymentMethods as $paymentMethod) {
@@ -304,7 +304,7 @@ class Transaction extends AbstractService
                 $transaction = $this->getTransactionByBasket();
                 try {
                     $paymentMethods = $this->callApi($this->apiClient, function () use ($transaction) {
-                        return $this->transactionService->fetchPossiblePaymentMethods($transaction->getLinkedSpaceId(), $transaction->getId());
+                        return $this->transactionService->fetchPaymentMethods($transaction->getLinkedSpaceId(), $transaction->getId(), 'iframe');
                     });
                 } catch (ApiException $e) {
                     static::$possiblePaymentMethodByBasketCache = [];

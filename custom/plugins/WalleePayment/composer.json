@@ -10,14 +10,14 @@
 	"homepage" : "https://www.wallee.com/",
 	"license" : "Apache-2.0",
 	"authors" : [{
-			"name" : "customweb GmbH",
-			"homepage" : "https://customweb.com"
+			"name" : "wallee AG",
+			"homepage" : "https://www.wallee.com"
 		}
 	],
 	"type" : "shopware-plugin",
-	"version" : "1.0.62",
+	"version" : "1.1.0",
 	"require" : {
-		"wallee/sdk" : "2.0.17"
+		"wallee/sdk" : "2.1.4"
 	},
 	"extra" : {
 		"installer-name" : "WalleePayment"
