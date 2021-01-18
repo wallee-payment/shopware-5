@@ -14,6 +14,7 @@ namespace WalleePayment\Components;
 
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Detail;
+use Shopware\Components\Plugin\ConfigReader;
 use Shopware\Components\Model\ModelManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use WalleePayment\Components\Provider\Currency as CurrencyProvider;
@@ -47,6 +48,12 @@ class LineItem extends AbstractService
      * @var CurrencyProvider
      */
     private $currencyProvider;
+    
+    /**
+     *
+     * @var ConfigReader
+     */
+    private $configReader;
 
     /**
      * Constructor.
@@ -54,12 +61,15 @@ class LineItem extends AbstractService
      * @param ContainerInterface $container
      * @param ModelManager $modelManager
      * @param CurrencyProvider $currencyProvider
+     * @param ConfigReader $configReader
      */
-    public function __construct(ContainerInterface $container, ModelManager $modelManager, CurrencyProvider $currencyProvider)
+    public function __construct(ContainerInterface $container, ModelManager $modelManager, CurrencyProvider $currencyProvider,
+        ConfigReader $configReader)
     {
         parent::__construct($container);
         $this->modelManager = $modelManager;
         $this->currencyProvider = $currencyProvider;
+        $this->configReader = $configReader;
     }
 
     /**
@@ -121,12 +131,8 @@ class LineItem extends AbstractService
             $lineItems[] = $this->cleanLineItem($lineItem);
         }
         
-        $lineItemTotalAmount = $this->getTotalAmountIncludingTax($lineItems);
-        if (abs($lineItemTotalAmount - $order->getInvoiceAmount()) > 0.0001) {
-            throw new \Exception('The line item total amount of ' . $lineItemTotalAmount . ' does not match the order\'s invoice amount of ' . $order->getInvoiceAmount() . '.');
-        }
-
-        return $lineItems;
+        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
+        return $this->cleanupLineItems($lineItems, $order->getInvoiceAmount(), $order->getCurrency(), (boolean) $pluginConfig['enforceLineItemConsistency']);
     }
     
     /**
@@ -245,12 +251,8 @@ class LineItem extends AbstractService
             isset($shippingcosts['brutto']) ? $shippingcosts['brutto'] : null,
             $easyCouponShippingAmount, $this->isTaxFree());
         
-        $lineItemTotalAmount = $this->getTotalAmountIncludingTax($lineItems);
-        if (abs($lineItemTotalAmount - $basketTotalAmount) > 0.0001) {
-            throw new \Exception('The line item total amount of ' . $lineItemTotalAmount . ' does not match the basket\'s invoice amount of ' . $basketTotalAmount . '.');
-        }
-        
-        return $lineItems;
+        $pluginConfig = $this->configReader->getByPluginName('WalleePayment', Shopware()->Shop());
+        return $this->cleanupLineItems($lineItems, $basketTotalAmount, $currency, (boolean) $pluginConfig['enforceLineItemConsistency']);
     }
     
     /**
@@ -560,4 +562,56 @@ class LineItem extends AbstractService
         $lineItem->setName($this->fixLength($lineItem->getName(), 150));
         return $lineItem;
     }
+    
+    /**
+     * Cleans the given line items by introducing adjustment line items if necessary.
+     *
+     * @param \Wallee\Sdk\Model\LineItemCreate[] $lineItems
+     * @param float $expectedSum
+     * @param string $currency
+     * @param boolean $ensureConsistency
+     * @return \Wallee\Sdk\Model\LineItemCreate[]
+     */
+    private function cleanupLineItems(array $lineItems, $expectedSum, $currency, $ensureConsistency = true)
+    {
+        $expectedSum = $this->roundAmount($expectedSum, $currency);
+        $effectiveSum = $this->roundAmount($this->getTotalAmountIncludingTax($lineItems), $currency);
+        $difference = abs($expectedSum - $effectiveSum);
+        if ($difference > 0.0001) {
+            if ($ensureConsistency) {
+                throw new \Exception('The line item total amount of ' . $effectiveSum . ' does not match the invoice amount of ' . $expectedSum . '.');
+            } else {
+                $this->adjustLineItems($lineItems, $expectedSum, $currency);
+            }
+        }
+        return $lineItems;
+    }
+    
+    /**
+     *
+     * @param \Wallee\Sdk\Model\LineItemCreate[] $lineItems
+     * @param float $amount
+     * @param string $currency
+     */
+    private function adjustLineItems(array &$lineItems, $expectedSum, $currency)
+    {
+        $expectedSum = $this->roundAmount($expectedSum, $currency);
+        $effectiveSum = $this->roundAmount($this->getTotalAmountIncludingTax($lineItems), $currency);
+        $difference = $expectedSum - $effectiveSum;
+        
+        $adjustmentLineItem = new \Wallee\Sdk\Model\LineItemCreate();
+        $adjustmentLineItem->setAmountIncludingTax($this->roundAmount($difference, $currency));
+        $adjustmentLineItem->setName($this->container->get('snippets')
+            ->getNamespace('frontend/wallee_payment/main')
+            ->get('line_item/adjustment', 'Adjustment'));
+        $adjustmentLineItem->setQuantity(1);
+        $adjustmentLineItem->setSku('adjustment');
+        $adjustmentLineItem->setUniqueId('adjustment');
+        $adjustmentLineItem->setShippingRequired(false);
+        $adjustmentLineItem->setType(
+            $difference > 0 ? \Wallee\Sdk\Model\LineItemType::FEE : \Wallee\Sdk\Model\LineItemType::DISCOUNT);
+        
+        $lineItems[] = $adjustmentLineItem;
+    }
+    
 }

@@ -125,6 +125,14 @@
 			<label lang="en">Delete failed orders</label>
 			<value>0</value>
         </element>
+        <element type="boolean" scope="shop">
+			<name>enforceLineItemConsistency</name>
+			<label lang="de">Konsistenz sicherstellen</label>
+			<label lang="en">Enforce Consistency</label>
+			<value>1</value>
+			<description lang="de">Erfordere, dass die Einzelposten der Transaktion denen der Bestellung in Magento entsprechen. Dies kann dazu führen, dass die Zahlungsmethoden von wallee dem Kunden in bestimmten Fällen nicht zur Verfügung stehen. Im Gegenzug wird sichergestellt, dass nur korrekte Daten an wallee übertragen werden.</description>
+			<description lang="en">Require that the line items of the transaction correspond to those of the purchase order in Magento. This may result in the wallee payment methods not being available to the customer in certain cases. In return, it is ensured that only correct data is transmitted to wallee.</description>
+        </element>
         <element required="false" type="number" scope="shop">
             <name>spaceViewId</name>
             <label lang="de">Space View Id</label>
