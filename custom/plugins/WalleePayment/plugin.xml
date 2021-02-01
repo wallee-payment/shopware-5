@@ -10,14 +10,27 @@
  * @license http://www.apache.org/licenses/LICENSE-2.0  Apache Software License (ASL 2.0)
  */
 -->
-<plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.2/engine/Shopware/Components/Plugin/schema/plugin.xsd">
+<plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.7/engine/Shopware/Components/Plugin/schema/plugin.xsd">
     <label lang="de">wallee Payment</label>
     <label lang="en">wallee Payment</label>
 
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <copyright>(c) by wallee AG</copyright>
-    <license>ASL 2.0</license>
+    <license>Apache-2.0</license>
     <link>https://www.wallee.com</link>
     <author>wallee AG</author>
-    <compatibility minVersion="5.2.0" />
+    
+    <description lang="de">wallee-Integration für Shopware 5</description>
+    <description lang="en">wallee Integration for Shopware 5</description>
+    
+    <changelog version="1.1.2">
+    	<changes lang="de">SDK auf die neueste Version aktualisiert.</changes>
+    	<changes lang="en">Update SDK to the latest version.</changes>
+   	</changelog>
+   	<changelog version="1.1.1">
+        <changes lang="de">SDK auf die neueste Version aktualisiert. Option zum Aktivieren von Einzelposten-Korrekturen eingeführt.</changes>
+        <changes lang="en">Update SDK to the latest version. Introduce option to enable line item adjustments.</changes>
+    </changelog>
+   	
+   	<compatibility minVersion="5.3.0" />
 </plugin>
