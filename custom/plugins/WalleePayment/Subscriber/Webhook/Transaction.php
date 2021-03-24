@@ -285,7 +285,7 @@ class Transaction extends AbstractOrderRelatedSubscriber
         /**
          * @var \Shopware\Models\Shop\Shop $shopBackup
          */
-        $shopBackup = $this->container->get('shop');
+        $shopBackup = $this->container->get('shop', ContainerInterface::NULL_ON_INVALID_REFERENCE);
         
         $shop = $order->getLanguageSubShop();
         $shop->registerResources();
@@ -308,6 +308,8 @@ class Transaction extends AbstractOrderRelatedSubscriber
             $orderModule->sUserData = $sUserDataBackup;
         }
         
-        $shopBackup->registerResources();
+        if ($shopBackup != null) {
+            $shopBackup->registerResources();
+        }
     }
 }
