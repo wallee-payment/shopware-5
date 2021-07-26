@@ -12,18 +12,19 @@
 
 namespace WalleePayment\Subscriber\Webhook;
 
-use WalleePayment\Components\Webhook\Request as WebhookRequest;
+use Psr\Log\LoggerInterface;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Components\Plugin\ConfigReader;
+use Shopware\Components\ShopRegistrationServiceInterface;
 use Shopware\Models\Order\Order;
-use WalleePayment\Models\TransactionInfo;
-use WalleePayment\Components\Transaction as TransactionService;
-use WalleePayment\Components\TransactionInfo as TransactionInfoService;
 use Shopware\Models\Order\Status;
-use WalleePayment\Models\OrderTransactionMapping;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use WalleePayment\Components\Registry;
-use Shopware\Components\Plugin\ConfigReader;
-use Psr\Log\LoggerInterface;
+use WalleePayment\Components\Transaction as TransactionService;
+use WalleePayment\Components\TransactionInfo as TransactionInfoService;
+use WalleePayment\Components\Webhook\Request as WebhookRequest;
+use WalleePayment\Models\OrderTransactionMapping;
+use WalleePayment\Models\TransactionInfo;
 
 class Transaction extends AbstractOrderRelatedSubscriber
 {
@@ -69,17 +70,32 @@ class Transaction extends AbstractOrderRelatedSubscriber
      */
     private $logger;
 
-    /**
-     *
-     * @param ContainerInterface $container
-     * @param ConfigReader $configReader
-     * @param ModelManager $modelManager
-     * @param TransactionService $transactionService
-     * @param TransactionInfoService $transactionInfoService
-     * @param Registry $registry
-     * @param LoggerInterface $logger
-     */
-    public function __construct(ContainerInterface $container, ConfigReader $configReader, ModelManager $modelManager, TransactionService $transactionService, TransactionInfoService $transactionInfoService, Registry $registry, LoggerInterface $logger)
+	/**
+	 * @var \Shopware\Components\ShopRegistrationServiceInterface
+	 */
+    protected $shopRegistrationService;
+
+	/**
+	 *
+	 * @param ContainerInterface                                    $container
+	 * @param ConfigReader                                          $configReader
+	 * @param ModelManager                                          $modelManager
+	 * @param TransactionService                                    $transactionService
+	 * @param TransactionInfoService                                $transactionInfoService
+	 * @param Registry                                              $registry
+	 * @param \Shopware\Components\ShopRegistrationServiceInterface $shopRegistrationService
+	 * @param LoggerInterface                                       $logger
+	 */
+    public function __construct(
+    	ContainerInterface $container,
+		ConfigReader $configReader,
+		ModelManager $modelManager,
+		TransactionService $transactionService,
+		TransactionInfoService $transactionInfoService,
+		Registry $registry,
+		ShopRegistrationServiceInterface $shopRegistrationService,
+		LoggerInterface $logger
+	)
     {
         parent::__construct($modelManager);
         $this->container = $container;
@@ -88,7 +104,8 @@ class Transaction extends AbstractOrderRelatedSubscriber
         $this->transactionInfoService = $transactionInfoService;
         $this->registry = $registry;
         $this->logger = $logger;
-    }
+		$this->shopRegistrationService = $shopRegistrationService;
+	}
 
     /**
      *
@@ -288,7 +305,7 @@ class Transaction extends AbstractOrderRelatedSubscriber
         $shopBackup = $this->container->get('shop', ContainerInterface::NULL_ON_INVALID_REFERENCE);
         
         $shop = $order->getLanguageSubShop();
-        $shop->registerResources();
+        $this->shopRegistrationService->registerResources($shop);
         
         $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
         $sendOrderEmail = $pluginConfig['orderEmail'];
@@ -309,7 +326,7 @@ class Transaction extends AbstractOrderRelatedSubscriber
         }
         
         if ($shopBackup != null) {
-            $shopBackup->registerResources();
+			$this->shopRegistrationService->registerResources($shop);
         }
     }
 }
