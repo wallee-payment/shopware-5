@@ -15,9 +15,10 @@
 		}
 	],
 	"type" : "shopware-plugin",
-	"version" : "1.1.5",
+	"version" : "1.1.6",
 	"require" : {
-		"wallee/sdk" : "3.0.1"
+		"wallee/sdk" : "3.0.1",
+        "shopware/shopware": "~5.7"
 	},
 	"extra" : {
 		"installer-name" : "WalleePayment"

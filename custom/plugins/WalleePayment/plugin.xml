@@ -14,14 +14,18 @@
     <label lang="de">wallee Payment</label>
     <label lang="en">wallee Payment</label>
 
-    <version>1.1.5</version>
+    <version>1.1.6</version>
     <copyright>(c) by wallee AG</copyright>
     <license>Apache-2.0</license>
     <link>https://www.wallee.com</link>
     <author>wallee AG</author>
-    
+
     <description lang="de">wallee-Integration für Shopware 5</description>
     <description lang="en">wallee Integration for Shopware 5</description>
+    <changelog version="1.1.6">
+        <changes lang="de">Plugin auf Shopware 5.7 beschränken.</changes>
+        <changes lang="en">Restrict plugin to Shopware 5.7.</changes>
+    </changelog>
     <changelog version="1.1.5">
         <changes lang="de">SDK auf die neueste Version aktualisiert.</changes>
         <changes lang="en">Update SDK to the latest version.</changes>
@@ -42,6 +46,6 @@
         <changes lang="de">SDK auf die neueste Version aktualisiert. Option zum Aktivieren von Einzelposten-Korrekturen eingeführt.</changes>
         <changes lang="en">Update SDK to the latest version. Introduce option to enable line item adjustments.</changes>
     </changelog>
-   	
+
    	<compatibility minVersion="5.7.0" />
 </plugin>
