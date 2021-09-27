@@ -11,25 +11,25 @@
 //{namespace name=backend/wallee_payment/main}
 //{block name="backend/wallee_payment_transaction/controller/transaction"}
 Ext.define('Shopware.apps.WalleePaymentTransaction.controller.Transaction', {
-    
+
     extend:'Ext.app.Controller',
-    
+
     refs: [
         { ref: 'orderList', selector: 'order-list' }
     ],
-    
+
     snippets: {
         message: {
-            success: '{s name=line_item/message/success}The line items have been successfully updated.{/s}',
-            failure: '{s name=line_item/message/failure}An error has occurred while saving the line items.{/s}',
-            voided: '{s name=transaction/message/void_success}The transaction has been voided.{/s}',
-            completed: '{s name=transaction/message/complete_success}The transaction has been completed.{/s}',
-            denied: '{s name=transaction/message/delivery_indication_deny}The payment has been denied.{/s}',
-            accepted: '{s name=transaction/message/delivery_indication_accept}The payment has been accepted.{/s}',
-            exception: '{s name=message/error}There has been an exception.{/s}',
-            updated: '{s name=transaction/message/update_success}The transaction has been updated.{/s}',
+            success: '{s name="line_item/message/success"}The line items have been successfully updated.{/s}',
+            failure: '{s name="line_item/message/failure"}An error has occurred while saving the line items.{/s}',
+            voided: '{s name="transaction/message/void_success"}The transaction has been voided.{/s}',
+            completed: '{s name="transaction/message/complete_success"}The transaction has been completed.{/s}',
+            denied: '{s name="transaction/message/delivery_indication_deny"}The payment has been denied.{/s}',
+            accepted: '{s name="transaction/message/delivery_indication_accept"}The payment has been accepted.{/s}',
+            exception: '{s name="message/error"}There has been an exception.{/s}',
+            updated: '{s name="transaction/message/update_success"}The transaction has been updated.{/s}',
         },
-        growlTitle: '{s name=growl_title}wallee Payment{/s}'
+        growlTitle: '{s name="growl_title"}wallee Payment{/s}'
     },
 
     init:function () {

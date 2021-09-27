@@ -11,48 +11,48 @@
 //{block name="backend/wallee_payment_transaction/view/transaction/refunds/details"}
 //{namespace name=backend/wallee_payment/main}
 Ext.define('Shopware.apps.WalleePaymentTransaction.view.transaction.Refunds.Details', {
-    
+
     extend: 'Ext.panel.Panel',
-    
+
     alias: 'widget.wallee-payment-transaction-refunds-details',
-    
+
     cls: 'shopware-form',
-    
+
     autoScroll: true,
 
     bodyPadding: 10,
-    
+
     snippets: {
-        title: '{s name=refund/title}Refund details:{/s}',
+        title: '{s name="refund/title"}Refund details:{/s}',
         field: {
-            state: '{s name=refund/field/state}Refund State{/s}',
-            amount: '{s name=refund/field/amount}Amount{/s}',
-            externalId: '{s name=refund/field/external_id}External ID{/s}',
-            failureReason: '{s name=refund/fild/failure_reason}Failure Reason{/s}',
-            document: '{s name=refund/field/document}Document{/s}'
+            state: '{s name="refund/field/state"}Refund State{/s}',
+            amount: '{s name="refund/field/amount"}Amount{/s}',
+            externalId: '{s name="refund/field/external_id"}External ID{/s}',
+            failureReason: '{s name="refund/fild/failure_reason"}Failure Reason{/s}',
+            document: '{s name="refund/field/document"}Document{/s}'
         },
         state: {
-            successful: '{s name=refund/state/successful}Successful{/s}',
-            failed: '{s name=refund/state/failed}Failed{/s}',
-            pending: '{s name=refund/state/pending}Pending{/s}',
-            manualCheck: '{s name=refund/state/manual_check}Manual Check{/s}',
-            unknown: '{s name=refund/state/unknown}Unknown State{/s}'
+            successful: '{s name="refund/state/successful"}Successful{/s}',
+            failed: '{s name="refund/state/failed"}Failed{/s}',
+            pending: '{s name="refund/state/pending"}Pending{/s}',
+            manualCheck: '{s name="refund/state/manual_check"}Manual Check{/s}',
+            unknown: '{s name="refund/state/unknown"}Unknown State{/s}'
         },
         button: {
-            downloadDocument: '{s name=refund/button/download_document}Download Document{/s}',
-            failed: '{s name=refund/button/mark_as_failed}Mark as Failed{/s}',
-            successful: '{s name=refund/button/mark_as_successful}Mark as Successful{/s}'
+            downloadDocument: '{s name="refund/button/download_document"}Download Document{/s}',
+            failed: '{s name="refund/button/mark_as_failed"}Mark as Failed{/s}',
+            successful: '{s name="refund/button/mark_as_successful"}Mark as Successful{/s}'
         }
     },
-    
+
     initComponent:function () {
         var me = this;
-        
+
         me.registerEvents();
         me.items = [];
         me.callParent(arguments);
     },
-    
+
     registerEvents: function() {
         this.addEvents(
             'markAsFailed',

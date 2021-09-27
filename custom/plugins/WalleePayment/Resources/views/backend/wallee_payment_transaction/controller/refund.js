@@ -11,20 +11,20 @@
 //{namespace name=backend/wallee_payment/main}
 //{block name="backend/wallee_payment_transaction/controller/refund"}
 Ext.define('Shopware.apps.WalleePaymentTransaction.controller.Refund', {
-    
+
     extend:'Ext.app.Controller',
-    
+
     refs: [
         { ref: 'refundGrid', selector: 'wallee-payment-transaction-refunds-grid' }
     ],
-    
+
     snippets: {
         message: {
-            successful: '{s name=refund/message/marked_as_successful}The refund has been marked as successful.{/s}',
-            failed: '{s name=refund/message/marked_as_failed}The refund has been marked as failed.{/s}',
-            exception: '{s name=message/error}There has been an exception.{/s}'
+            successful: '{s name="refund/message/marked_as_successful"}The refund has been marked as successful.{/s}',
+            failed: '{s name="refund/message/marked_as_failed"}The refund has been marked as failed.{/s}',
+            exception: '{s name="message/error"}There has been an exception.{/s}'
         },
-        growlTitle: '{s name=growl_title}wallee Payment{/s}'
+        growlTitle: '{s name="growl_title"}wallee Payment{/s}'
     },
 
     init:function () {

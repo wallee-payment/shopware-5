@@ -11,27 +11,27 @@
 //{block name="backend/wallee_payment_transaction/view/transaction/line_items"}
 //{namespace name=backend/wallee_payment/main}
 Ext.define('Shopware.apps.WalleePaymentTransaction.view.transaction.LineItems', {
-    
+
     extend: 'Ext.panel.Panel',
-    
+
     alias: 'widget.wallee-payment-transaction-line-items',
-    
+
     layout: 'fit',
-    
+
     autoScroll: true,
 
     border: false,
-    
+
     snippets: {
         field: {
-            taxes: '{s name=line_item/field/total_tax_amount}Taxes{/s}',
-            total: '{s name=line_item/field/total_amount}Total{/s}'
+            taxes: '{s name="line_item/field/total_tax_amount"}Taxes{/s}',
+            total: '{s name="line_item/field/total_amount"}Total{/s}'
         },
         button: {
-            update: '{s name=line_item/button/update}Update{/s}'
+            update: '{s name="line_item/button/update"}Update{/s}'
         }
     },
-    
+
     initComponent: function() {
         var me = this;
         me.registerEvents();

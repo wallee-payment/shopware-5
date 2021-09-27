@@ -11,30 +11,30 @@
 //{block name="backend/wallee_payment_refund/controller/main"}
 //{namespace name=backend/wallee_payment/main}
 Ext.define('Shopware.apps.WalleePaymentRefund.controller.Main', {
-    
+
     extend: 'Ext.app.Controller',
-    
+
     views: [ 'main.Window', 'main.Form' ],
-    
+
     refs: [
         { ref: 'refundForm', selector: 'wallee-payment-refund-main-form' },
         { ref: 'transactionView', selector: 'wallee-payment-transaction-transaction' },
         { ref: 'refundGrid', selector: 'wallee-payment-transaction-refunds-grid' }
     ],
-    
+
     snippets: {
         createRefund: {
-            successMessage: '{s name=refund/message/create_success}The refund has been successfully created.{/s}',
-            failureMessage: '{s name=refund/message/create_failure}An error has occurred while creating the refund.{/s}'
+            successMessage: '{s name="refund/message/create_success"}The refund has been successfully created.{/s}',
+            failureMessage: '{s name="refund/message/create_failure"}An error has occurred while creating the refund.{/s}'
         },
-        growlTitle: '{s name=growl_title}wallee Payment{/s}'
+        growlTitle: '{s name="growl_title"}wallee Payment{/s}'
     },
-    
+
     mainWindow: null,
 
     init: function() {
         var me = this;
-        
+
         me.control({
             'wallee-payment-refund-main-window button[action=wallee-payment-refund-main-window-cancel]': {
                 click: me.onCloseWindow

@@ -11,48 +11,48 @@
 //{block name="backend/wallee_payment_refund/view/main/form"}
 //{namespace name=backend/wallee_payment/main}
 Ext.define('Shopware.apps.WalleePaymentRefund.view.main.Form', {
-    
+
     extend: 'Ext.grid.Panel',
-    
+
     alias: 'widget.wallee-payment-refund-main-form',
-    
+
     minHeight: 90,
-    
+
     autoScroll: true,
-    
+
     disableSelection: true,
-    
+
     sortableColumns: false,
-    
+
     snippets: {
         field: {
-            uniqueId: '{s name=line_item/field/uniqueid}Unique ID{/s}',
-            sku: '{s name=line_item/field/sku}SKU{/s}',
-            name: '{s name=line_item/field/name}Name{/s}',
-            unitPriceIncludingTax: '{s name=line_item/field/unit_price_including_tax}Unit Price{/s}',
-            amountIncludingTax: '{s name=refund/field/refund_amount}Refund Amount{/s}',
-            taxRate: '{s name=line_item/field/tax_rate}Taxes{/s}',
-            quantity: '{s name=line_item/field/quantity}Quantity{/s}',
-            type: '{s name=line_item/field/type}Type{/s}'
+            uniqueId: '{s name="line_item/field/uniqueid"}Unique ID{/s}',
+            sku: '{s name="line_item/field/sku"}SKU{/s}',
+            name: '{s name="line_item/field/name"}Name{/s}',
+            unitPriceIncludingTax: '{s name="line_item/field/unit_price_including_tax"}Unit Price{/s}',
+            amountIncludingTax: '{s name="refund/field/refund_amount"}Refund Amount{/s}',
+            taxRate: '{s name="line_item/field/tax_rate"}Taxes{/s}',
+            quantity: '{s name="line_item/field/quantity"}Quantity{/s}',
+            type: '{s name="line_item/field/type"}Type{/s}'
         },
         type: {
-            product: '{s name=line_item/type/product}Product{/s}',
-            discount: '{s name=line_item/type/discount}Discount{/s}',
-            fee: '{s name=line_item/type/fee}Fee{/s}',
-            shipping: '{s name=line_item/type/shipping}Shipping{/s}'
+            product: '{s name="line_item/type/product"}Product{/s}',
+            discount: '{s name="line_item/type/discount"}Discount{/s}',
+            fee: '{s name="line_item/type/fee"}Fee{/s}',
+            shipping: '{s name="line_item/type/shipping"}Shipping{/s}'
         }
     },
-    
+
     viewConfig: {
         enableTextSelection: false
     },
-    
+
     initComponent:function () {
         var me = this;
         me.columns = me.getColumns();
         me.callParent(arguments);
     },
-    
+
     getColumns:function () {
         var me = parent = this;
 
@@ -81,7 +81,7 @@ Ext.define('Shopware.apps.WalleePaymentRefund.view.main.Form', {
                     if (value == 0) {
                         return 0;
                     }
-                    
+
                     return {
                         xtype: 'container',
                         layout: 'fit',
@@ -122,7 +122,7 @@ Ext.define('Shopware.apps.WalleePaymentRefund.view.main.Form', {
                     if (value == 0) {
                         return me.amountRenderer(0);
                     }
-                    
+
                     return {
                         xtype: 'container',
                         layout: 'fit',
@@ -190,26 +190,26 @@ Ext.define('Shopware.apps.WalleePaymentRefund.view.main.Form', {
                 renderer: me.taxRenderer
             }
         ];
-        
+
         return columns;
     },
-    
+
     amountRenderer: function(value) {
         var me = this;
-        
+
         if (value === Ext.undefined) {
             return value;
         }
         return Ext.util.Format.currency(value, null, me.record.get('currencyDecimals'));
     },
-    
+
     taxRenderer: function(value){
         return value.toString().replace(/[.,]/, Ext.util.Format.decimalSeparator)+'%';
     },
-    
+
     typeRenderer: function(value) {
         var me = this;
-        
+
         switch (value) {
         case 'PRODUCT':
             return me.snippets.type.product;
@@ -221,6 +221,6 @@ Ext.define('Shopware.apps.WalleePaymentRefund.view.main.Form', {
             return me.snippets.type.shipping;
         }
     }
-    
+
 });
 //{/block}

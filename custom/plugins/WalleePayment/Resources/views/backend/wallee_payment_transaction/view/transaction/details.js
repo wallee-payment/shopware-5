@@ -11,54 +11,54 @@
 //{block name="backend/wallee_payment_transaction/view/transaction/details"}
 //{namespace name=backend/wallee_payment/main}
 Ext.define('Shopware.apps.WalleePaymentTransaction.view.transaction.Details', {
-    
+
     extend: 'Ext.panel.Panel',
-    
+
     alias: 'widget.wallee-payment-transaction-details',
-    
+
     cls: 'shopware-form',
-    
+
     autoScroll: true,
 
     bodyPadding: 10,
-    
+
     snippets: {
         field: {
-            paymentMethod: '{s name=transaction/field/payment_method}Payment Method{/s}',
-            state: '{s name=transaction/field/state}Transaction State{/s}',
-            failureReason: '{s name=transaction/field/failure_reason}Failure Reason{/s}',
-            currency: '{s name=transaction/field/currency}Currency{/s}',
-            amount: '{s name=transaction/field/authorization_amount}Authorization Amount{/s}',
-            transaction: '{s name=transaction/field/transaction}Transaction{/s}',
-            customer: '{s name=transaction/field/customer}Customer{/s}',
-            invoice: '{s name=transaction/field/invoice}Invoice{/s}',
-            packingSlip: '{s name=transaction/field/packing_slip}Packing Slip{/s}'
+            paymentMethod: '{s name="transaction/field/payment_method"}Payment Method{/s}',
+            state: '{s name="transaction/field/state"}Transaction State{/s}',
+            failureReason: '{s name="transaction/field/failure_reason"}Failure Reason{/s}',
+            currency: '{s name="transaction/field/currency"}Currency{/s}',
+            amount: '{s name="transaction/field/authorization_amount"}Authorization Amount{/s}',
+            transaction: '{s name="transaction/field/transaction"}Transaction{/s}',
+            customer: '{s name="transaction/field/customer"}Customer{/s}',
+            invoice: '{s name="transaction/field/invoice"}Invoice{/s}',
+            packingSlip: '{s name="transaction/field/packing_slip"}Packing Slip{/s}'
         },
         state: {
-            authorized: '{s name=transaction/state/authorized}Authorized{/s}',
-            completed: '{s name=transaction/state/completed}Completed{/s}',
-            confirmed: '{s name=transaction/state/confirmed}Confirmed{/s}',
-            decline: '{s name=transaction/state/decline}Decline{/s}',
-            failed: '{s name=transaction/state/failed}Failed{/s}',
-            fulfill: '{s name=transaction/state/fulfill}Fulfill{/s}',
-            pending: '{s name=transaction/state/pending}Pending{/s}',
-            processing: '{s name=transaction/state/processing}Processing{/s}',
-            voided: '{s name=transaction/state/voided}Voided{/s}',
-            unknown: '{s name=transaction/state/unknown}Unknown State{/s}'
+            authorized: '{s name="transaction/state/authorized"}Authorized{/s}',
+            completed: '{s name="transaction/state/completed"}Completed{/s}',
+            confirmed: '{s name="transaction/state/confirmed"}Confirmed{/s}',
+            decline: '{s name="transaction/state/decline"}Decline{/s}',
+            failed: '{s name="transaction/state/failed"}Failed{/s}',
+            fulfill: '{s name="transaction/state/fulfill"}Fulfill{/s}',
+            pending: '{s name="transaction/state/pending"}Pending{/s}',
+            processing: '{s name="transaction/state/processing"}Processing{/s}',
+            voided: '{s name="transaction/state/voided"}Voided{/s}',
+            unknown: '{s name="transaction/state/unknown"}Unknown State{/s}'
         },
         button: {
-            downloadInvoice: '{s name=transaction/button/download_invoice}Download Invoice{/s}',
-            downloadPackingSlip: '{s name=transaction/button/download_packing_slip}Download Packing Slip{/s}',
-            void: '{s name=transaction/button/void}Void{/s}',
-            complete: '{s name=transaction/button/complete}Complete{/s}',
-            deny: '{s name=transaction/button/delivery_indication_deny}Deny{/s}',
-            accept: '{s name=transaction/button/delivery_indication_accept}Accept{/s}',
-            transaction: '{s name=transaction/button/transaction_link}View in wallee{/s}',
-            customer: '{s name=transaction/button/customer_link}View in wallee{/s}',
-            update: '{s name=transaction/button/update}Update{/s}',
+            downloadInvoice: '{s name="transaction/button/download_invoice"}Download Invoice{/s}',
+            downloadPackingSlip: '{s name="transaction/button/download_packing_slip"}Download Packing Slip{/s}',
+            void: '{s name="transaction/button/void"}Void{/s}',
+            complete: '{s name="transaction/button/complete"}Complete{/s}',
+            deny: '{s name="transaction/button/delivery_indication_deny"}Deny{/s}',
+            accept: '{s name="transaction/button/delivery_indication_accept"}Accept{/s}',
+            transaction: '{s name="transaction/button/transaction_link"}View in wallee{/s}',
+            customer: '{s name="transaction/button/customer_link"}View in wallee{/s}',
+            update: '{s name="transaction/button/update"}Update{/s}'
         }
     },
-    
+
     initComponent: function() {
         var me = this;
         me.registerEvents();

@@ -11,34 +11,34 @@
 //{block name="backend/wallee_payment_refund/view/main/window"}
 //{namespace name=backend/wallee_payment/main}
 Ext.define('Shopware.apps.WalleePaymentRefund.view.main.Window', {
-    
+
     extend: 'Enlight.app.Window',
-    
-    title: '{s name=refund/window/title}Create Refund{/s}',
-    
+
+    title: '{s name="refund/window/title"}Create Refund{/s}',
+
     alias: 'widget.wallee-payment-refund-main-window',
-    
+
     border: false,
-    
+
     autoShow: true,
-    
+
     layout: 'fit',
-    
+
     height: 400,
-    
+
     width: 800,
-    
+
     snippets: {
         field: {
-            totalTaxAmount: '{s name=refund/total_tax_amount}Refund Taxes{/s}',
-            totalRefundAmount: '{s name=refund/total_amount}Total Refund Amount{/s}',
+            totalTaxAmount: '{s name="refund/total_tax_amount"}Refund Taxes{/s}',
+            totalRefundAmount: '{s name="refund/total_amount"}Total Refund Amount{/s}',
         },
         button: {
-            cancel: '{s name=button/cancel}Cancel{/s}',
-            create: '{s name=button/create}Create{/s}'
+            cancel: '{s name="button/cancel"}Cancel{/s}',
+            create: '{s name="button/create"}Create{/s}'
         }
     },
-    
+
     initComponent: function() {
         var me = this;
 

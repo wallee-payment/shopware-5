@@ -11,41 +11,41 @@
 //{block name="backend/wallee_payment_transaction/view/transaction/line_items/grid"}
 //{namespace name=backend/wallee_payment/main}
 Ext.define('Shopware.apps.WalleePaymentTransaction.view.transaction.LineItems.Grid', {
-    
+
     extend: 'Ext.grid.Panel',
-    
+
     alias: 'widget.wallee-payment-transaction-line-items-grid',
-    
+
     minHeight: 90,
-    
+
     autoScroll: true,
-    
+
     disableSelection: true,
-    
+
     sortableColumns: false,
-    
+
     snippets: {
         field: {
-            uniqueId: '{s name=line_item/field/uniqueid}Unique ID{/s}',
-            sku: '{s name=line_item/field/sku}SKU{/s}',
-            name: '{s name=line_item/field/name}Name{/s}',
-            amountIncludingTax: '{s name=line_item/field/amount_including_tax}Total{/s}',
-            taxRate: '{s name=line_item/field/tax_rate}Taxes{/s}',
-            quantity: '{s name=line_item/field/quantity}Quantity{/s}',
-            type: '{s name=line_item/field/type}Type{/s}',
+            uniqueId: '{s name="line_item/field/uniqueid"}Unique ID{/s}',
+            sku: '{s name="line_item/field/sku"}SKU{/s}',
+            name: '{s name="line_item/field/name"}Name{/s}',
+            amountIncludingTax: '{s name="line_item/field/amount_including_tax"}Total{/s}',
+            taxRate: '{s name="line_item/field/tax_rate"}Taxes{/s}',
+            quantity: '{s name="line_item/field/quantity"}Quantity{/s}',
+            type: '{s name="line_item/field/type"}Type{/s}'
         },
         type: {
-            product: '{s name=line_item/type/product}Product{/s}',
-            discount: '{s name=line_item/type/discount}Discount{/s}',
-            fee: '{s name=line_item/type/fee}Fee{/s}',
-            shipping: '{s name=line_item/type/shipping}Shipping{/s}',
+            product: '{s name="line_item/type/product"}Product{/s}',
+            discount: '{s name="line_item/type/discount"}Discount{/s}',
+            fee: '{s name="line_item/type/fee"}Fee{/s}',
+            shipping: '{s name="line_item/type/shipping"}Shipping{/s}'
         }
     },
-    
+
     viewConfig: {
         enableTextSelection: false
     },
-    
+
     initComponent:function () {
         var me = this;
         me.store.each(function(record){

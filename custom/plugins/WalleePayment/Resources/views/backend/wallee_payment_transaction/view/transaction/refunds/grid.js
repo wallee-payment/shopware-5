@@ -11,44 +11,44 @@
 //{block name="backend/wallee_payment_transaction/view/transaction/refunds/grid"}
 //{namespace name=backend/wallee_payment/main}
 Ext.define('Shopware.apps.WalleePaymentTransaction.view.transaction.Refunds.Grid', {
-    
+
     extend: 'Ext.grid.Panel',
-    
+
     alias: 'widget.wallee-payment-transaction-refunds-grid',
-    
+
     minHeight: 90,
-    
+
     autoScroll: true,
-    
+
     snippets: {
-        state: '{s name=refund/field/state}State{/s}',
-        id: '{s name=refund/field/id}ID{/s}',
-        createdOn: '{s name=refund/field/created_on}Created On{/s}',
-        amount: '{s name=refund/field/amount}Amount{/s}',
-        detail: '{s name=refund/field/details}Details{/s}',
+        state: '{s name="refund/field/state"}State{/s}',
+        id: '{s name="refund/field/id"}ID{/s}',
+        createdOn: '{s name="refund/field/created_on"}Created On{/s}',
+        amount: '{s name="refund/field/amount"}Amount{/s}',
+        detail: '{s name="refund/field/details"}Details{/s}',
     },
-    
+
     viewConfig: {
         enableTextSelection: true
     },
-    
+
     registerEvents: function() {
         this.addEvents(
             'showDetail'
         );
     },
-    
+
     initComponent: function() {
         var me = this;
         me.columns = me.getColumns();
-        
+
         me.getSelectionModel().on('selectionchange', function(row, selection, options) {
             me.fireEvent('showDetail', selection[0], me);
         });
-        
+
         me.callParent(arguments);
     },
-    
+
     getColumns: function() {
         var me = this;
 

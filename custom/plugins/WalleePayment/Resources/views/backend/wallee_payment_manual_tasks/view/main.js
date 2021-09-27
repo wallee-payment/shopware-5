@@ -14,19 +14,19 @@ Ext.define('Shopware.apps.WalleePaymentManualTasksWidget.view.Main', {
     extend: 'Shopware.apps.Index.view.widgets.Base',
 
     alias: 'widget.wallee-payment-manual-tasks',
-    
-    title: '{s name=manual_task/window/title}wallee Payment - Manual Tasks{/s}',
-    
+
+    title: '{s name="manual_task/window/title"}wallee Payment - Manual Tasks{/s}',
+
     minHeight: 0,
 
     snippets: {
         button: '{s name=manual_task/info_button}View in wallee{/s}',
-        dataLabel: '{s name=manual_task/text}Number of manual tasks that need your attention{/s}'
+        dataLabel: '{s name="manual_task/text"}Number of manual tasks that need your attention{/s}'
     },
 
     initComponent: function() {
         var me = this;
-        
+
         me.items = [];
 
         me.tools = [{

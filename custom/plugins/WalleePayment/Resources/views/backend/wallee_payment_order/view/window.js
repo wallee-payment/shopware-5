@@ -18,23 +18,23 @@
 //{$smarty.block.parent}
 //{namespace name=backend/wallee_payment/main}
 Ext.define('Shopware.apps.Order.PluginWalleePayment.view.window.TransactionTab', {
-    
+
     /**
      * Return order transaction tab.
-     * 
+     *
      * @return Ext.container.Container
      */
     createOrderTransactionTab: function(parent) {
         var me = this,
             storeLoaded = false,
             tabTransactionStore = Ext.create('Shopware.apps.WalleePaymentTransaction.store.Transaction');
-        
+
         me.transactionDetails = Ext.create('Shopware.apps.WalleePaymentTransaction.view.transaction.Transaction', {
             region: 'center'
         });
-        
+
         parent.orderTransactionsTab = Ext.create('Ext.container.Container', {
-            title: '{s name=order_view/tab/title}wallee Payment{/s}',
+            title: '{s name="order_view/tab/title"}wallee Payment{/s}',
             disabled: parent.record.get('id') === null,
             layout: 'border',
             items: [

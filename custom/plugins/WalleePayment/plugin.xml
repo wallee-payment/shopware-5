@@ -14,7 +14,7 @@
     <label lang="de">wallee Payment</label>
     <label lang="en">wallee Payment</label>
 
-    <version>1.1.7</version>
+    <version>1.1.8</version>
     <copyright>(c) by wallee AG</copyright>
     <license>Apache-2.0</license>
     <link>https://www.wallee.com</link>
@@ -22,6 +22,10 @@
 
     <description lang="de">wallee-Integration für Shopware 5</description>
     <description lang="en">wallee Integration for Shopware 5</description>
+    <changelog version="1.1.8">
+        <changes lang="de">Fix snippets compatibility in javascript files.</changes>
+        <changes lang="en">Kompatibilität von Snippets in Javascript-Dateien beheben.</changes>
+    </changelog>
     <changelog version="1.1.7">
         <changes lang="de">Fix snippets compatibility.</changes>
         <changes lang="en">Kompatibilität der Schnipsel verbessern.</changes>
