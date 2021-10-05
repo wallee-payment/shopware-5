@@ -20,7 +20,7 @@ Ext.define('Shopware.apps.WalleePaymentManualTasksWidget.view.Main', {
     minHeight: 0,
 
     snippets: {
-        button: '{s name=manual_task/info_button}View in wallee{/s}',
+        button: '{s name="manual_task/info_button"}View in wallee{/s}',
         dataLabel: '{s name="manual_task/text"}Number of manual tasks that need your attention{/s}'
     },
 
