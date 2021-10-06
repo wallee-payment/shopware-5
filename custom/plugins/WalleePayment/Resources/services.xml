@@ -256,7 +256,7 @@
         <!-- Commands -->
         
         <service id="wallee_payment.commands.transaction_update" class="WalleePayment\Commands\UpdateTransactionCommand" public="true">
-			<tag name="console.command"/>
-		</service>
+            <tag name="console.command" command="wallee_payment:transaction:update" />
+        </service>
     </services>
 </container>
