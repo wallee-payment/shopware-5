@@ -326,7 +326,7 @@ class Transaction extends AbstractOrderRelatedSubscriber
         }
         
         if ($shopBackup != null) {
-			$this->shopRegistrationService->registerResources($shop);
+			$this->shopRegistrationService->registerResources($shopBackup);
         }
     }
 }
