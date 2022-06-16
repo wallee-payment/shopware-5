@@ -126,6 +126,14 @@
 			<value>0</value>
         </element>
         <element type="boolean" scope="shop">
+            <name>provideOrderComment</name>
+            <label lang="de">Bestellkommentar übermitteln</label>
+            <label lang="en">Provide order comment</label>
+            <value>0</value>
+            <description lang="de">Dokumenttemplate invoice.twig muss mit dem Baustein {{transaction.metaData.orderComment}} ergänzt werden.</description>
+            <description lang="en">Block {{transaction.metaData.orderComment}} must be added to documenttemplate invocie.twig</description>
+        </element>
+        <element type="boolean" scope="shop">
 			<name>enforceLineItemConsistency</name>
 			<label lang="de">Konsistenz sicherstellen</label>
 			<label lang="en">Enforce Consistency</label>

@@ -14,7 +14,7 @@
     <label lang="de">wallee Payment</label>
     <label lang="en">wallee Payment</label>
 
-    <version>1.1.12</version>
+    <version>1.1.13</version>
     <copyright>(c) by wallee AG</copyright>
     <license>Apache-2.0</license>
     <link>https://www.wallee.com</link>
@@ -22,6 +22,10 @@
 
     <description lang="de">wallee-Integration für Shopware 5</description>
     <description lang="en">wallee Integration for Shopware 5</description>
+    <changelog version="1.1.13">
+        <changes lang="en">Provides order comment</changes>
+        <changes lang="de">Übermittelt Bestellkommentar</changes>
+    </changelog>
     <changelog version="1.1.10">
         <changes lang="en">Add command to services.xml</changes>
         <changes lang="de">Befehl zu services.xml hinzufügen</changes>
