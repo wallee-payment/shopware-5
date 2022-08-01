@@ -668,7 +668,7 @@ class Transaction extends AbstractService
         /* @var Customer $customer */
         $customer = $this->modelManager->getRepository(Customer::class)->find($this->container->get('session')
             ->get('sUserId'));
-        
+
         $currency = Shopware()->Shop()->getCurrency()->getCurrency();
         if (empty($currency)) {
             $currency = 'EUR';
@@ -683,7 +683,7 @@ class Transaction extends AbstractService
         }
         $transaction->setLanguage($shop->getLocale()
             ->getLocale());
-        
+
         $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $shop);
 
         if ($transaction instanceof \Wallee\Sdk\Model\TransactionCreate) {
