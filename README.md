@@ -12,7 +12,7 @@ This repository contains the Shopware 5 plugin that enables to process payments 
 
 ## Documentation
 
-* [Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware-5/1.1.14/docs/en/documentation.html)
+* [Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware-5/1.1.15/docs/en/documentation.html)
 
 ## Support
 
@@ -20,4 +20,4 @@ Support queries can be issued on the [wallee support site](https://app-wallee.co
 
 ## License
 
-Please see the [license file](https://github.com/wallee-payment/shopware-5/blob/1.1.14/LICENSE) for more information.
+Please see the [license file](https://github.com/wallee-payment/shopware-5/blob/1.1.15/LICENSE) for more information.
