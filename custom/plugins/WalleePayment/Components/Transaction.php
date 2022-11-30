@@ -845,6 +845,12 @@ class Transaction extends AbstractService
                 $orderTransactionMapping->setOrder($order);
                 $this->modelManager->persist($orderTransactionMapping);
                 $this->modelManager->flush($orderTransactionMapping);
+
+                // Set transactionId also in the shopware order table.
+                $order->setTransactionId($transaction->getId());
+                $this->modelManager->persist($order);
+                $this->modelManager->flush($order);
+
                 $this->modelManager->commit();
                 return;
             } catch (\Exception $e) {
