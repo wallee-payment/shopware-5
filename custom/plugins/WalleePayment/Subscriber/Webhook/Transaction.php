@@ -187,6 +187,14 @@ class Transaction extends AbstractOrderRelatedSubscriber
         if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_RESERVED) {
             $order->setPaymentStatus($this->getStatus(Status::PAYMENT_STATE_COMPLETELY_INVOICED));
         }
+
+        // Due to race condition, the authorize step is skipped and the payment status is not updated and remains open.
+        // We contemplate here this possibility, replating same functionality that is done when authorizing.
+        if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_OPEN) {
+            $order->setPaymentStatus($this->getStatus(Status::PAYMENT_STATE_COMPLETELY_INVOICED));
+            $this->sendOrderEmail($order);
+        }
+
         $order->setOrderStatus($this->getStatus($this->getCompletedOrderStatusId($order)));
         $this->modelManager->flush($order);
         $this->transactionInfoService->updateTransactionInfoByOrder($transaction, $order);

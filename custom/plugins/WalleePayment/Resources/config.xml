@@ -12,10 +12,12 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.2/engine/Shopware/Components/Plugin/schema/config.xsd">
     <elements>
-    	<element type="button">
+        <element type="button">
             <name>buttonSynchronize</name>
             <label lang="de">Synchronisieren</label>
             <label lang="en">Synchronize</label>
+            <label lang="it">Sincronizzare</label>
+            <label lang="fr">Synchroniser</label>
             <options>
                 <handler>
                     <![CDATA[
@@ -37,117 +39,159 @@
             <name>applicationUserId</name>
             <label lang="de">Benutzer-Id</label>
             <label lang="en">User Id</label>
+            <label lang="it">ID utente</label>
+            <label lang="fr">Identifiant d'utilisateur</label>
             <value></value>
             <description lang="en">The Application User needs to have full permissions in all spaces this shop is linked to.</description>
             <description lang="de">Der Applikationsbenutzer benötigt volle Zugriffsrechte auf alle Spaces, mit denen dieser Shop verlinkt ist.</description>
+            <description lang="it">L'utente dell'applicazione deve disporre di autorizzazioni complete in tutti gli spazi a cui è collegato questo negozio.</description>
+            <description lang="fr">L'utilisateur de l'application doit disposer des autorisations complètes dans tous les espaces auxquels cette boutique est liée.</description>
         </element>
         <element required="true" type="password">
             <name>applicationUserKey</name>
             <label lang="de">Authentication Key</label>
             <label lang="en">Authentication Key</label>
+            <label lang="it">Authentication Key</label>
+            <label lang="fr">Authentication Key</label>
             <value></value>
         </element>
         <element required="true" type="number" scope="shop">
             <name>spaceId</name>
             <label lang="de">Space Id</label>
             <label lang="en">Space Id</label>
+            <label lang="it">Space Id</label>
+            <label lang="fr">Space Id</label>
             <value></value>
         </element>
-        <element type="boolean" scope="shop">
-        	<name>orderEmail</name>
-        	<label lang="de">Bestell-E-Mail senden</label>
-        	<label lang="en">Send Order Email</label>
-        	<value>1</value>
+        <element type="boolean">
+            <name>orderEmail</name>
+            <label lang="de">Bestell-E-Mail senden</label>
+            <label lang="en">Send Order Email</label>
+            <label lang="it">Invia e-mail dell'ordine</label>
+            <label lang="fr">Envoyer l'email de commande</label>
+            <value>1</value>
         </element>
         <element type="boolean" scope="shop">
-        	<name>customerDownloadInvoice</name>
-        	<label lang="de">Kunden-Download: Rechnung</label>
-        	<label lang="en">Customer Download: Invoice</label>
-        	<value>1</value>
+            <name>customerDownloadInvoice</name>
+            <label lang="de">Kunden-Download: Rechnung</label>
+            <label lang="en">Customer Download: Invoice</label>
+            <label lang="it">Scarica cliente: Fattura</label>
+            <label lang="fr">Téléchargement client: facture d'achat</label>
+            <value>1</value>
         </element>
         <element type="boolean" scope="shop">
-        	<name>customerDownloadPackingSlip</name>
-        	<label lang="de">Kunden-Download: Lieferschein</label>
-        	<label lang="en">Customer Download: Packing Slip</label>
-        	<value>1</value>
+            <name>customerDownloadPackingSlip</name>
+            <label lang="de">Kunden-Download: Lieferschein</label>
+            <label lang="en">Customer Download: Packing Slip</label>
+            <label lang="it">Scarica cliente: bolla di accompagnamento</label>
+            <label lang="fr">Téléchargement client: bordereau d'expédition</label>
+            <value>1</value>
         </element>
         <element type="boolean" scope="shop">
-        	<name>customerDownloadRefund</name>
-        	<label lang="de">Kunden-Download: Gutschrift</label>
-        	<label lang="en">Customer Download: Refund</label>
-        	<value>1</value>
+            <name>customerDownloadRefund</name>
+            <label lang="de">Kunden-Download: Gutschrift</label>
+            <label lang="en">Customer Download: Refund</label>
+            <label lang="it">Scarica cliente: Rimborso</label>
+            <label lang="fr">Statut de la commande: Remboursement</label>
+            <value>1</value>
         </element>
         <element type="select" scope="shop">
-        	<name>orderStatusPending</name>
-        	<label lang="de">Bestell-Status: Ausstehend</label>
-        	<label lang="en">Order Status: Pending</label>
-        	<value>8</value>
-        	<store>Shopware.apps.Base.store.OrderStatus</store>
+            <name>orderStatusPending</name>
+            <label lang="de">Bestell-Status: Ausstehend</label>
+            <label lang="en">Order Status: Pending</label>
+            <label lang="it">Lo stato dell'ordine: In attesa di</label>
+            <label lang="fr">Statut de la commande: En attendant</label>
+            <value>8</value>
+            <store>Shopware.apps.Base.store.OrderStatus</store>
         </element>
         <element type="select" scope="shop">
-        	<name>orderStatusAuthorized</name>
-        	<label lang="de">Bestell-Status: Autorisiert</label>
-        	<label lang="en">Order Status: Authorized</label>
-        	<value>8</value>
-        	<store>Shopware.apps.Base.store.OrderStatus</store>
+            <name>orderStatusAuthorized</name>
+            <label lang="de">Bestell-Status: Autorisiert</label>
+            <label lang="en">Order Status: Authorized</label>
+            <label lang="it">Lo stato dell'ordine: Autorizzato</label>
+            <label lang="fr">Statut de la commande : Autorisé</label>
+            <value>8</value>
+            <store>Shopware.apps.Base.store.OrderStatus</store>
         </element>
         <element type="select" scope="shop">
-        	<name>orderStatusVoid</name>
-        	<label lang="de">Bestell-Status: Annulliert</label>
-        	<label lang="en">Order Status: Void</label>
-        	<value>4</value>
-        	<store>Shopware.apps.Base.store.OrderStatus</store>
+            <name>orderStatusVoid</name>
+            <label lang="de">Bestell-Status: Annulliert</label>
+            <label lang="en">Order Status: Void</label>
+            <label lang="it">Lo stato dell'ordine: Vuoto</label>
+            <label lang="fr">Statut de la commande: Annuler</label>
+            <value>4</value>
+            <store>Shopware.apps.Base.store.OrderStatus</store>
         </element>
         <element type="select" scope="shop">
-        	<name>orderStatusCompleted</name>
-        	<label lang="de">Bestell-Status: Verbucht</label>
-        	<label lang="en">Order Status: Completed</label>
-        	<value>8</value>
-        	<store>Shopware.apps.Base.store.OrderStatus</store>
+            <name>orderStatusCompleted</name>
+            <label lang="de">Bestell-Status: Verbucht</label>
+            <label lang="en">Order Status: Completed</label>
+            <label lang="it">Lo stato dell'ordine: Completato</label>
+            <label lang="fr">Statut de la commande: Complété</label>
+            <value>8</value>
+            <store>Shopware.apps.Base.store.OrderStatus</store>
         </element>
         <element type="select" scope="shop">
-        	<name>orderStatusFulfill</name>
-        	<label lang="de">Bestell-Status: Erfüllen</label>
-        	<label lang="en">Order Status: Fulfill</label>
-        	<value>5</value>
-        	<store>Shopware.apps.Base.store.OrderStatus</store>
+            <name>orderStatusFulfill</name>
+            <label lang="de">Bestell-Status: Erfüllen</label>
+            <label lang="en">Order Status: Fulfill</label>
+            <label lang="it">Lo stato dell'ordine: Svolgere</label>
+            <label lang="fr">Statut de la commande: Remplir</label>
+            <value>5</value>
+            <store>Shopware.apps.Base.store.OrderStatus</store>
         </element>
         <element type="select" scope="shop">
-        	<name>orderStatusCancelled</name>
-        	<label lang="de">Bestell-Status: Abgelehnt/Fehlgeschlagen</label>
-        	<label lang="en">Order Status: Declined/Failed</label>
-        	<value>4</value>
-        	<store>Shopware.apps.Base.store.OrderStatus</store>
+            <name>orderStatusCancelled</name>
+            <label lang="de">Bestell-Status: Abgelehnt/Fehlgeschlagen</label>
+            <label lang="en">Order Status: Declined/Failed</label>
+            <label lang="it">Lo stato dell'ordine: Rifiutato/fallito</label>
+            <label lang="fr">Statut de la commande: Refusé/Échec</label>
+            <value>4</value>
+            <store>Shopware.apps.Base.store.OrderStatus</store>
         </element>
         <element type="boolean" scope="shop">
-			<name>orderRemoveFailed</name>
-			<label lang="de">Fehlgeschlagene Bestellungen löschen</label>
-			<label lang="en">Delete failed orders</label>
-			<value>0</value>
+            <name>orderRemoveFailed</name>
+            <label lang="de">Fehlgeschlagene Bestellungen löschen</label>
+            <label lang="en">Delete failed orders</label>
+            <label lang="it">Elimina gli ordini non riusciti</label>
+            <label lang="fr">Supprimer les commandes échouées</label>
+            <value>0</value>
         </element>
         <element type="boolean" scope="shop">
             <name>provideOrderComment</name>
             <label lang="de">Bestellkommentar übermitteln</label>
             <label lang="en">Provide order comment</label>
+            <label lang="it">Fornire un commento sull'ordine</label>
+            <label lang="fr">Fournir un commentaire sur la commande</label>
             <value>0</value>
             <description lang="de">Dokumenttemplate invoice.twig muss mit dem Baustein {{transaction.metaData.orderComment}} ergänzt werden.</description>
-            <description lang="en">Block {{transaction.metaData.orderComment}} must be added to documenttemplate invocie.twig</description>
+            <description lang="en">Block {{transaction.metaData.orderComment}} must be added to document template invocie.twig</description>
+            <description lang="it">Blocchi {{transaction.metaData.orderComment}} deve essere aggiunto al modello del documento invocie.twig</description>
+            <description lang="fr">Le bloc {{transaction.metaData.orderComment}} doit être ajouté au modèle de document invocie.twig</description>
         </element>
         <element type="boolean" scope="shop">
-			<name>enforceLineItemConsistency</name>
-			<label lang="de">Konsistenz sicherstellen</label>
-			<label lang="en">Enforce Consistency</label>
-			<value>1</value>
-			<description lang="de">Erfordere, dass die Einzelposten der Transaktion denen der Bestellung in Magento entsprechen. Dies kann dazu führen, dass die Zahlungsmethoden von wallee dem Kunden in bestimmten Fällen nicht zur Verfügung stehen. Im Gegenzug wird sichergestellt, dass nur korrekte Daten an wallee übertragen werden.</description>
-			<description lang="en">Require that the line items of the transaction correspond to those of the purchase order in Magento. This may result in the wallee payment methods not being available to the customer in certain cases. In return, it is ensured that only correct data is transmitted to wallee.</description>
+            <name>enforceLineItemConsistency</name>
+            <label lang="de">Konsistenz sicherstellen</label>
+            <label lang="en">Enforce Consistency</label>
+            <label lang="it">Applicare la coerenza</label>
+            <label lang="fr">Appliquer la cohérence</label>
+            <value>1</value>
+            <description lang="de">Erfordere, dass die Einzelposten der Transaktion denen der Bestellung in Shopware entsprechen. Dies kann dazu führen, dass die Zahlungsmethoden von wallee dem Kunden in bestimmten Fällen nicht zur Verfügung stehen. Im Gegenzug wird sichergestellt, dass nur korrekte Daten an wallee übertragen werden.</description>
+            <description lang="en">Require that the line items of the transaction correspond to those of the purchase order in Shopware. This may result in the wallee payment methods not being available to the customer in certain cases. In return, it is ensured that only correct data is transmitted to wallee.</description>
+            <description lang="it">Richiedere che le voci della transazione corrispondano a quelle dell'ordine di acquisto in Shopware. Ciò può comportare che i metodi di pagamento wallee non siano disponibili per il cliente in alcuni casi. In cambio, si garantisce che solo i dati corretti vengano trasmessi a wallee.</description>
+            <description lang="fr">Exigez que les informations pour chaque article de la transaction correspondent à celles du bon de commande dans Shopware.Cela peut avoir pour conséquence que les modes de paiement wallee ne soient pas disponibles pour le client dans certains cas. En contrepartie, il est assuré que seules des données correctes soient transmises à wallee.</description>
         </element>
         <element required="false" type="number" scope="shop">
             <name>spaceViewId</name>
             <label lang="de">Space View Id</label>
             <label lang="en">Space View Id</label>
+            <label lang="it">Space View Id</label>
+            <label lang="fr">Space View Id</label>
             <value></value>
             <description lang="en">The Space View Id allows to control the styling of the payment form and the payment page. It allows in multistore setups to adapt the payment form to different styling per substore without requiring a dedicated space.</description>
             <description lang="de">Mit der Space View-ID können Sie das Styling des Zahlungsformulars und der Bezahlseite steuern. In Multistore-Setups erlaubt dies das Anpassen des Bezahlformulars an die verschiedenen Styles der Substores, ohne mehrere Spaces erstellen zu müssen.</description>
+            <description lang="it">Lo Space View Id consente di controllare lo stile del modulo di pagamento e della pagina di pagamento. Consente nelle configurazioni multistore di adattare il modulo di pagamento a diversi stili per sottonegozio senza richiedere uno spazio dedicato.</description>
+            <description lang="fr">Le Space View ID permet de contrôler le style du formulaire de paiement et de la page de paiement. Il permet dans les configurations multi-magasins d'adapter le formulaire de paiement à différents styles par sous-magasin sans nécessiter d'espace dédié.</description>
         </element>
     </elements>
 </config>
