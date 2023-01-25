@@ -228,7 +228,9 @@ class Transaction extends AbstractOrderRelatedSubscriber
 
     private function fulfill(Order $order, \Wallee\Sdk\Model\Transaction $transaction)
     {
-        if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_RESERVED) {
+        if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_RESERVED || $order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_OPEN) {
+            // Due to race conditions, sometimes the plugin receives the fulfill command and misses previous status change commands.
+            // We contemplate this possibility here.
             $order->setPaymentStatus($this->getStatus(Status::PAYMENT_STATE_COMPLETELY_INVOICED));
         }
         $order->setOrderStatus($this->getStatus($this->getFulfillOrderStatusId($order)));

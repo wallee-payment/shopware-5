@@ -7,12 +7,12 @@ This repository contains the Shopware 5 plugin that enables to process payments 
 
 ## Requirements
 
-* [Shopware](https://shopware.com/) 5.7
-* [PHP](http://php.net/) PHP 7.4 or higher
+* [Shopware](https://shopware.com/) 5.7.x.x
+* [PHP](http://php.net/) PHP 7.4 - 8.1
 
 ## Documentation
 
-* [Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware-5/1.1.17/docs/en/documentation.html)
+* [Documentation](https://plugin-documentation.wallee.com/wallee-payment/shopware-5/1.1.18/docs/en/documentation.html)
 
 ## Support
 
@@ -20,4 +20,4 @@ Support queries can be issued on the [wallee support site](https://app-wallee.co
 
 ## License
 
-Please see the [license file](https://github.com/wallee-payment/shopware-5/blob/1.1.17/LICENSE) for more information.
+Please see the [license file](https://github.com/wallee-payment/shopware-5/blob/1.1.18/LICENSE) for more information.
