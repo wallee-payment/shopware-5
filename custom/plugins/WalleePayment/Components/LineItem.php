@@ -108,7 +108,6 @@ class LineItem extends AbstractService
             $lineItems[] = $this->cleanLineItem($lineItem);
         }
 
-        if ($order->getInvoiceShipping() != 0) {
             if ($order->getDispatch() instanceof \Shopware\Models\Dispatch\Dispatch) {
                 $shippingMethodName = $order->getDispatch()->getName();
             } else {
@@ -123,13 +122,12 @@ class LineItem extends AbstractService
             $lineItem->setQuantity(1);
             $lineItem->setShippingRequired(false);
             $lineItem->setSku('shipping');
-            $lineItem->setTaxes([
-                $this->getOrderShippingTax($order)
-            ]);
+            if ($order->getInvoiceShipping() != 0) {
+                $lineItem->setTaxes([$this->getOrderShippingTax($order)]);
+            }
             $lineItem->setType(\Wallee\Sdk\Model\LineItemType::SHIPPING);
             $lineItem->setUniqueId('shipping');
             $lineItems[] = $this->cleanLineItem($lineItem);
-        }
         
         $pluginConfig = $this->configReader->getByPluginName('WalleePayment', $order->getShop());
         return $this->cleanupLineItems($lineItems, $order->getInvoiceAmount(), $order->getCurrency(), (boolean) $pluginConfig['enforceLineItemConsistency']);
