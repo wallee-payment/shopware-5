@@ -40,8 +40,7 @@ abstract class Backend extends \Shopware_Controllers_Backend_ExtJs
 
         $this->Response()->sendHeaders();
         session_write_close();
-        $this->Response()->outputBody();
-        die();
+        return $this->Response()->outputBody();
     }
 
     /**

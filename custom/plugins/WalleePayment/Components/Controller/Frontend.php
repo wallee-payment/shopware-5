@@ -42,8 +42,7 @@ abstract class Frontend extends \Enlight_Controller_Action
 
         $this->Response()->sendHeaders();
         session_write_close();
-        $this->Response()->outputBody();
-        die();
+        return $this->Response()->outputBody();
     }
 
     /**
