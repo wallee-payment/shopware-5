@@ -14,7 +14,7 @@
     <label lang="de">wallee Payment</label>
     <label lang="en">wallee Payment</label>
 
-    <version>1.1.21</version>
+    <version>1.1.22</version>
     <copyright>(c) by wallee AG</copyright>
     <license>Apache-2.0</license>
     <link>https://www.wallee.com</link>
@@ -24,7 +24,10 @@
     <description lang="en">wallee Integration for Shopware 5</description>
     <description lang="it">wallee Integrazione per shopware 5</description>
     <description lang="fr">wallee Intégration pour Shopware 5</description>
-
+    <changelog version="1.1.22">
+        <changes lang="en">Compatibility with php 8.2.</changes>
+        <changes lang="de">Kompatibilität mit PHP 8.2</changes>
+    </changelog>
     <changelog version="1.1.21">
         <changes lang="en">A line item is created on the **portal** when using Free Shipping.</changes>
         <changes lang="de">Bei Verwendung des kostenlosen Versands wird im **Portal** eine Position erstellt.</changes>
