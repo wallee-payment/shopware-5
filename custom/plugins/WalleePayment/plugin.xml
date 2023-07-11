@@ -14,7 +14,7 @@
     <label lang="de">wallee Payment</label>
     <label lang="en">wallee Payment</label>
 
-    <version>1.1.23</version>
+    <version>1.1.24</version>
     <copyright>(c) by wallee AG</copyright>
     <license>Apache-2.0</license>
     <link>https://www.wallee.com</link>
@@ -24,6 +24,10 @@
     <description lang="en">wallee Integration for Shopware 5</description>
     <description lang="it">wallee Integrazione per shopware 5</description>
     <description lang="fr">wallee Intégration pour Shopware 5</description>
+    <changelog version="1.1.24">
+        <changes lang="en">Fix the incorrect email sender used when operating sub-shops</changes>
+        <changes lang="de">Behebung des falschen E-Mail-Absenders beim Betrieb von Sub-Shops</changes>
+    </changelog>
     <changelog version="1.1.23">
         <changes lang="en">Support of Shopware 5.7.18</changes>
         <changes lang="de">Unterstützung von Shopware 5.7.18</changes>

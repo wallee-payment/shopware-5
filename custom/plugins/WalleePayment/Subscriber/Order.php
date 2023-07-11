@@ -78,8 +78,9 @@ class Order implements SubscriberInterface
             'Shopware_Modules_Order_SaveOrder_FilterParams' => 'onFilterParams',
             'Shopware_Modules_Order_SaveOrder_ProcessDetails' => 'onSaveOrder',
             'Shopware_Modules_Order_SendMail_Create' => 'onOrderCreateMail',
-            'Shopware_Modules_Order_SendMail_Send' => 'onOrderSendMail'
-        ];
+            'Shopware_Modules_Order_SendMail_Send' => 'onOrderSendMail',
+            'Shopware_Modules_Order_SendMail_CreateMail_FilterOverrideConfig' => 'onMailCreateFilterOverrideConfig'
+		];
     }
 
     /**
@@ -189,6 +190,32 @@ class Order implements SubscriberInterface
                 }
             }
         }
+    }
+
+    /**
+     * This function sets the values for the fromMail and fromName parameters,
+     * right before sending an email.
+     * 
+     * We do it like this to avoid default behavoir, which is use the value stored
+     * in the cache. Because of a problem in shopware5 and the portal, when receiving
+     * a webhook invocation, shopware5 stores values that belong to one language
+     * to the cache for the default language. This can provoke further calls to the cache
+     * to get invalid data, as it belongs to a different language.
+     * 
+     * In the case of the fromMail and fromName, we ensure these values are the expected ones. 
+     *
+     * @param \Enlight_Event_EventArgs $args
+     * 
+     * @see \sOrder::sendMail
+     */
+    public function onMailCreateFilterOverrideConfig(\Enlight_Event_EventArgs $args)
+    {
+        $overrideConfig = $args->getReturn();
+        $overrideConfig["fromMail"] = $this->container->get('config')->get('mail');
+        $overrideConfig['fromName'] = $this->container->get('config')->get('shopName');
+        $args->setReturn($overrideConfig);
+
+        return $args->getReturn();
     }
 
     public function onOrderSendMail(\Enlight_Event_EventArgs $args)

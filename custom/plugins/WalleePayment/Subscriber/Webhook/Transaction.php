@@ -325,6 +325,7 @@ class Transaction extends AbstractOrderRelatedSubscriber
             $orderModule = $this->container->get('modules')->Order();
             $sUserDataBackup = $orderModule->sUserData;
             $orderModule->sUserData = $orderEmailData[0]['orderEmailVariables']['sUserData'];
+            
             try {
                 $this->registry->set('force_order_email', true);
                 $orderModule->sendMail($orderEmailData[0]['orderEmailVariables']['variables']);
