@@ -1,6 +1,9 @@
 
 
 # wallee Shopware 5
+
+**This project is no longer actively maintained**
+
 This repository contains the Shopware 5 plugin that enables to process payments with [wallee](https://www.wallee.com/).
 
 ###### To use this extension, a [wallee](https://app-wallee.com/user/signup) account is required.
